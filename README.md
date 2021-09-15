@@ -1,2 +1,4 @@
 # MultimediaRetrieval
-Multimedia Retrieval code 
+
+Multimedia Retrieval code
+pip install -r requirements.txt

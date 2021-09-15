@@ -1,0 +1,2 @@
+trimesh==3.9.29
+scipy
