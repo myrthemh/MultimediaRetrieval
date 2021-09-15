@@ -1,7 +1,30 @@
 import numpy as np
 import trimesh
+import os
 
 trimesh.util.attach_to_log()
+
+classes = [
+      "Insect", #0
+      "Farm animal", #1
+      "People", #2
+      "Face", #3
+      "Building", #4
+      "Container", #5
+      "LampOrWatch", #6
+      "Stabweapon", #7
+      "Chair", #8
+      "Table", #9
+      "Flowerpot", #10
+      "Tool", #11
+      "Airplane", #12 
+      "Aircraft", #13
+      "Spacecraft", #14
+      "Car", #15
+      "Chess piece", #16
+      "DoorOrChest", #17
+      "Satellite" #18
+      ]
 
 # Step 1
 def step_1():
@@ -35,13 +58,20 @@ def bounding_box(vertices):
       return (bottom, top)
 
 def filter_database():
-      mesh = trimesh.load('testModels/m0/m0.off', force='mesh')
-      mesh_info = {}
-      mesh_info["nrfaces"] = len(mesh.faces)
-      mesh_info["nrvertices"] = len(mesh.vertices)
-      face_sizes = list(map(lambda x: len(x) ,mesh.faces))
-      mesh_info["containsTriangles"] = 3 in face_sizes
-      mesh_info["containsQuads"] = 4 in face_sizes
-      mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
-      print(mesh_info)
+      db = 'testModels/db'
+      # iterate over files in that directory
+      for classFolder in os.listdir(db):
+            for modelFolder in os.listdir(db + '/' + classFolder):
+                  for filename in os.listdir(db + '/' + classFolder + '/' + modelFolder):
+                        if filename.endswith('.off'):
+                              print(filename)
+                              mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
+                              mesh_info = {}
+                              mesh_info["nrfaces"] = len(mesh.faces)
+                              mesh_info["nrvertices"] = len(mesh.vertices)
+                              face_sizes = list(map(lambda x: len(x) ,mesh.faces))
+                              mesh_info["containsTriangles"] = 3 in face_sizes
+                              mesh_info["containsQuads"] = 4 in face_sizes
+                              mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
+                              print(mesh_info)
 filter_database()
