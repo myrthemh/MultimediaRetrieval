@@ -4,9 +4,10 @@ import trimesh
 trimesh.util.attach_to_log()
 
 # Step 1
-mesh = trimesh.load('testModels/m0/m0.off', force='mesh')
-#mesh = trimesh.load('testModels/bunny.ply', force='mesh')
-mesh.show()
+def step_1():
+      mesh = trimesh.load('testModels/m0/m0.off', force='mesh')
+      #mesh = trimesh.load('testModels/bunny.ply', force='mesh')
+      mesh.show()
 
 # Step 2
 
@@ -21,3 +22,26 @@ mesh.show()
 # - the number of faces and vertices of the shape
 # - the type of faces (e.g. only triangles, only quads, mixes of triangles and quads)
 # - the axis-aligned 3D bounding box of the shapes
+
+def bounding_box(vertices):
+      #Find the two corners of the bounding box surrounding the mesh.
+      #Bottom will contain the lowest x, y and z values, while 'top' contains the highest values in the mesh.
+      bottom = vertices[0].copy()
+      top = vertices[0].copy()
+      for vertex in vertices:
+            for dimension in [0,1,2]:
+                  bottom[dimension] = min(bottom[dimension], vertex[dimension])
+                  top[dimension] = max(top[dimension], vertex[dimension])
+      return (bottom, top)
+
+def filter_database():
+      mesh = trimesh.load('testModels/m0/m0.off', force='mesh')
+      mesh_info = {}
+      mesh_info["nrfaces"] = len(mesh.faces)
+      mesh_info["nrvertices"] = len(mesh.vertices)
+      face_sizes = list(map(lambda x: len(x) ,mesh.faces))
+      mesh_info["containsTriangles"] = 3 in face_sizes
+      mesh_info["containsQuads"] = 4 in face_sizes
+      mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
+      print(mesh_info)
+filter_database()
