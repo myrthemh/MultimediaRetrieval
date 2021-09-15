@@ -59,12 +59,13 @@ def bounding_box(vertices):
 
 def filter_database():
       db = 'testModels/db'
-      # iterate over files in that directory
+      # iterate over all models:
       for classFolder in os.listdir(db):
             for modelFolder in os.listdir(db + '/' + classFolder):
                   for filename in os.listdir(db + '/' + classFolder + '/' + modelFolder):
                         if filename.endswith('.off'):
-                              print(filename)
+
+                              #Find the relevant info for the mesh:
                               mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
                               mesh_info = {}
                               mesh_info["nrfaces"] = len(mesh.faces)
@@ -73,5 +74,8 @@ def filter_database():
                               mesh_info["containsTriangles"] = 3 in face_sizes
                               mesh_info["containsQuads"] = 4 in face_sizes
                               mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
+                              
+                              #This should still be stored somewhere:
                               print(mesh_info)
+
 filter_database()
