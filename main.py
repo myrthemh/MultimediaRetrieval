@@ -131,9 +131,32 @@ def save_all_histograms(df):
   for column in histogrammable_columns:
     save_histogram(df.loc[:,column].values, column, "Meshes", column)
 
+def normalize_mesh(path):
+  mesh = trimesh.load(path, force='mesh')
+
+  #Center the mass of the mesh on (0,0,0)
+  center_mass = mesh.center_mass
+  mesh.apply_translation(-center_mass)
+  
+  #Get the highest value we can scale with so it still fits within the unit cube
+  scale_value = 1 / max(mesh.bounds.flatten())
+
+  #Make a vector to scale x, y and z in the mesh to this value
+  scaleVector = [scale_value, scale_value, scale_value]
+
+  #Create transformation matrix
+  matrix = np.eye(4)
+  matrix[:3, :3] *= scaleVector
+  mesh.apply_transform(matrix)
+  # print(mesh.bounds)
+  # print(mesh.center_mass)
+  return mesh
+
 #refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
 #filter_database()
-df = read_excel()
-print(meta_data(df))
-save_all_histograms(df)
+# df = read_excel()
+# print(meta_data(df))
+# save_all_histograms(df)'
+
+normalize_mesh("testModels/db/0/m0/m0.off")
 
