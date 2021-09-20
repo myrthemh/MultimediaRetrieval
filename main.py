@@ -1,8 +1,14 @@
 import numpy as np
 import trimesh
 import os
-
+import matplotlib.pyplot as plt
+import pandas as pd
+import logging
 trimesh.util.attach_to_log()
+logging.getLogger('matplotlib.font_manager').disabled = True
+
+dataPath = "features/data.xlsx"
+imagePath = "graphs/"
 
 classes = [
       "Insect", #0
@@ -25,6 +31,8 @@ classes = [
       "DoorOrChest", #17
       "Satellite" #18
       ]
+
+
 
 # Step 1
 def step_1():
@@ -59,12 +67,12 @@ def bounding_box(vertices):
 
 def filter_database():
       db = 'testModels/db'
+      df = pd.DataFrame()
       # iterate over all models:
       for classFolder in os.listdir(db):
             for modelFolder in os.listdir(db + '/' + classFolder):
                   for filename in os.listdir(db + '/' + classFolder + '/' + modelFolder):
                         if filename.endswith('.off'):
-
                               #Find the relevant info for the mesh:
                               mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
                               mesh_info = {}
@@ -77,6 +85,34 @@ def filter_database():
                               mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
                               
                               #This should still be stored somewhere:
-                              print(mesh_info)
+                              df = df.append(mesh_info, ignore_index=True)
+      df.to_excel(dataPath)
 
-filter_database()
+def get_excel():
+     return pd.read_excel(dataPath, index_col=0) 
+
+def meta_data(dataframe):
+      metadata = {}
+      metadata["avgfaces"] = np.mean(dataframe.loc[:,"nrfaces"].values)
+      metadata["avgvertices"] = np.mean(dataframe.loc[:,"nrvertices"].values)
+      return metadata
+
+
+def save_histogram(data, xlabel, ylabel, title):
+      # the histogram of the data
+      plt.xlabel(xlabel)
+      plt.ylabel(ylabel)
+      plt.title(title)
+      plt.xlim(0, max(data))
+      plt.grid(True)
+      plt.savefig(imagePath + title + '.png')
+
+def save_all_histograms():
+      df = get_excel()
+      histogrammable_colums = ["class", "nrfaces", "nrvertices"]
+      for column in df.columns:
+            save_histogram(df.loc[:,column].values, column, "Meshes", column)
+
+#save_all_histograms()
+print(meta_data(get_excel()))
+#filter_database()
