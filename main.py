@@ -68,6 +68,7 @@ def filter_database():
                               #Find the relevant info for the mesh:
                               mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
                               mesh_info = {}
+                              mesh_info["class"] = int(classFolder)
                               mesh_info["nrfaces"] = len(mesh.faces)
                               mesh_info["nrvertices"] = len(mesh.vertices)
                               face_sizes = list(map(lambda x: len(x) ,mesh.faces))
