@@ -115,21 +115,27 @@ def meta_data(dataframe):
   metadata["avgvertices"] = np.mean(dataframe.loc[:,"nrvertices"].values)
   return metadata
 
-def save_histogram(data, xlabel, ylabel, title):
+def save_histogram(data, info):
   # the histogram of the data
-  plt.hist(data, 50, density=True, facecolor='g', alpha=0.75)
-  plt.xlabel(xlabel)
-  plt.ylabel(ylabel)
-  plt.title(title)
+  plt.hist(data, info["blocksize"], facecolor='g', alpha=0.75)
+  plt.xlabel(info["xlabel"])
+  plt.ylabel(info["ylabel"])
+  plt.title(info["title"])
   plt.xlim(0, max(data))
   plt.grid(True)
-  plt.show()
-  plt.savefig(imagePath + title + '.png')
+  plt.gcf().subplots_adjust(left=0.15)
+  plt.savefig(imagePath + info["title"] + '.png')
+  plt.clf()
 
 def save_all_histograms(df):
-  histogrammable_columns = ["class", "nrfaces", "nrvertices"]
-  for column in histogrammable_columns:
-    save_histogram(df.loc[:,column].values, column, "Meshes", column)
+  #Define plot configuration for each plot:
+  plotInfos = [
+    {"column": "class", "title": "Class distribution", "blocksize": 19, "ylabel": "#Meshes", "xlabel": "Class nr"},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of faces"},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of vertices"},
+  ]
+  for info in plotInfos:
+    save_histogram(df.loc[:,info['column']].values, info)
 
 def normalize_mesh(path):
   mesh = trimesh.load(path, force='mesh')
@@ -154,9 +160,9 @@ def normalize_mesh(path):
 
 #refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
 #filter_database()
-# df = read_excel()
-# print(meta_data(df))
-# save_all_histograms(df)'
+df = read_excel()
+print(meta_data(df))
+save_all_histograms(df)
 
-normalize_mesh("testModels/db/0/m0/m0.off")
+#normalize_mesh("testModels/db/0/m0/m0.off")
 
