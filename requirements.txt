@@ -1,2 +1,5 @@
 trimesh[easy]
 scipy
+matplotlib
+pandas
+openpyxl
