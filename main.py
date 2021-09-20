@@ -1,9 +1,11 @@
-import os
-import trimesh
-import matplotlib.pyplot as plt
-import pandas as pd
 import logging
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import trimesh
+
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
 
@@ -32,11 +34,12 @@ classes = [
   "Satellite"  # 18
 ]
 
+
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/m0/m0.off', force='mesh')
-  # mesh = trimesh.load('testModels/bunny.ply', force='mesh')
+  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
   mesh.show()
+
 
 # Step 2
 
@@ -58,9 +61,9 @@ def bounding_box(vertices):
   bottom = vertices[0].copy()
   top = vertices[0].copy()
   for vertex in vertices:
-      for dimension in [0, 1, 2]:
-          bottom[dimension] = min(bottom[dimension], vertex[dimension])
-          top[dimension] = max(top[dimension], vertex[dimension])
+    for dimension in [0, 1, 2]:
+      bottom[dimension] = min(bottom[dimension], vertex[dimension])
+      top[dimension] = max(top[dimension], vertex[dimension])
   return (bottom, top)
 
 
@@ -72,48 +75,65 @@ def filter_database():
     for modelFolder in os.listdir(db + '/' + classFolder):
       for filename in os.listdir(db + '/' + classFolder + '/' + modelFolder):
         if filename.endswith('.off'):
-          #Find the relevant info for the mesh:
-          mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
-          mesh_info = fill_mesh_info(mesh, classFolder)
+          # Find the relevant info for the mesh:
+          path = db + '/' + classFolder + '/' + modelFolder + '/' + filename
+          mesh = trimesh.load(path, force='mesh')
+          mesh_info = fill_mesh_info(mesh, classFolder, path)
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(dataPath)
+  refine_outliers(df)
 
-def fill_mesh_info(mesh, classFolder):
-  mesh_info = {}
-  mesh_info["class"] = int(classFolder)
-  mesh_info["nrfaces"] = len(mesh.faces)
-  mesh_info["nrvertices"] = len(mesh.vertices)
+
+def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
-  mesh_info["containsTriangles"] = 3 in face_sizes
-  mesh_info["containsQuads"] = 4 in face_sizes
-  mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
+  mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+               "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}'}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
+
 def detect_outliers(mesh, mesh_info):
   if (len(mesh.faces) < 100 and len(mesh.vertices) < 100) or (len(mesh.faces) < 100 or len(mesh.vertices) < 100):
-    mesh_info["outlier"] = True
+    mesh_info["subsampled_outlier"] = True
+    mesh_info["supersampled_outlier"] = False
   elif (len(mesh.faces) > 50000 and len(mesh.vertices) > 50000) or (
-    len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
-    mesh_info["outlier"] = True
+          len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
+    mesh_info["supersampled_outlier"] = True
+    mesh_info["subsampled_outlier"] = False
   else:
-      mesh_info["outlier"] = False
+    mesh_info["subsampled_outlier"] = False
+    mesh_info["supersampled_outlier"] = False
   return mesh_info
 
+
+def refine_outliers():
+  df = pd.read_excel(dataPath)
+  undersampled = df[df["subsampled_outlier"] == True]
+  for path in undersampled["path"]:
+    refined_path = path[:11] + 'refined_' + path[11:]
+    refine_mesh(path, refined_path)
+
+
+
 def refine_mesh(inputfile, outputfile):
+  ensure_dir(outputfile)
   command = f'java -jar ./scripts/catmullclark.jar {inputfile} {outputfile}'
   os.system(command)
 
+
 def read_excel():
-  #Load the excel into a pandas df
-  return pd.read_excel(dataPath, index_col=0) 
+  # Load the excel into a pandas df
+  return pd.read_excel(dataPath, index_col=0)
+
 
 def meta_data(dataframe):
-  #Calculate metadata on the datafram
+  # Calculate metadata on the datafram
   metadata = {}
-  metadata["avgfaces"] = np.mean(dataframe.loc[:,"nrfaces"].values)
-  metadata["avgvertices"] = np.mean(dataframe.loc[:,"nrvertices"].values)
+  metadata["avgfaces"] = np.mean(dataframe.loc[:, "nrfaces"].values)
+  metadata["avgvertices"] = np.mean(dataframe.loc[:, "nrvertices"].values)
   return metadata
+
 
 def save_histogram(data, xlabel, ylabel, title):
   # the histogram of the data
@@ -126,14 +146,25 @@ def save_histogram(data, xlabel, ylabel, title):
   plt.show()
   plt.savefig(imagePath + title + '.png')
 
+
 def save_all_histograms(df):
   histogrammable_columns = ["class", "nrfaces", "nrvertices"]
   for column in histogrammable_columns:
-    save_histogram(df.loc[:,column].values, column, "Meshes", column)
+    save_histogram(df.loc[:, column].values, column, "Meshes", column)
 
-#refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
-#filter_database()
+
+def ensure_dir(file_path):
+  directory = os.path.dirname(file_path)
+  if not os.path.exists(directory):
+    os.makedirs(directory)
+
+
+# return alle indexes van subsampled meshes
+# alle filepaths ophalen van de indexes
+# refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
+# filter_database()
+refine_outliers()
+
 df = read_excel()
 print(meta_data(df))
 save_all_histograms(df)
-
