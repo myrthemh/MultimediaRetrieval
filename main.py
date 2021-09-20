@@ -107,13 +107,20 @@ def detect_outliers(mesh, mesh_info):
   return mesh_info
 
 
-def refine_outliers():
+def refine_outliers(show=False):
   df = pd.read_excel(dataPath)
   undersampled = df[df["subsampled_outlier"] == True]
   for path in undersampled["path"]:
     refined_path = path[:11] + 'refined_' + path[11:]
     refine_mesh(path, refined_path)
+    if show:
+      mesh1 = trimesh.load(refined_path, force='mesh')
+      mesh2 = trimesh.load(path, force='mesh')
+      meshes = [mesh1, mesh2]
+      for i, m in enumerate(meshes):
+        m.apply_translation([0, 0, i * 1])
 
+      trimesh.Scene(meshes).show()
 
 
 def refine_mesh(inputfile, outputfile):
@@ -163,7 +170,7 @@ def ensure_dir(file_path):
 # alle filepaths ophalen van de indexes
 # refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
 # filter_database()
-refine_outliers()
+refine_outliers(show=False)
 
 df = read_excel()
 print(meta_data(df))
