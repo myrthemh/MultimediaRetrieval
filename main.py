@@ -69,17 +69,21 @@ def filter_database():
                 if filename.endswith('.off'):
                     # Find the relevant info for the mesh:
                     mesh = trimesh.load(db + '/' + classFolder + '/' + modelFolder + '/' + filename, force='mesh')
-                    mesh_info = {}
-                    mesh_info["class"] = int(classFolder)
-                    mesh_info["nrfaces"] = len(mesh.faces)
-                    mesh_info["nrvertices"] = len(mesh.vertices)
-                    face_sizes = list(map(lambda x: len(x), mesh.faces))
-                    mesh_info["containsTriangles"] = 3 in face_sizes
-                    mesh_info["containsQuads"] = 4 in face_sizes
-                    mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
-                    mesh_info = detect_outliers(mesh, mesh_info)
+                    mesh_info = fill_mesh_info(mesh_info={}, mesh=mesh, classFolder=classFolder )
                     # This should still be stored somewhere:
                     print(mesh_info)
+
+
+def fill_mesh_info(mesh_info, mesh, classFolder):
+    mesh_info["class"] = int(classFolder)
+    mesh_info["nrfaces"] = len(mesh.faces)
+    mesh_info["nrvertices"] = len(mesh.vertices)
+    face_sizes = list(map(lambda x: len(x), mesh.faces))
+    mesh_info["containsTriangles"] = 3 in face_sizes
+    mesh_info["containsQuads"] = 4 in face_sizes
+    mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
+    mesh_info = detect_outliers(mesh, mesh_info)
+    return mesh_info
 
 
 def detect_outliers(mesh, mesh_info):
@@ -93,4 +97,10 @@ def detect_outliers(mesh, mesh_info):
     return mesh_info
 
 
+def refine_mesh(inputfile, outputfile):
+    command = f'java -jar ./scripts/catmullclark.jar {inputfile} {outputfile}'
+    os.system(command)
+
+
+#refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
 filter_database()
