@@ -77,9 +77,20 @@ def filter_database():
                     mesh_info["containsTriangles"] = 3 in face_sizes
                     mesh_info["containsQuads"] = 4 in face_sizes
                     mesh_info["bounding_box_corners"] = bounding_box(mesh.vertices)
-
+                    mesh_info = detect_outliers(mesh, mesh_info)
                     # This should still be stored somewhere:
                     print(mesh_info)
+
+
+def detect_outliers(mesh, mesh_info):
+    if (len(mesh.faces) < 100 and len(mesh.vertices) < 100) or (len(mesh.faces) < 100 or len(mesh.vertices) < 100):
+        mesh_info["outlier"] = True
+    elif (len(mesh.faces) > 50000 and len(mesh.vertices) > 50000) or (
+            len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
+        mesh_info["outlier"] = True
+    else:
+        mesh_info["outlier"] = False
+    return mesh_info
 
 
 filter_database()
