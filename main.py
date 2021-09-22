@@ -44,21 +44,25 @@ def scale_mesh(mesh, scale):
   mesh.apply_transform(matrix)
   return mesh
 
-# Step 1
-def step_1():
-  mesh1 = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
-  mesh2 = trimesh.load('testModels/db/0/m0/m0.off')
-  mesh2 = scale_mesh(mesh2, 1.001)
-  material = pyrender.Material()
-  mesh1 = pyrender.Mesh.from_trimesh(mesh1, smooth=False)
-  mesh2 = pyrender.Mesh.from_trimesh(mesh2, wireframe=True, smooth=False, material=material)
+def render(meshes, showWireframe=True):
   scene = pyrender.Scene()
-  scene.add(mesh1)
-  scene.add(mesh2)
-  
+  for mesh in meshes:
+    mesh1 = pyrender.Mesh.from_trimesh(mesh, smooth=False)
+    scene.add(mesh1)
+  if showWireframe:
+    for mesh in meshes:
+      #Add copy of mesh in wireframe mode
+      material = pyrender.Material()
+      #mesh = scale_mesh(mesh, 1.001)
+      wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False, material=material)
+      scene.add(wireframe)
   pyrender.Viewer(scene, use_raymond_lighting=True)
 
-step_1()
+# Step 1
+def step_1():
+  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+  render([mesh])
+  
 # Step 2
 
 # The key constraints here are that (a) the reduced database should contain at least 200 shapes; (b) you should have
@@ -201,6 +205,16 @@ def normalize_mesh(path):
   # print(mesh.center_mass)
   return mesh
 
+def subdivide():
+  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+  x = trimesh.remesh.subdivide(mesh.vertices, mesh.faces)
+  newmesh = trimesh.Trimesh(vertices=x[0], faces=x[1])
+  meshes = [mesh, newmesh]
+  for i, m in enumerate(meshes):
+    m.apply_translation([0, 0, i * 1])
+  render(meshes)
+
+subdivide()
 #filter_database()
 # df = read_excel()
 # print(meta_data(df))
