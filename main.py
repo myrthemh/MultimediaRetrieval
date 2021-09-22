@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import trimesh
+import pyrender
 
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
@@ -33,14 +34,31 @@ classes = [
   "DoorOrChest",  # 17
   "Satellite"  # 18
 ]
+def scale_mesh(mesh, scale):
+  #Make a vector to scale x, y and z in the mesh to this value
+  scaleVector = [scale, scale, scale]
 
+  #Create transformation matrix
+  matrix = np.eye(4)
+  matrix[:3, :3] *= scaleVector
+  mesh.apply_transform(matrix)
+  return mesh
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
-  mesh.show()
+  mesh1 = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+  mesh2 = trimesh.load('testModels/db/0/m0/m0.off')
+  mesh2 = scale_mesh(mesh2, 1.001)
+  material = pyrender.Material()
+  mesh1 = pyrender.Mesh.from_trimesh(mesh1, smooth=False)
+  mesh2 = pyrender.Mesh.from_trimesh(mesh2, wireframe=True, smooth=False, material=material)
+  scene = pyrender.Scene()
+  scene.add(mesh1)
+  scene.add(mesh2)
+  
+  pyrender.Viewer(scene, use_raymond_lighting=True)
 
-
+step_1()
 # Step 2
 
 # The key constraints here are that (a) the reduced database should contain at least 200 shapes; (b) you should have
@@ -177,23 +195,17 @@ def normalize_mesh(path):
   
   #Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 1 / max(mesh.bounds.flatten())
-
-  #Make a vector to scale x, y and z in the mesh to this value
-  scaleVector = [scale_value, scale_value, scale_value]
-
-  #Create transformation matrix
-  matrix = np.eye(4)
-  matrix[:3, :3] *= scaleVector
-  mesh.apply_transform(matrix)
+  mesh = scale_mesh(mesh, scale_value)
+  
   # print(mesh.bounds)
   # print(mesh.center_mass)
   return mesh
 
 #filter_database()
-df = read_excel()
-print(meta_data(df))
-save_all_histograms(df)
-normalize_mesh("testModels/db/0/m0/m0.off")
+# df = read_excel()
+# print(meta_data(df))
+# save_all_histograms(df)
+# normalize_mesh("testModels/db/0/m0/m0.off")
 
 # return alle indexes van subsampled meshes
 # alle filepaths ophalen van de indexes
