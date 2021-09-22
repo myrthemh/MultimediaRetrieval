@@ -97,8 +97,7 @@ def detect_outliers(mesh, mesh_info):
   if (len(mesh.faces) < 100 and len(mesh.vertices) < 100) or (len(mesh.faces) < 100 or len(mesh.vertices) < 100):
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif (len(mesh.faces) > 50000 and len(mesh.vertices) > 50000) or (
-          len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
+  elif (len(mesh.faces) > 15000 or len(mesh.vertices) > 15000):
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:
@@ -141,23 +140,27 @@ def meta_data(dataframe):
   metadata["avgvertices"] = np.mean(dataframe.loc[:, "nrvertices"].values)
   return metadata
 
-
-def save_histogram(data, xlabel, ylabel, title):
+def save_histogram(data, info):
   # the histogram of the data
-  plt.hist(data, 50, density=True, facecolor='g', alpha=0.75)
-  plt.xlabel(xlabel)
-  plt.ylabel(ylabel)
-  plt.title(title)
+  plt.hist(data, info["blocksize"], facecolor='g', alpha=0.75)
+  plt.xlabel(info["xlabel"])
+  plt.ylabel(info["ylabel"])
+  plt.title(info["title"])
   plt.xlim(0, max(data))
   plt.grid(True)
-  plt.show()
-  plt.savefig(imagePath + title + '.png')
+  plt.gcf().subplots_adjust(left=0.15)
+  plt.savefig(imagePath + info["title"] + '.png')
+  plt.clf()
 
 
 def save_all_histograms(df):
-  histogrammable_columns = ["class", "nrfaces", "nrvertices"]
-  for column in histogrammable_columns:
-    save_histogram(df.loc[:, column].values, column, "Meshes", column)
+  plotInfos = [
+    {"column": "class", "title": "Class distribution", "blocksize": 19, "ylabel": "#Meshes", "xlabel": "Class nr"},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of faces"},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of vertices"},
+  ]
+  for info in plotInfos:
+    save_histogram(df.loc[:,info['column']].values, info)
 
 
 def ensure_dir(file_path):
@@ -165,13 +168,36 @@ def ensure_dir(file_path):
   if not os.path.exists(directory):
     os.makedirs(directory)
 
+def normalize_mesh(path):
+  mesh = trimesh.load(path, force='mesh')
+
+  #Center the mass of the mesh on (0,0,0)
+  center_mass = mesh.center_mass
+  mesh.apply_translation(-center_mass)
+  
+  #Get the highest value we can scale with so it still fits within the unit cube
+  scale_value = 1 / max(mesh.bounds.flatten())
+
+  #Make a vector to scale x, y and z in the mesh to this value
+  scaleVector = [scale_value, scale_value, scale_value]
+
+  #Create transformation matrix
+  matrix = np.eye(4)
+  matrix[:3, :3] *= scaleVector
+  mesh.apply_transform(matrix)
+  # print(mesh.bounds)
+  # print(mesh.center_mass)
+  return mesh
+
+#filter_database()
+df = read_excel()
+print(meta_data(df))
+save_all_histograms(df)
+normalize_mesh("testModels/db/0/m0/m0.off")
 
 # return alle indexes van subsampled meshes
 # alle filepaths ophalen van de indexes
 # refine_mesh("./testModels/db/0/m0/m0.off", "./testModels/refined_db/0/m0/m0.off")
 # filter_database()
-refine_outliers(show=False)
-
-df = read_excel()
-print(meta_data(df))
-save_all_histograms(df)
+#refine_outliers(show=False)
+  #Define plot configuration for each plot:
