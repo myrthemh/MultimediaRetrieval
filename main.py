@@ -97,8 +97,7 @@ def detect_outliers(mesh, mesh_info):
   if (len(mesh.faces) < 100 and len(mesh.vertices) < 100) or (len(mesh.faces) < 100 or len(mesh.vertices) < 100):
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif (len(mesh.faces) > 50000 and len(mesh.vertices) > 50000) or (
-          len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
+  elif (len(mesh.faces) > 50000 or len(mesh.vertices) > 50000):
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:
