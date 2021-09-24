@@ -11,7 +11,17 @@ def selection_sort(x):
 def computeaveragecell(mesh):
   return mesh.area / len(mesh.area_faces)
 
-def subdivide(mesh, min_area, show=False):
+def sortFunction(x):
+  return x[1]
+
+def get_area_indices_list(mesh):
+  area_with_index = []
+  for index, area in enumerate(mesh.area_faces):
+    area_with_index.append((index, area))
+  area_with_index.sort(key=sortFunction, reverse=True)
+  return area_with_index
+
+def subdivide(mesh, target_vertices=1000, show=False):
   n_subdivided = 0
   NC = len(mesh.area_faces)
   NP = len(mesh.vertices)
@@ -20,45 +30,54 @@ def subdivide(mesh, min_area, show=False):
   updated_vertices = np.asarray(mesh.vertices)
   updated_faces = np.asarray(mesh.faces)
   indices_to_delete = []
-  area_sorted_cells = np.sort(mesh.area_faces)[::-1]
-  avg_area = mesh.area_faces / len(mesh.area_faces)
-  for index,face in enumerate(mesh.faces):
-    if mesh.area_faces[index] >= min_area: # if face area is smaller than cutoff, split the face into 3 new faces
-      center = (mesh.vertices[face[0]] + mesh.vertices[face[1]] + mesh.vertices[face[2]]) / 3
+  area_with_index = get_area_indices_list(mesh)
+  counter = 0
+  print(len(updated_vertices))
+  while len(updated_vertices) < target_vertices:
+    if counter > len(area_with_index) - 1:
+      updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
+      indices_to_delete.clear()
+      newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces)
+      area_with_index = get_area_indices_list(newmesh)
+      counter = 0
 
-      #new vertices
-      updated_vertices = np.append(updated_vertices, [center], axis=0)
-      center_index = len(updated_vertices) - 1
+    index, area = area_with_index[counter]
+    face = updated_faces[index]
+    center = (updated_vertices[face[0]] + updated_vertices[face[1]] + updated_vertices[face[2]]) / 3
 
-      #new faces
-      face1 = [face[0], face[1], center_index]
-      face2 = [face[0], center_index, face[2]]
-      face3 = [center_index, face[1], face[2]]
-      newfaces = [face1, face2, face3]
+    #new vertices
+    updated_vertices = np.append(updated_vertices, [center], axis=0)
+    center_index = len(updated_vertices) - 1
 
-      updated_faces = np.append(updated_faces, newfaces, axis=0)
-      indices_to_delete.append(index)
+    #new faces
+    face1 = [face[0], face[1], center_index]
+    face2 = [face[0], center_index, face[2]]
+    face3 = [center_index, face[1], face[2]]
+    newfaces = [face1, face2, face3]
 
-      # update mesh statistics (delete? not currently using)
-      n_subdivided = n_subdivided + 1
-      NP2 = NP2 + 1
-      NC2 = NC2 + 3
+    updated_faces = np.append(updated_faces, newfaces, axis=0)
+    indices_to_delete.append(index)
 
-  #batch delete all 'old' triangles that have been subdivided
+    # update mesh statistics (delete? not currently using)
+    n_subdivided = n_subdivided + 1
+    NP2 = NP2 + 1
+    NC2 = NC2 + 3
+    counter += 1
+
+    #batch delete all 'old' triangles that have been subdivided
   updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
-
+  newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces)
   if show:
-    newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces)
     meshes = [mesh, newmesh]
     for i, m in enumerate(meshes):
       m.apply_translation([0, 0, i * 1])
 
     trimesh.Scene(meshes).show()
+  return newmesh
 
 
 
 # mesh objects can be created from existing faces and vertex data
 # mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]])
 
-mesh = trimesh.load('testModels/db/1/m100/m100.off', force='mesh')
-subdivide(mesh, 0, show=True)
+#

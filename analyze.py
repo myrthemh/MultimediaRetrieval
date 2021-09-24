@@ -43,8 +43,8 @@ def bounding_box(vertices):
       top[dimension] = max(top[dimension], vertex[dimension])
   return (bottom, top)
 
-def filter_database():
-  db = utils.originalDB
+def filter_database(dbPath, excelPath):
+  db = dbPath
   df = pd.DataFrame()
   # iterate over all models:
   for classFolder in os.listdir(db):
@@ -56,7 +56,7 @@ def filter_database():
           mesh = trimesh.load(path, force='mesh')
           mesh_info = fill_mesh_info(mesh, classFolder, path)
           df = df.append(mesh_info, ignore_index=True)
-  df.to_excel(utils.excelPath)
+  df.to_excel(excelPath)
 
 def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
@@ -86,7 +86,7 @@ def meta_data(dataframe):
   metadata["avgvertices"] = np.mean(dataframe.loc[:, "nrvertices"].values)
   return metadata
 
-def save_histogram(data, info):
+def save_histogram(data, info, path):
   # the histogram of the data
   plt.hist(data, info["blocksize"], facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
@@ -95,20 +95,16 @@ def save_histogram(data, info):
   plt.xlim(0, max(data))
   plt.grid(True)
   plt.gcf().subplots_adjust(left=0.15)
-  plt.savefig(utils.imagePath + info["title"] + '.png')
+  utils.ensure_dir(path)
+  plt.savefig(path + info["title"] + '.png')
   plt.clf()
 
 
-def save_all_histograms(df):
+def save_all_histograms(df, path):
   plotInfos = [
     {"column": "class", "title": "Class distribution", "blocksize": 19, "ylabel": "#Meshes", "xlabel": "Class nr"},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of faces"},
     {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of vertices"},
   ]
   for info in plotInfos:
-    save_histogram(df.loc[:,info['column']].values, info)
-
-filter_database()
-df = utils.read_excel()
-print(meta_data(df))
-save_all_histograms(df)
+    save_histogram(df.loc[:,info['column']].values, info, path)

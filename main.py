@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 import trimesh
 import pyrender
-import preprocess
+import preprocess, analyze, utils
 trimesh.util.attach_to_log()
-
 
 def render(meshes, showWireframe=True):
   scene = pyrender.Scene()
@@ -43,4 +42,8 @@ def step_1():
 # - the type of faces (e.g. only triangles, only quads, mixes of triangles and quads)
 # - the axis-aligned 3D bounding box of the shapes
 
-preprocess.refine_outliers(show=True)
+analyze.filter_database(utils.originalDB, utils.excelPath)
+preprocess.process_all()
+analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
+analyze.save_all_histograms(utils.read_excel(original=True), utils.imagePath)
+analyze.save_all_histograms(utils.read_excel(original=False), utils.refinedImagePath)

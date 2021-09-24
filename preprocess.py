@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import trimesh
 import utils
+import subdivision
 
 def scale_mesh(mesh, scale):
   #Make a vector to scale x, y and z in the mesh to this value
@@ -17,27 +18,19 @@ def scale_mesh(mesh, scale):
   mesh.apply_transform(matrix)
   return mesh
 
-def ensure_dir(file_path):
-  directory = os.path.dirname(file_path)
-  if not os.path.exists(directory):
-    os.makedirs(directory)
+def save_mesh(mesh, path):
+  utils.ensure_dir(path)
+  trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
-def refine_outliers(show=False):
+def refine_outlier(show=False):
   df = pd.read_excel(utils.excelPath)
   undersampled = df[df["subsampled_outlier"] == True]
   for path in undersampled["path"]:
     refined_path = path[:11] + 'refined_' + path[11:]
-    refined_mesh = subdivide(trimesh.load(path, force='mesh'))
-    ensure_dir(refined_path)
+    mesh = trimesh.load(path, force='mesh')
+    refined_mesh = subdivision.subdivide(mesh, utils.target_vertices, show=show)
+    save_mesh(refined_mesh, refined_path)
     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
-    if show:
-      mesh1 = trimesh.load(refined_path, force='mesh')
-      mesh2 = trimesh.load(path, force='mesh')
-      meshes = [mesh1, mesh2]
-      for i, m in enumerate(meshes):
-        m.apply_translation([0, 0, i * 1])
-
-      trimesh.Scene(meshes).show()
 
 def normalize_mesh(path):
   mesh = trimesh.load(path, force='mesh')
@@ -54,8 +47,14 @@ def normalize_mesh(path):
   # print(mesh.center_mass)
   return mesh
 
-def subdivide(mesh):
-  x = trimesh.remesh.subdivide(mesh.vertices, mesh.faces)
-  newmesh = trimesh.Trimesh(vertices=x[0], faces=x[1])
-  return newmesh
-  
+def process_all():
+  #Perform all preprocessing steps on all meshes:
+  df = pd.read_excel(utils.excelPath)
+  for index, row in df.iterrows():
+    path = row['path']
+    mesh = trimesh.load(row['path'])
+    mesh = normalize_mesh(mesh)
+    if row['subsampled_outlier'] == True:
+      mesh = subdivision.subdivide(mesh, utils.target_vertices)
+    refined_path = path[:11] + 'refined_' + path[11:]
+    save_mesh(mesh, refined_path)
