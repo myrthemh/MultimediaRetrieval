@@ -51,6 +51,8 @@ def barycentre_distance(mesh):
 def bounding_box_volume(mesh):
   x = mesh.bounds
   volume = (x[1][0] - x[0][0]) * (x[1][1] - x[0][1]) * (x[1][2] - x[0][2])
+  if volume > 100:
+    print(x)
   return volume
 
 def filter_database(dbPath, excelPath):
@@ -72,7 +74,7 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',  "center_mass": mesh.center_mass,
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}', "barycentre_distance": barycentre_distance(mesh),
                 'volume': bounding_box_volume(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
@@ -101,12 +103,20 @@ def meta_data(dataframe):
   metadata["minvertices"] = np.min(dataframe.loc[:, "nrvertices"].values)
   metadata["maxvertices"] = np.max(dataframe.loc[:, "nrvertices"].values)
 
+  metadata["avgbarycentre_distance"] = np.mean(dataframe.loc[:, "barycentre_distance"].values)
+  metadata["volume"] = np.mean(dataframe.loc[:, "volume"].values)
+
   return metadata
 
 def save_histogram(data, info, path):
   # the histogram of the data
-
-  plt.hist(data,  bins=np.arange(0, info["xlim"] + info["blocksize"], info["blocksize"]), facecolor='g', alpha=0.75)
+  if info['skip_outliers']:
+    #Remove all data below the 5th percentile and 95th percentile
+    p5 = np.percentile(data, 5)
+    p95 = np.percentile(data, 95)
+    data = data[data >= p5]
+    data = data[data <= p95]
+  plt.hist(data,  bins = info["blocksize"], facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
@@ -122,10 +132,11 @@ def save_histogram(data, info, path):
 def save_all_histograms(df, path):
   meta_data(df)
   plotInfos = [
-    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":19, "ylabel": "#Meshes", "xlabel": "Class nr"},
-    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of faces"},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of vertices"},
-    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Bounding box volume"},
+    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":18, "ylabel": "#Meshes", "xlabel": "Class nr", "skip_outliers": False},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":0,  "ylabel": "#Meshes", "xlabel": "Number of faces", "skip_outliers": True},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Number of vertices", "skip_outliers": True},
+    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Bounding box volume", "skip_outliers": True},
+    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)

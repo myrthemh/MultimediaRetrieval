@@ -29,8 +29,13 @@ def step_1():
   mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
   render([mesh])
 
-#analyze.filter_database(utils.originalDB, utils.excelPath)
-# preprocess.process_all()
-#analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
-analyze.save_all_histograms(utils.read_excel(original=True), utils.imagePath)
-analyze.save_all_histograms(utils.read_excel(original=False), utils.refinedImagePath)
+analyze.filter_database(utils.originalDB, utils.excelPath)
+preprocess.process_all()
+analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
+originalDF = utils.read_excel(original=True)
+refinedDF = utils.read_excel(original=False)
+print(analyze.meta_data(originalDF))
+print(analyze.meta_data(refinedDF))
+analyze.save_all_histograms(originalDF, utils.imagePath)
+analyze.save_all_histograms(refinedDF, utils.refinedImagePath)
+
