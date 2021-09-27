@@ -32,7 +32,6 @@ def subdivide(mesh, target_vertices=1000, show=False):
   indices_to_delete = []
   area_with_index = get_area_indices_list(mesh)
   counter = 0
-  print(len(updated_vertices))
   while len(updated_vertices) < target_vertices:
     if counter > len(area_with_index) - 1:
       updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
@@ -75,9 +74,12 @@ def subdivide(mesh, target_vertices=1000, show=False):
     trimesh.Scene(meshes).show()
   return newmesh
 
+def superdivide(mesh, target_faces=2000, show=False):
+  newmesh = trimesh.Trimesh.simplify_quadratic_decimation(mesh, target_faces)
+  if show:
+    meshes = [mesh, newmesh]
+    for i, m in enumerate(meshes):
+      m.apply_translation([0, 0, i * 1])
+    trimesh.Scene(meshes).show()
+  return newmesh
 
-
-# mesh objects can be created from existing faces and vertex data
-# mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]])
-
-#
