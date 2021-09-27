@@ -22,15 +22,15 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
-def refine_outlier(show=False):
-  df = pd.read_excel(utils.excelPath)
-  undersampled = df[df["subsampled_outlier"] == True]
-  for path in undersampled["path"]:
-    refined_path = path[:11] + 'refined_' + path[11:]
-    mesh = trimesh.load(path, force='mesh')
-    refined_mesh = subdivision.subdivide(mesh, utils.target_vertices, show=show)
-    save_mesh(refined_mesh, refined_path)
-    trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
+# def refine_outlier(show=False):
+#   df = pd.read_excel(utils.excelPath)
+#   undersampled = df[df["subsampled_outlier"] == True]
+#   for path in undersampled["path"]:
+#     refined_path = path[:11] + 'refined_' + path[11:]
+#     mesh = trimesh.load(path, force='mesh')
+#     refined_mesh = subdivision.subdivide(mesh, utils.target_vertices, show=show)
+#     save_mesh(refined_mesh, refined_path)
+#     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
 
 def normalize_mesh(path):
   mesh = trimesh.load(path, force='mesh')
@@ -47,6 +47,8 @@ def normalize_mesh(path):
   # print(mesh.center_mass)
   return mesh
 
+
+
 def process_all():
   #Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
@@ -54,7 +56,11 @@ def process_all():
     path = row['path']
     mesh = trimesh.load(row['path'])
     mesh = normalize_mesh(mesh)
-    if row['subsampled_outlier'] == True:
-      mesh = subdivision.subdivide(mesh, utils.target_vertices)
     refined_path = path[:11] + 'refined_' + path[11:]
-    save_mesh(mesh, refined_path)
+    if row['subsampled_outlier']:
+      mesh = subdivision.subdivide(mesh, utils.target_vertices)
+      save_mesh(mesh, refined_path)
+    if row['supersampled_outlier']:
+      mesh = subdivision.superdivide(mesh, utils.target_faces)
+      save_mesh(mesh, refined_path)
+
