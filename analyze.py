@@ -9,6 +9,7 @@ import pandas as pd
 import trimesh
 import pyrender
 import utils
+import math
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
 
@@ -43,6 +44,13 @@ def bounding_box(vertices):
       bottom[dimension] = min(bottom[dimension], vertex[dimension])
       top[dimension] = max(top[dimension], vertex[dimension])
   return (bottom, top)
+
+def barycentre_distance(mesh):
+  return math.sqrt(sum(mesh.center_mass * mesh.center_mass))
+
+def bounding_box_volume(mesh):
+  x = mesh.bounds
+  print(x)
 
 def filter_database(dbPath, excelPath):
   db = dbPath
@@ -117,3 +125,6 @@ def save_all_histograms(df, path):
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)
+
+# mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+# print(bounding_box_volume(mesh))

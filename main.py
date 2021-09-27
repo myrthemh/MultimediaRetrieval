@@ -9,6 +9,7 @@ import pyrender
 import preprocess, analyze, utils
 trimesh.util.attach_to_log()
 
+
 def render(meshes, showWireframe=True):
   scene = pyrender.Scene()
   for mesh in meshes:
