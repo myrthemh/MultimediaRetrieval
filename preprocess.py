@@ -61,7 +61,9 @@ def process_all():
     normalize_values_after.append(mesh.center_mass)
     if row['subsampled_outlier']:
       mesh = subdivision.subdivide(mesh, utils.target_vertices)
-
+    if row['supersampled_outlier']:
+      mesh = subdivision.superdivide(mesh, utils.target_faces)
+      save_mesh(mesh, refined_path)
     refined_path = path[:11] + 'refined_' + path[11:]
     save_mesh(mesh, refined_path)
   avgs_before = [sum(vals) / len(normalize_values_before) for vals in zip(*normalize_values_before)]

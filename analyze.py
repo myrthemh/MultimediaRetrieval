@@ -110,7 +110,8 @@ def save_histogram(data, info, path):
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
-  plt.xlim(0, info["xlim"])
+  if info["xlim"] != 0:
+    plt.xlim(0, info["xlim"])
   # plt.grid(True)
   plt.gcf().subplots_adjust(left=0.15)
   utils.ensure_dir(path)
@@ -124,7 +125,7 @@ def save_all_histograms(df, path):
     {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":19, "ylabel": "#Meshes", "xlabel": "Class nr"},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of faces"},
     {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of vertices"},
-    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":10,  "ylabel": "#Meshes", "xlabel": "Bounding box volume"},
+    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Bounding box volume"},
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)
