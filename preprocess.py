@@ -48,19 +48,22 @@ def normalize_mesh(path):
   return mesh
 
 
-
 def process_all():
   #Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
+  normalize_values_before = []
+  normalize_values_after = []
   for index, row in df.iterrows():
     path = row['path']
     mesh = trimesh.load(row['path'])
+    normalize_values_before.append(mesh.center_mass)
     mesh = normalize_mesh(mesh)
-    refined_path = path[:11] + 'refined_' + path[11:]
+    normalize_values_after.append(mesh.center_mass)
     if row['subsampled_outlier']:
       mesh = subdivision.subdivide(mesh, utils.target_vertices)
-      save_mesh(mesh, refined_path)
-    if row['supersampled_outlier']:
-      mesh = subdivision.superdivide(mesh, utils.target_faces)
-      save_mesh(mesh, refined_path)
 
+    refined_path = path[:11] + 'refined_' + path[11:]
+    save_mesh(mesh, refined_path)
+  avgs_before = [sum(vals) / len(normalize_values_before) for vals in zip(*normalize_values_before)]
+  avgs_after = [sum(vals) / len(normalize_values_after) for vals in zip(*normalize_values_after)]
+  print(avgs_before, avgs_after)
