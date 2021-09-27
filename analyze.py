@@ -1,6 +1,7 @@
 
 import logging
 import os
+import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -62,16 +63,16 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}'}
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',  "center_mass": mesh.center_mass}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
 
 def detect_outliers(mesh, mesh_info):
-  if (len(mesh.faces) < 900 and len(mesh.vertices) < 900) or (len(mesh.faces) < 900 or len(mesh.vertices) < 900):
+  if (len(mesh.vertices) < 900):
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif (len(mesh.faces) > 1100 or len(mesh.vertices) > 1100):
+  elif (len(mesh.vertices) > 1100):
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:
@@ -83,17 +84,24 @@ def meta_data(dataframe):
   # Calculate metadata on the datafram
   metadata = {}
   metadata["avgfaces"] = np.mean(dataframe.loc[:, "nrfaces"].values)
+  metadata["minfaces"] = np.min(dataframe.loc[:, "nrfaces"].values)
+  metadata["maxfaces"] = np.max(dataframe.loc[:, "nrfaces"].values)
+
   metadata["avgvertices"] = np.mean(dataframe.loc[:, "nrvertices"].values)
+  metadata["minvertices"] = np.min(dataframe.loc[:, "nrvertices"].values)
+  metadata["maxvertices"] = np.max(dataframe.loc[:, "nrvertices"].values)
+
   return metadata
 
 def save_histogram(data, info, path):
   # the histogram of the data
-  plt.hist(data, info["blocksize"], facecolor='g', alpha=0.75)
+
+  plt.hist(data,  bins=np.arange(0, info["xlim"] + info["blocksize"], info["blocksize"]), facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
-  plt.xlim(0, max(data))
-  plt.grid(True)
+  plt.xlim(0, info["xlim"])
+  # plt.grid(True)
   plt.gcf().subplots_adjust(left=0.15)
   utils.ensure_dir(path)
   plt.savefig(path + info["title"] + '.png')
@@ -101,10 +109,11 @@ def save_histogram(data, info, path):
 
 
 def save_all_histograms(df, path):
+  meta_data(df)
   plotInfos = [
-    {"column": "class", "title": "Class distribution", "blocksize": 19, "ylabel": "#Meshes", "xlabel": "Class nr"},
-    {"column": "nrfaces", "title": "Face distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of faces"},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 50, "ylabel": "#Meshes", "xlabel": "Number of vertices"},
+    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":19, "ylabel": "#Meshes", "xlabel": "Class nr"},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of faces"},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of vertices"},
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)
