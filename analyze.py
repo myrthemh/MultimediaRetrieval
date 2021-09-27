@@ -8,6 +8,7 @@ import pandas as pd
 import trimesh
 import pyrender
 import utils
+import math
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
 
@@ -43,6 +44,10 @@ def bounding_box(vertices):
       top[dimension] = max(top[dimension], vertex[dimension])
   return (bottom, top)
 
+def barycentre_distance(mesh):
+  return math.sqrt(sum(mesh.center_mass * mesh.center_mass))
+
+
 def filter_database(dbPath, excelPath):
   db = dbPath
   df = pd.DataFrame()
@@ -62,16 +67,16 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}'}
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}', "distance_barycentre": barycentre_distance(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
 
 def detect_outliers(mesh, mesh_info):
-  if (len(mesh.faces) < 900 and len(mesh.vertices) < 900) or (len(mesh.faces) < 900 or len(mesh.vertices) < 900):
+  if (len(mesh.vertices) < 900):
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif (len(mesh.faces) > 1100 or len(mesh.vertices) > 1100):
+  elif len(mesh.vertices) > 1100:
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:
@@ -108,3 +113,6 @@ def save_all_histograms(df, path):
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)
+
+# mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+# print(barycentre_distance(mesh))
