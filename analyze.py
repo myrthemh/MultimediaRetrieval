@@ -1,15 +1,15 @@
-
 import logging
-import os
 import math
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import trimesh
-import pyrender
+
+import preprocess
 import utils
-import math
+
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
 
@@ -34,6 +34,8 @@ classes = [
   "DoorOrChest",  # 17
   "Satellite"  # 18
 ]
+
+
 def bounding_box(vertices):
   # Find the two corners of the bounding box surrounding the mesh.
   # Bottom will contain the lowest x, y and z values, while 'top' contains the highest values in the mesh.
@@ -45,15 +47,16 @@ def bounding_box(vertices):
       top[dimension] = max(top[dimension], vertex[dimension])
   return (bottom, top)
 
+
 def barycentre_distance(mesh):
-  return math.sqrt(sum(mesh.center_mass * mesh.center_mass))
+  return math.sqrt(sum(preprocess.calc_center_mass(mesh) * preprocess.calc_center_mass(mesh)))
+
 
 def bounding_box_volume(mesh):
   x = mesh.bounds
   volume = (x[1][0] - x[0][0]) * (x[1][1] - x[0][1]) * (x[1][2] - x[0][2])
-  if volume > 100:
-    print(x)
   return volume
+
 
 def filter_database(dbPath, excelPath):
   db = dbPath
@@ -70,27 +73,30 @@ def filter_database(dbPath, excelPath):
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
 
+
 def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}', "barycentre_distance": barycentre_distance(mesh),
-                'volume': bounding_box_volume(mesh)}
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',
+               "barycentre_distance": barycentre_distance(mesh),
+               'volume': bounding_box_volume(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
 
 def detect_outliers(mesh, mesh_info):
-  if (len(mesh.vertices) < 900):
+  if len(mesh.vertices) < 900:
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif (len(mesh.vertices) > 1100):
+  elif len(mesh.vertices) > 1100:
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:
     mesh_info["subsampled_outlier"] = False
     mesh_info["supersampled_outlier"] = False
   return mesh_info
+
 
 def meta_data(dataframe):
   # Calculate metadata on the datafram
@@ -108,15 +114,16 @@ def meta_data(dataframe):
 
   return metadata
 
+
 def save_histogram(data, info, path):
   # the histogram of the data
   if info['skip_outliers']:
-    #Remove all data below the 5th percentile and 95th percentile
+    # Remove all data below the 5th percentile and 95th percentile
     p5 = np.percentile(data, 5)
     p95 = np.percentile(data, 95)
     data = data[data >= p5]
     data = data[data <= p95]
-  plt.hist(data,  bins = info["blocksize"], facecolor='g', alpha=0.75)
+  plt.hist(data, bins=info["blocksize"], facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
@@ -132,14 +139,18 @@ def save_histogram(data, info, path):
 def save_all_histograms(df, path):
   meta_data(df)
   plotInfos = [
-    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":18, "ylabel": "#Meshes", "xlabel": "Class nr", "skip_outliers": False},
-    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":0,  "ylabel": "#Meshes", "xlabel": "Number of faces", "skip_outliers": True},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Number of vertices", "skip_outliers": True},
-    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Bounding box volume", "skip_outliers": True},
-    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 100,"xlim":0,  "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
+    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
+     "xlabel": "Class nr", "skip_outliers": False},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+     "xlabel": "Number of faces", "skip_outliers": True},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+     "xlabel": "Number of vertices", "skip_outliers": True},
+    {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+     "xlabel": "Bounding box volume", "skip_outliers": True},
+    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 100, "xlim": 0,
+     "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
   ]
   for info in plotInfos:
-    save_histogram(df.loc[:,info['column']].values, info, path)
+    save_histogram(df.loc[:, info['column']].values, info, path)
 
 # mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
-# print(bounding_box_volume(mesh))

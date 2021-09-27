@@ -1,5 +1,5 @@
-import trimesh
 import numpy as np
+import trimesh
 
 
 def selection_sort(x):
@@ -8,11 +8,14 @@ def selection_sort(x):
     (x[i], x[swap]) = (x[swap], x[i])
   return x
 
+
 def computeaveragecell(mesh):
   return mesh.area / len(mesh.area_faces)
 
+
 def sortFunction(x):
   return x[1]
+
 
 def get_area_indices_list(mesh):
   area_with_index = []
@@ -20,6 +23,7 @@ def get_area_indices_list(mesh):
     area_with_index.append((index, area))
   area_with_index.sort(key=sortFunction, reverse=True)
   return area_with_index
+
 
 def subdivide(mesh, target_vertices=1000, show=False):
   n_subdivided = 0
@@ -44,11 +48,11 @@ def subdivide(mesh, target_vertices=1000, show=False):
     face = updated_faces[index]
     center = (updated_vertices[face[0]] + updated_vertices[face[1]] + updated_vertices[face[2]]) / 3
 
-    #new vertices
+    # new vertices
     updated_vertices = np.append(updated_vertices, [center], axis=0)
     center_index = len(updated_vertices) - 1
 
-    #new faces
+    # new faces
     face1 = [face[0], face[1], center_index]
     face2 = [face[0], center_index, face[2]]
     face3 = [center_index, face[1], face[2]]
@@ -63,7 +67,7 @@ def subdivide(mesh, target_vertices=1000, show=False):
     NC2 = NC2 + 3
     counter += 1
 
-    #batch delete all 'old' triangles that have been subdivided
+    # batch delete all 'old' triangles that have been subdivided
   updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
   newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces, process=False)
   if show:
@@ -74,6 +78,7 @@ def subdivide(mesh, target_vertices=1000, show=False):
     trimesh.Scene(meshes).show()
   return newmesh
 
+
 def superdivide(mesh, target_faces=2000, show=False):
   newmesh = trimesh.Trimesh.simplify_quadratic_decimation(mesh, target_faces)
   if show:
@@ -82,4 +87,3 @@ def superdivide(mesh, target_faces=2000, show=False):
       m.apply_translation([0, 0, i * 1])
     trimesh.Scene(meshes).show()
   return newmesh
-

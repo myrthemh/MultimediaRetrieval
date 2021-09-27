@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
@@ -17,6 +18,7 @@ def read_excel(original=True):
     return pd.read_excel(excelPath, index_col=0)
   else:
     return pd.read_excel(refinedexcelPath, index_col=0)
+
 
 def ensure_dir(file_path):
   directory = os.path.dirname(file_path)
