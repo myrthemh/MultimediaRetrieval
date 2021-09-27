@@ -22,7 +22,7 @@ def calc_center_mass(mesh):
   meshVolume = 0
   temp = (0, 0, 0)
 
-  for index, face in enumerate(mesh.faces):
+  for face in mesh.faces:
     center = (mesh.vertices[face[0]] + mesh.vertices[face[1]] + mesh.vertices[face[2]]) / 4
     volume = np.dot(mesh.vertices[face[0]], np.cross(mesh.vertices[face[1]], mesh.vertices[face[2]])) / 6
     meshVolume += volume
