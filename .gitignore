@@ -146,4 +146,4 @@ cython_debug/
 models/
 graphs/
 features/
-testmodels/
+testModels/

@@ -50,7 +50,8 @@ def barycentre_distance(mesh):
 
 def bounding_box_volume(mesh):
   x = mesh.bounds
-  print(x)
+  volume = (x[1][0] - x[0][0]) * (x[1][1] - x[0][1]) * (x[1][2] - x[0][2])
+  return volume
 
 def filter_database(dbPath, excelPath):
   db = dbPath
@@ -71,7 +72,8 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',  "center_mass": mesh.center_mass}
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',  "center_mass": mesh.center_mass,
+                'volume': bounding_box_volume(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
@@ -122,6 +124,7 @@ def save_all_histograms(df, path):
     {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim":19, "ylabel": "#Meshes", "xlabel": "Class nr"},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of faces"},
     {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100,"xlim":5000,  "ylabel": "#Meshes", "xlabel": "Number of vertices"},
+    {"column": "volume", "title": "Bounding box volume", "blocksize": 100,"xlim":10,  "ylabel": "#Meshes", "xlabel": "Bounding box volume"},
   ]
   for info in plotInfos:
     save_histogram(df.loc[:,info['column']].values, info, path)
