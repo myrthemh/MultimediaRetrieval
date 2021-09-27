@@ -47,6 +47,9 @@ def bounding_box(vertices):
 def barycentre_distance(mesh):
   return math.sqrt(sum(mesh.center_mass * mesh.center_mass))
 
+def bounding_box_volume(mesh):
+  x = mesh.bounds
+  print(x)
 
 def filter_database(dbPath, excelPath):
   db = dbPath
@@ -67,7 +70,8 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}', "distance_barycentre": barycentre_distance(mesh)}
+               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}', "distance_barycentre": barycentre_distance(mesh)
+               , "bounding_box_volume": 0}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
@@ -115,4 +119,4 @@ def save_all_histograms(df, path):
     save_histogram(df.loc[:,info['column']].values, info, path)
 
 # mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
-# print(barycentre_distance(mesh))
+# print(bounding_box_volume(mesh))
