@@ -1,5 +1,6 @@
 # MultimediaRetrieval
 
+All packages are installed on Python 3.8.x. Newer or older versions might not work.
 
 ### 1. Install required packages
 Install the required Python Packages with PIP:
@@ -7,8 +8,6 @@ Install the required Python Packages with PIP:
 pip install -r requirements.txt
 ```
 ### 2. Additional dependencies
-Have a running Java Runtime Environment on you device. Check with:
-```bash
-java -version
-```
+None so far
+
 
