@@ -35,19 +35,6 @@ classes = [
   "Satellite"  # 18
 ]
 
-
-def bounding_box(vertices):
-  # Find the two corners of the bounding box surrounding the mesh.
-  # Bottom will contain the lowest x, y and z values, while 'top' contains the highest values in the mesh.
-  bottom = vertices[0].copy()
-  top = vertices[0].copy()
-  for vertex in vertices:
-    for dimension in [0, 1, 2]:
-      bottom[dimension] = min(bottom[dimension], vertex[dimension])
-      top[dimension] = max(top[dimension], vertex[dimension])
-  return (bottom, top)
-
-
 def barycentre_distance(mesh):
   barycentre = preprocess.barycenter(mesh)
   return math.sqrt(sum(barycentre * barycentre))
@@ -79,7 +66,8 @@ def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": bounding_box(mesh.vertices), "path": f'{path}',
+               "bounding_box_corners": mesh.bounds, "path": f'{path}',
+               "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] -  mesh.bounds[1]),
                "barycentre_distance": barycentre_distance(mesh),
                'volume': bounding_box_volume(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
@@ -150,6 +138,8 @@ def save_all_histograms(df, path):
      "xlabel": "Bounding box volume", "skip_outliers": True},
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
+    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 100, "xlim": 0,
+     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": True}
   ]
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
