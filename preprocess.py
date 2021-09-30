@@ -5,7 +5,7 @@ import trimesh
 import analyze
 import subdivision
 import utils
-import math
+
 
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
@@ -31,8 +31,9 @@ def calc_center_mass(mesh):
 
   return meshCenter
 
+
 def barycenter(mesh):
-  #Returns the face area weighted barycentr of the mesh.
+  # Returns the face area weighted barycentr of the mesh.
   faces = np.asarray(mesh.faces)
   weighted_vertices = []
   for index, face in enumerate(faces):
@@ -57,7 +58,7 @@ def save_mesh(mesh, path):
 #     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
 
 def normalize_mesh(mesh):
-  #Fix normals
+  # Fix normals
   if mesh.body_count > 1:
     trimesh.Trimesh.fix_normals(mesh, multibody=True)
   else:

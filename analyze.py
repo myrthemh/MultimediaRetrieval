@@ -35,6 +35,7 @@ classes = [
   "Satellite"  # 18
 ]
 
+
 def barycentre_distance(mesh):
   barycentre = preprocess.barycenter(mesh)
   return math.sqrt(sum(barycentre * barycentre))
@@ -68,7 +69,7 @@ def fill_mesh_info(mesh, classFolder, path):
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                "bounding_box_corners": mesh.bounds, "path": f'{path}',
-               "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] -  mesh.bounds[1]),
+               "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                "barycentre_distance": barycentre_distance(mesh),
                'volume': bounding_box_volume(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
@@ -143,7 +144,8 @@ def save_all_histograms(df, path):
      "xlabel": "Bounding box volume", "skip_outliers": False},
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50, "xlim": 3,
+    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
+     "xlim": 3,
      "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False}
   ]
   for info in plotInfos:
