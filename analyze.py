@@ -148,7 +148,7 @@ def save_all_histograms(df, path):
      "xlabel": "Number of vertices", "skip_outliers": True},
     {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
      "xlabel": "Bounding box volume", "skip_outliers": True},
-    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 100, "xlim": 0,
+    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
   ]
   for info in plotInfos:
