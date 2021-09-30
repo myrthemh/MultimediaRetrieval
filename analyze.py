@@ -49,7 +49,8 @@ def bounding_box(vertices):
 
 
 def barycentre_distance(mesh):
-  return math.sqrt(sum(preprocess.calc_center_mass(mesh) * preprocess.calc_center_mass(mesh)))
+  barycentre = preprocess.barycenter(mesh)
+  return math.sqrt(sum(barycentre * barycentre))
 
 
 def bounding_box_volume(mesh):

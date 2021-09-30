@@ -5,7 +5,7 @@ import trimesh
 import analyze
 import subdivision
 import utils
-
+import math
 
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
@@ -31,6 +31,15 @@ def calc_center_mass(mesh):
 
   return meshCenter
 
+def barycenter(mesh):
+  #Returns the face area weighted barycentr of the mesh.
+  faces = np.asarray(mesh.faces)
+  weighted_vertices = []
+  for index, face in enumerate(faces):
+    weighted_vertices.append(mesh.area_faces[index] * utils.get_face_barycentre(face, mesh.vertices))
+  bary_centre = sum(weighted_vertices) / mesh.area
+  return bary_centre
+
 
 def save_mesh(mesh, path):
   utils.ensure_dir(path)
@@ -47,17 +56,14 @@ def save_mesh(mesh, path):
 #     save_mesh(refined_mesh, refined_path)
 #     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
 
-def normalize_mesh(path):
-  mesh = trimesh.load(path, force='mesh')
-
+def normalize_mesh(mesh):
   # Center the mass of the mesh on (0,0,0)
-  center_mass = calc_center_mass(mesh)
+  center_mass = barycenter(mesh)
   mesh.apply_translation(-center_mass)
 
   # Get the highest value we can scale with so it still fits within the unit cube
-  scale_value = 1 / max(mesh.bounds.flatten())
+  scale_value = 1 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
-
   return mesh
 
 
@@ -73,6 +79,9 @@ def process_all():
       mesh = subdivision.subdivide(mesh, utils.target_vertices)
     if row['supersampled_outlier']:
       mesh = subdivision.superdivide(mesh, utils.target_faces)
-
+    mesh = normalize_mesh(mesh)
     if analyze.barycentre_distance(mesh) < 1:
       save_mesh(mesh, refined_path)
+
+# mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+# normalize_mesh(mesh)
