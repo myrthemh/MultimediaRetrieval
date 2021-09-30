@@ -50,6 +50,8 @@ def save_mesh(mesh, path):
 def normalize_mesh(path):
   mesh = trimesh.load(path, force='mesh')
 
+  #Fix normals
+  trimesh.repair.fix_normals(mesh)
   # Center the mass of the mesh on (0,0,0)
   center_mass = calc_center_mass(mesh)
   mesh.apply_translation(-center_mass)
@@ -57,6 +59,7 @@ def normalize_mesh(path):
   # Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 1 / max(mesh.bounds.flatten())
   mesh = scale_mesh(mesh, scale_value)
+
 
   return mesh
 

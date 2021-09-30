@@ -21,7 +21,6 @@ def render(meshes, showWireframe=True):
     scene.add(mesh1)
   if showWireframe:
     for mesh in meshes:
-      # mesh = scale_mesh(mesh, 1.001)
       colorvisuals = trimesh.visual.ColorVisuals(mesh, [0,0,0,255])
       mesh.visual = colorvisuals
       wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
@@ -34,8 +33,6 @@ def step_1():
   mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
   render([mesh])
 
-
-step_1()
 start_time = time.monotonic()
 print("Analyze 1")
 analyze.filter_database(utils.originalDB, utils.excelPath)
