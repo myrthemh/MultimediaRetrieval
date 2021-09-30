@@ -18,20 +18,6 @@ def scale_mesh(mesh, scale):
   return mesh
 
 
-def calc_center_mass(mesh):
-  meshVolume = 0
-  temp = (0, 0, 0)
-
-  for face in mesh.faces:
-    center = (mesh.vertices[face[0]] + mesh.vertices[face[1]] + mesh.vertices[face[2]]) / 4
-    volume = np.dot(mesh.vertices[face[0]], np.cross(mesh.vertices[face[1]], mesh.vertices[face[2]])) / 6
-    meshVolume += volume
-    temp = center * volume
-  meshCenter = temp / meshVolume
-
-  return meshCenter
-
-
 def barycenter(mesh):
   # Returns the face area weighted barycentr of the mesh.
   faces = np.asarray(mesh.faces)
@@ -46,16 +32,6 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
-
-# def refine_outlier(show=False):
-#   df = pd.read_excel(utils.excelPath)
-#   undersampled = df[df["subsampled_outlier"] == True]
-#   for path in undersampled["path"]:
-#     refined_path = path[:11] + 'refined_' + path[11:]
-#     mesh = trimesh.load(path, force='mesh')
-#     refined_mesh = subdivision.subdivide(mesh, utils.target_vertices, show=show)
-#     save_mesh(refined_mesh, refined_path)
-#     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
 
 def normalize_mesh(mesh):
   # Fix normals

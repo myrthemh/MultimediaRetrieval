@@ -2,17 +2,6 @@ import numpy as np
 import trimesh
 
 
-def selection_sort(x):
-  for i in range(len(x)):
-    swap = i + np.argmin(x[i:])
-    (x[i], x[swap]) = (x[swap], x[i])
-  return x
-
-
-def computeaveragecell(mesh):
-  return mesh.area / len(mesh.area_faces)
-
-
 def sortFunction(x):
   return x[1]
 
@@ -26,11 +15,6 @@ def get_area_indices_list(mesh):
 
 
 def subdivide(mesh, target_vertices=1000, show=False):
-  n_subdivided = 0
-  NC = len(mesh.area_faces)
-  NP = len(mesh.vertices)
-  NP2 = NP
-  NC2 = 0
   updated_vertices = np.asarray(mesh.vertices)
   updated_faces = np.asarray(mesh.faces)
   indices_to_delete = []
@@ -60,12 +44,6 @@ def subdivide(mesh, target_vertices=1000, show=False):
 
     updated_faces = np.append(updated_faces, newfaces, axis=0)
     indices_to_delete.append(index)
-
-    # update mesh statistics (delete? not currently using)
-    n_subdivided = n_subdivided + 1
-    NP2 = NP2 + 1
-    NC2 = NC2 + 3
-    counter += 1
 
     # batch delete all 'old' triangles that have been subdivided
   updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
