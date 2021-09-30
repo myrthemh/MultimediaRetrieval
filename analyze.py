@@ -36,8 +36,8 @@ classes = [
 ]
 
 def barycentre_distance(mesh):
-  mass = preprocess.calc_center_mass(mesh)
-  return math.sqrt(sum(mass * mass))
+  barycentre = preprocess.barycenter(mesh)
+  return math.sqrt(sum(barycentre * barycentre))
 
 
 def bounding_box_volume(mesh):
@@ -112,7 +112,11 @@ def save_histogram(data, info, path):
     p95 = np.percentile(data, 95)
     data = data[data >= p5]
     data = data[data <= p95]
-  plt.hist(data, bins=info["blocksize"], facecolor='g', alpha=0.75)
+  if info["xlim"] > 0:
+    bins = np.arange(0, info["xlim"], info["xlim"] / info["blocksize"])
+  else:
+    bins = info["blocksize"]
+  plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
@@ -135,11 +139,11 @@ def save_all_histograms(df, path):
     {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
      "xlabel": "Number of vertices", "skip_outliers": True},
     {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
-     "xlabel": "Bounding box volume", "skip_outliers": True},
-    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 100, "xlim": 0,
-     "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": True},
-    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 100, "xlim": 0,
-     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": True}
+     "xlabel": "Bounding box volume", "skip_outliers": False},
+    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
+     "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
+    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50, "xlim": 3,
+     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False}
   ]
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
