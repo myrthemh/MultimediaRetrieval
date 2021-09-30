@@ -143,7 +143,7 @@ dmypy.json
 cython_debug/
 
 #user specified
-models/
-graphs/
-features/
-testModels/
+models/**
+graphs/**
+features/**
+testModels/**
