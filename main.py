@@ -19,11 +19,7 @@ def render(meshes, showWireframe=True):
     mesh.visual = colorvisuals
     mesh1 = pyrender.Mesh.from_trimesh(mesh, smooth=False)
     scene.add(mesh1)
-  boxf_trimesh = trimesh.creation.box(extents=0.1*np.ones(3))
-  boxf_face_colors = np.random.uniform(size=boxf_trimesh.faces.shape)
-  boxf_trimesh.visual.face_colors = boxf_face_colors
-  boxf_mesh = pyrender.Mesh.from_trimesh(boxf_trimesh, smooth=False)
-  scene.add(boxf_mesh)
+
   if showWireframe:
     for mesh in meshes:
       colorvisuals = trimesh.visual.ColorVisuals(mesh, [0,0,0,255])
@@ -35,7 +31,7 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
   render([mesh])
 
 start_time = time.monotonic()

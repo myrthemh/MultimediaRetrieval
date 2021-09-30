@@ -49,6 +49,7 @@ def bounding_box_volume(mesh):
 def filter_database(dbPath, excelPath):
   db = dbPath
   df = pd.DataFrame()
+  utils.ensure_dir(excelPath)
   # iterate over all models:
   for classFolder in os.listdir(db):
     for modelFolder in os.listdir(db + '/' + classFolder):

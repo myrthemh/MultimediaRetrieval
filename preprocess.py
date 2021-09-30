@@ -57,6 +57,12 @@ def save_mesh(mesh, path):
 #     trimesh.exchange.export.export_mesh(refined_mesh, refined_path, file_type="off")
 
 def normalize_mesh(mesh):
+  #Fix normals
+  if mesh.body_count > 1:
+    trimesh.Trimesh.fix_normals(mesh, multibody=True)
+  else:
+    trimesh.Trimesh.fix_normals(mesh)
+
   # Center the mass of the mesh on (0,0,0)
   center_mass = barycenter(mesh)
   mesh.apply_translation(-center_mass)
