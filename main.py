@@ -38,7 +38,7 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/db/0/m0/m0.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
   render([mesh])
 
 step_1()
