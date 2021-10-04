@@ -74,7 +74,7 @@ def translate_eigen(mesh):
   return mesh
 
 
-def process_all(show_subdivide=True, show_superdivide=True):
+def process_all(show_subdivide=False, show_superdivide=False):
   # Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
   for index, row in df.iterrows():
@@ -82,7 +82,7 @@ def process_all(show_subdivide=True, show_superdivide=True):
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
 
-    if  row['subsampled_outlier']:
+    if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
         main.compare([mesh, mesh2])
@@ -90,6 +90,8 @@ def process_all(show_subdivide=True, show_superdivide=True):
       mesh2 = subdivision.superdivide(mesh, utils.target_faces)
       if show_superdivide:
         main.compare([mesh, mesh2])
+    else:
+      mesh2 = mesh
 
     mesh2 = normalize_mesh(mesh2)
     mesh2 = translate_eigen(mesh2)

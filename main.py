@@ -29,17 +29,16 @@ def render(meshes, showWireframe=True):
   if showWireframe:
     for mesh in meshes:
       mesh = scale_outward(mesh)
-      colorvisuals1 = trimesh.visual.ColorVisuals(mesh, [0, 0, 0, 255])
-      mesh.visual = colorvisuals1
+      colorvisuals = trimesh.visual.ColorVisuals(mesh, [0, 0, 0, 255])
+      mesh.visual = colorvisuals
       wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
       scene.add(wireframe)
-  x = pyrender.Viewer(scene, use_raymond_lighting=True)
-  x.close_external()
+  pyrender.Viewer(scene, use_raymond_lighting=True)
 
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/16/m1606/m1606.off', force='mesh')
   render([mesh])
 
 def compare(meshes):
@@ -55,8 +54,6 @@ def compare_all():
     compare(meshes)
 
 def main():
-  # step_1()
-  #compare_all()
   start_time = time.monotonic()
   # print("Analyze 1")
   # analyze.filter_database(utils.originalDB, utils.excelPath)
