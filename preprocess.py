@@ -44,10 +44,11 @@ def normalize_mesh(mesh):
   center_mass = barycenter(mesh)
   mesh.apply_translation(-center_mass)
 
+  mesh = translate_eigen(mesh)
   # Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 1 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
-
+  print(mesh.bounds)
   return mesh
 
 def eigen_values_vectors(mesh):
@@ -94,6 +95,5 @@ def process_all(show_subdivide=False, show_superdivide=False):
       mesh2 = mesh
 
     mesh2 = normalize_mesh(mesh2)
-    mesh2 = translate_eigen(mesh2)
     if analyze.barycentre_distance(mesh2) < 1:
       save_mesh(mesh2, refined_path)
