@@ -39,21 +39,24 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/9/m910/m910.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
   render([mesh])
 
-def compare():
+def compare(meshes):
+  for i, m in enumerate(meshes):
+    m.apply_translation([0, 0, i * 1])
+  render(meshes)
+
+def compare_all():
   for path in utils.shape_paths(utils.originalDB):
     ogmesh = trimesh.load(path, force='mesh')
     rfmesh = trimesh.load(utils.refined_path(path), force='mesh')
     meshes = [ogmesh, rfmesh]
-    for i, m in enumerate(meshes):
-      m.apply_translation([0, 0, i * 1])
-    render(meshes)
+    compare(meshes)
 
 def main():
   # step_1()
-  #compare()
+  #compare_all()
   start_time = time.monotonic()
   # print("Analyze 1")
   # analyze.filter_database(utils.originalDB, utils.excelPath)

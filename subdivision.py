@@ -45,6 +45,8 @@ def subdivide(mesh, target_vertices=1000, show=True):
     updated_faces = np.append(updated_faces, newfaces, axis=0)
     indices_to_delete.append(index)
 
+    counter += 1
+
     # batch delete all 'old' triangles that have been subdivided
   updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
   newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces, process=False)

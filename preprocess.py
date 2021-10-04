@@ -55,20 +55,18 @@ def process_all(show_subdivide=True, show_superdivide=True):
   df = pd.read_excel(utils.excelPath)
   for index, row in df.iterrows():
     path = row['path']
-    mesh = trimesh.load(row['path'])
+    mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
 
-    if row['subsampled_outlier']:
+    if  row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
+      if show_subdivide:
+        main.compare([mesh, mesh2])
     if row['supersampled_outlier']:
       mesh2 = subdivision.superdivide(mesh, utils.target_faces)
       if show_superdivide:
-        meshes = [mesh, mesh2]
-        for i, m in enumerate(meshes):
-          print(len(m.vertices), len(m.faces))
-          m.apply_translation([0, 0, i * 1])
-        main.render(meshes)
+        main.compare([mesh, mesh2])
     
-    mesh3 = normalize_mesh(mesh2)
-    if analyze.barycentre_distance(mesh3) < 1:
-      save_mesh(mesh3, refined_path)
+    mesh2 = normalize_mesh(mesh2)
+    if analyze.barycentre_distance(mesh2) < 1:
+      save_mesh(mesh2, refined_path)
