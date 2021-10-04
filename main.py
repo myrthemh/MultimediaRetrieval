@@ -11,7 +11,6 @@ import utils
 
 trimesh.util.attach_to_log(level=logging.INFO)
 
-
 def scale_outward(mesh):
   epsilon = 0.0002
   normals = mesh.face_normals
@@ -19,7 +18,6 @@ def scale_outward(mesh):
     for vertice in face:
       mesh.vertices[vertice] = mesh.vertices[vertice] + epsilon * normals[index]
   return mesh
-
 
 def render(meshes, showWireframe=True):
   scene = pyrender.Scene()
@@ -31,11 +29,12 @@ def render(meshes, showWireframe=True):
   if showWireframe:
     for mesh in meshes:
       mesh = scale_outward(mesh)
-      colorvisuals = trimesh.visual.ColorVisuals(mesh, [0, 0, 0, 255])
-      mesh.visual = colorvisuals
+      colorvisuals1 = trimesh.visual.ColorVisuals(mesh, [0, 0, 0, 255])
+      mesh.visual = colorvisuals1
       wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
       scene.add(wireframe)
-  pyrender.Viewer(scene, use_raymond_lighting=True)
+  x = pyrender.Viewer(scene, use_raymond_lighting=True)
+  x.close_external()
 
 
 # Step 1
@@ -43,12 +42,21 @@ def step_1():
   mesh = trimesh.load('testModels/refined_db/9/m910/m910.off', force='mesh')
   render([mesh])
 
+def compare():
+  for path in utils.shape_paths(utils.originalDB):
+    ogmesh = trimesh.load(path, force='mesh')
+    rfmesh = trimesh.load(utils.refined_path(path), force='mesh')
+    meshes = [ogmesh, rfmesh]
+    for i, m in enumerate(meshes):
+      m.apply_translation([0, 0, i * 1])
+    render(meshes)
 
 def main():
   # step_1()
+  #compare()
   start_time = time.monotonic()
-  print("Analyze 1")
-  analyze.filter_database(utils.originalDB, utils.excelPath)
+  # print("Analyze 1")
+  # analyze.filter_database(utils.originalDB, utils.excelPath)
   print("Preprocessing")
   preprocess.process_all()
   print("Analyze 2")

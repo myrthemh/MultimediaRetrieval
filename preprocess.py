@@ -5,7 +5,7 @@ import trimesh
 import analyze
 import subdivision
 import utils
-
+import main
 
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
@@ -50,18 +50,25 @@ def normalize_mesh(mesh):
   return mesh
 
 
-def process_all():
+def process_all(show_subdivide=True, show_superdivide=True):
   # Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
   for index, row in df.iterrows():
     path = row['path']
     mesh = trimesh.load(row['path'])
-    refined_path = path[:11] + 'refined_' + path[11:]
+    refined_path = utils.refined_path(path)
 
     if row['subsampled_outlier']:
-      mesh = subdivision.subdivide(mesh, utils.target_vertices)
+      mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
     if row['supersampled_outlier']:
-      mesh = subdivision.superdivide(mesh, utils.target_faces)
-    mesh = normalize_mesh(mesh)
-    if analyze.barycentre_distance(mesh) < 1:
-      save_mesh(mesh, refined_path)
+      mesh2 = subdivision.superdivide(mesh, utils.target_faces)
+      if show_superdivide:
+        meshes = [mesh, mesh2]
+        for i, m in enumerate(meshes):
+          print(len(m.vertices), len(m.faces))
+          m.apply_translation([0, 0, i * 1])
+        main.render(meshes)
+    
+    mesh3 = normalize_mesh(mesh2)
+    if analyze.barycentre_distance(mesh3) < 1:
+      save_mesh(mesh3, refined_path)
