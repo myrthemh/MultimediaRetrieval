@@ -6,7 +6,6 @@ import analyze
 import subdivision
 import utils
 
-
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
   scaleVector = [scale, scale, scale]
@@ -47,6 +46,30 @@ def normalize_mesh(mesh):
   # Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 1 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
+
+  return mesh
+
+def eigen_values_vectors(mesh):
+  covm = np.cov(mesh.vertices.T)
+  values, vectors = np.linalg.eig(covm)
+  #values[i] corresponds to vector[:,i}
+  return values, vectors
+
+def eigen_xyz(mesh):
+  values, vectors = eigen_values_vectors(mesh)
+  eig_vector_x = vectors[:,np.argmax(values)]  #largest
+  eig_vector_y = vectors[:,np.argsort(values)[1]]  # second largest
+  eig_vector_z = np.cross(eig_vector_x, eig_vector_y)
+  return eig_vector_x, eig_vector_y, eig_vector_z
+
+def translate_eigen(mesh):
+  c = barycenter(mesh)
+  eig_vector_x, eig_vector_y, eig_vector_z = eigen_xyz(mesh)
+  for vertex in mesh.vertices:
+    vc = vertex - c
+    vertex[0] = np.dot(vc, eig_vector_x)
+    vertex[1] = np.dot(vc, eig_vector_y)
+    vertex[2] = np.dot(vc, eig_vector_z)
   return mesh
 
 
@@ -63,5 +86,6 @@ def process_all():
     if row['supersampled_outlier']:
       mesh = subdivision.superdivide(mesh, utils.target_faces)
     mesh = normalize_mesh(mesh)
+    mesh = translate_eigen(mesh)
     if analyze.barycentre_distance(mesh) < 1:
       save_mesh(mesh, refined_path)
