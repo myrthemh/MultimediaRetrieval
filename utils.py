@@ -28,3 +28,14 @@ def ensure_dir(file_path):
 
 def get_face_barycentre(face, vertices):
   return (vertices[face[0]] + vertices[face[1]] + vertices[face[2]]) / 3
+
+def refined_path(path):
+  return path[:11] + 'refined_' + path[11:]
+
+def shape_paths(dbfolder):
+  paths = []
+  for path, subdirs, files in os.walk(dbfolder):
+    for name in files:
+      if name.endswith('.off'):
+        paths.append((os.path.join(path, name)))
+  return paths

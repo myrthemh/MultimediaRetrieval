@@ -1,7 +1,7 @@
 import numpy as np
 import trimesh
-
-
+import main
+import copy
 def sortFunction(x):
   return x[1]
 
@@ -14,7 +14,7 @@ def get_area_indices_list(mesh):
   return area_with_index
 
 
-def subdivide(mesh, target_vertices=1000, show=False):
+def subdivide(mesh, target_vertices=1000, show=True):
   updated_vertices = np.asarray(mesh.vertices)
   updated_faces = np.asarray(mesh.faces)
   indices_to_delete = []
@@ -50,20 +50,9 @@ def subdivide(mesh, target_vertices=1000, show=False):
     # batch delete all 'old' triangles that have been subdivided
   updated_faces = np.delete(updated_faces, indices_to_delete, axis=0)
   newmesh = trimesh.Trimesh(vertices=updated_vertices, faces=updated_faces, process=False)
-  if show:
-    meshes = [mesh, newmesh]
-    for i, m in enumerate(meshes):
-      m.apply_translation([0, 0, i * 1])
-
-    trimesh.Scene(meshes).show()
   return newmesh
 
 
-def superdivide(mesh, target_faces=2000, show=False):
+def superdivide(mesh, target_faces=2000, show=True):
   newmesh = trimesh.Trimesh.simplify_quadratic_decimation(mesh, target_faces)
-  if show:
-    meshes = [mesh, newmesh]
-    for i, m in enumerate(meshes):
-      m.apply_translation([0, 0, i * 1])
-    trimesh.Scene(meshes).show()
   return newmesh
