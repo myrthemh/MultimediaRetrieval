@@ -36,6 +36,17 @@ classes = [
 ]
 
 
+def compactness(mesh):
+  compactness = 0
+  return compactness
+
+
+def eccentricity(mesh):
+  values, _ = preprocess.eigen_values_vectors(mesh)
+  ecc = values[np.argmin(values)] / values[np.argmax(values)]
+  return ecc
+
+
 def barycentre_distance(mesh):
   barycentre = preprocess.barycenter(mesh)
   return math.sqrt(sum(barycentre * barycentre))
@@ -71,7 +82,9 @@ def fill_mesh_info(mesh, classFolder, path):
                "bounding_box_corners": mesh.bounds, "path": f'{path}',
                "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                "barycentre_distance": barycentre_distance(mesh),
-               'volume': bounding_box_volume(mesh)}
+               "volume": bounding_box_volume(mesh),
+               "area": mesh.area,
+               "eccentricity": eccentricity(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 

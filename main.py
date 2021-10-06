@@ -38,7 +38,7 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/16/m1606/m1606.off', force='mesh')
+  mesh = trimesh.load('testModels/db/13/m1300/m1300.off', force='mesh')
   render([mesh])
 
 def compare(meshes):
@@ -54,9 +54,11 @@ def compare_all():
     compare(meshes)
 
 def main():
+  #step_1()
+
   start_time = time.monotonic()
-  # print("Analyze 1")
-  # analyze.filter_database(utils.originalDB, utils.excelPath)
+  print("Analyze 1")
+  analyze.filter_database(utils.originalDB, utils.excelPath)
   print("Preprocessing")
   preprocess.process_all()
   print("Analyze 2")

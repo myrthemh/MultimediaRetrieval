@@ -48,7 +48,6 @@ def normalize_mesh(mesh):
   # Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 1 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
-  print(mesh.bounds)
   return mesh
 
 def eigen_values_vectors(mesh):
