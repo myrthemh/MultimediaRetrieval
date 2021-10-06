@@ -11,6 +11,7 @@ import utils
 
 trimesh.util.attach_to_log(level=logging.INFO)
 
+
 def scale_outward(mesh):
   epsilon = 0.0002
   normals = mesh.face_normals
@@ -18,6 +19,7 @@ def scale_outward(mesh):
     for vertice in face:
       mesh.vertices[vertice] = mesh.vertices[vertice] + epsilon * normals[index]
   return mesh
+
 
 def render(meshes, showWireframe=True):
   scene = pyrender.Scene()
@@ -38,13 +40,15 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/db/13/m1300/m1300.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/3/m300/m300.off', force='mesh')
   render([mesh])
+
 
 def compare(meshes):
   for i, m in enumerate(meshes):
     m.apply_translation([0, 0, i * 1])
   render(meshes)
+
 
 def compare_all():
   for path in utils.shape_paths(utils.originalDB):
@@ -53,9 +57,9 @@ def compare_all():
     meshes = [ogmesh, rfmesh]
     compare(meshes)
 
-def main():
-  #step_1()
 
+def main():
+  # step_1()
   start_time = time.monotonic()
   print("Analyze 1")
   analyze.filter_database(utils.originalDB, utils.excelPath)

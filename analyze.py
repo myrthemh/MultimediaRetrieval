@@ -36,9 +36,21 @@ classes = [
 ]
 
 
+def volume(mesh):
+  subvolume = 0
+  for index in range(len(mesh.faces)):
+    v1 = mesh.vertices[mesh.faces[index][0]] - mesh.centroid
+    v2 = mesh.vertices[mesh.faces[index][1]] - mesh.centroid
+    v3 = mesh.vertices[mesh.faces[index][2]] - mesh.centroid
+    subvolume += np.dot(np.cross(v1, v2), v3)
+  v = 1 / 6 * abs(subvolume)
+
+  return v
+
+
 def compactness(mesh):
-  compactness = 0
-  return compactness
+  c = (mesh.area ** 3) / (36 * np.pi * (volume(mesh) ** 2))
+  return c
 
 
 def eccentricity(mesh):
@@ -48,8 +60,7 @@ def eccentricity(mesh):
 
 
 def barycentre_distance(mesh):
-  barycentre = preprocess.barycenter(mesh)
-  return math.sqrt(sum(barycentre * barycentre))
+  return math.sqrt(sum(mesh.centroid * mesh.centroid))
 
 
 def bounding_box_volume(mesh):
@@ -77,6 +88,7 @@ def filter_database(dbPath, excelPath):
 
 def fill_mesh_info(mesh, classFolder, path):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
+  print(f"analyzing model {path}")
   mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                "bounding_box_corners": mesh.bounds, "path": f'{path}',
@@ -84,7 +96,8 @@ def fill_mesh_info(mesh, classFolder, path):
                "barycentre_distance": barycentre_distance(mesh),
                "volume": bounding_box_volume(mesh),
                "area": mesh.area,
-               "eccentricity": eccentricity(mesh)}
+               "eccentricity": eccentricity(mesh),
+               "compactness": compactness(mesh)}
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
