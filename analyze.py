@@ -214,7 +214,7 @@ def save_all_histograms(df, path, features=False):
        "skip_outliers": False},
       {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50, "xlim": 3.2,
        "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
-      {"column": "compactness", "title": "Compacness", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "compactness", "title": "Compactness", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Compactness", "skip_outliers": True},
       {"column": "eccentricity", "title": "Eccentricity", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Eccentricity", "skip_outliers": True}
