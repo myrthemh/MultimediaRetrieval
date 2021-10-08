@@ -107,6 +107,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "area": mesh.area,
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "diameter": diameter(mesh),
                  "compactness": compactness(mesh)}
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
@@ -117,7 +118,6 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
-                 "diameter": diameter(mesh),
                  # "eccentricity": eccentricity(mesh),
                  # "compactness": compactness(mesh)
                  }
