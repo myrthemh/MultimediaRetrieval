@@ -62,7 +62,7 @@ def main():
   # step_1()
   start_time = time.monotonic()
   print("Analyze 1")
-  analyze.filter_database(utils.originalDB, utils.excelPath)
+  analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
   print("Preprocessing")
   preprocess.process_all()
   print("Analyze 2")
@@ -71,7 +71,7 @@ def main():
   originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)
   print("Save histograms")
-  analyze.save_all_histograms(originalDF, utils.imagePath)
+  analyze.save_all_histograms(originalDF, utils.imagePath, )
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath)
 
   end_time = time.monotonic()

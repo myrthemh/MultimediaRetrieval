@@ -69,7 +69,7 @@ def bounding_box_volume(mesh):
   return volume
 
 
-def filter_database(dbPath, excelPath):
+def filter_database(dbPath, excelPath, features=True):
   db = dbPath
   df = pd.DataFrame()
   utils.ensure_dir(excelPath)
@@ -81,15 +81,16 @@ def filter_database(dbPath, excelPath):
           # Find the relevant info for the mesh:
           path = db + '/' + classFolder + '/' + modelFolder + '/' + filename
           mesh = trimesh.load(path, force='mesh')
-          mesh_info = fill_mesh_info(mesh, classFolder, path)
+          mesh_info = fill_mesh_info(mesh, classFolder, path, features)
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
 
 
-def fill_mesh_info(mesh, classFolder, path):
+def fill_mesh_info(mesh, classFolder, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   print(f"analyzing model {path}")
-  mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+  if features:
+    mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                "bounding_box_corners": mesh.bounds, "path": f'{path}',
                "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
@@ -98,6 +99,17 @@ def fill_mesh_info(mesh, classFolder, path):
                "area": mesh.area,
                "eccentricity": eccentricity(mesh),
                "compactness": compactness(mesh)}
+  else:
+    mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+                 "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
+                 "bounding_box_corners": mesh.bounds, "path": f'{path}',
+                 "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
+                 "barycentre_distance": barycentre_distance(mesh),
+                 "volume": bounding_box_volume(mesh),
+                 "area": mesh.area,
+                 #"eccentricity": eccentricity(mesh),
+                 #"compactness": compactness(mesh)
+                 }
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 

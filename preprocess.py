@@ -73,7 +73,7 @@ def process_all(show_subdivide=False, show_superdivide=False):
     path = row['path']
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-
+    print(f'preprocessing model {path}')
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
