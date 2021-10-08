@@ -52,6 +52,9 @@ def compactness(mesh):
   c = (mesh.area ** 3) / (36 * np.pi * (volume(mesh) ** 2))
   return c
 
+def diameter(mesh):
+  diameter =max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  return diameter
 
 def eccentricity(mesh):
   values, _ = preprocess.eigen_values_vectors(mesh)
@@ -98,6 +101,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                "volume": bounding_box_volume(mesh),
                "area": mesh.area,
                "eccentricity": eccentricity(mesh),
+                "diameter": diameter(mesh),
                "eigen_x_angle": preprocess.eigen_angle(mesh),
                "compactness": compactness(mesh)}
   else:
