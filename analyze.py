@@ -49,15 +49,17 @@ def volume(mesh):
 
 
 def compactness(mesh):
-  if mesh.area>0:
+  if mesh.area > 0:
     c = (mesh.area ** 3) / (36 * np.pi * (volume(mesh) ** 2))
   else:
-    c=0
+    c = 0
   return c
 
+
 def diameter(mesh):
-  diameter =max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
   return diameter
+
 
 def eccentricity(mesh):
   values, _ = preprocess.eigen_values_vectors(mesh)
@@ -97,18 +99,6 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
   print(f"analyzing model {path}")
   if features:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
-<<<<<<< HEAD
-               "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
-               "bounding_box_corners": mesh.bounds, "path": f'{path}',
-               "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
-               "barycentre_distance": barycentre_distance(mesh),
-               "volume": bounding_box_volume(mesh),
-               "area": mesh.area,
-               "eccentricity": eccentricity(mesh),
-                "diameter": diameter(mesh),
-               "eigen_x_angle": preprocess.eigen_angle(mesh),
-               "compactness": compactness(mesh)}
-=======
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
                  "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
@@ -118,7 +108,6 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
                  "compactness": compactness(mesh)}
->>>>>>> e8b751480e9eb998f8441db3b72bfb024f561143
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
@@ -128,6 +117,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "diameter": diameter(mesh),
                  # "eccentricity": eccentricity(mesh),
                  # "compactness": compactness(mesh)
                  }
@@ -167,7 +157,7 @@ def meta_data(dataframe):
 def save_histogram(data, info, path):
   # the histogram of the data
 
-  #drop NA values if they exist
+  # drop NA values if they exist
   data = data[np.isfinite(data)]
   if info['skip_outliers']:
     # Remove all data below the 5th percentile and 95th percentile
