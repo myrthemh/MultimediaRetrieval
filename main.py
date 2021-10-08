@@ -71,7 +71,7 @@ def main():
   originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)
   print("Save histograms")
-  analyze.save_all_histograms(originalDF, utils.imagePath, )
+  analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath)
 
   end_time = time.monotonic()

@@ -98,6 +98,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                "volume": bounding_box_volume(mesh),
                "area": mesh.area,
                "eccentricity": eccentricity(mesh),
+               "eigen_x_angle": preprocess.eigen_angle(mesh),
                "compactness": compactness(mesh)}
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
@@ -140,9 +141,7 @@ def meta_data(dataframe):
 
   metadata["avgbarycentre_distance"] = np.mean(dataframe.loc[:, "barycentre_distance"].values)
   metadata["volume"] = np.mean(dataframe.loc[:, "volume"].values)
-
   return metadata
-
 
 def save_histogram(data, info, path):
   # the histogram of the data
@@ -170,7 +169,7 @@ def save_histogram(data, info, path):
 
 
 def save_all_histograms(df, path):
-  meta_data(df)
+  md = meta_data(df)
   plotInfos = [
     {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
      "xlabel": "Class nr", "skip_outliers": False},
@@ -184,7 +183,10 @@ def save_all_histograms(df, path):
      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
     {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
      "xlim": 3,
-     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False}
+     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
+    {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50,
+    "xlim": 3.2,
+    "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False}
   ]
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)

@@ -47,6 +47,12 @@ def eigen_values_vectors(mesh):
   # values[i] corresponds to vector[:,i}
   return values, vectors
 
+def angle(vector1, vector2):
+  return np.arccos(np.clip(np.dot(vector1, vector2), -1.0, 1.0))
+
+def eigen_angle(mesh):
+  x, y, z = eigen_xyz(mesh)
+  return min(angle(x, [1,0,0]), angle(x, [-1,0,0]))
 
 def eigen_xyz(mesh):
   values, vectors = eigen_values_vectors(mesh)
