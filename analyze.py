@@ -49,7 +49,10 @@ def volume(mesh):
 
 
 def compactness(mesh):
-  c = (mesh.area ** 3) / (36 * np.pi * (volume(mesh) ** 2))
+  if mesh.area>0:
+    c = (mesh.area ** 3) / (36 * np.pi * (volume(mesh) ** 2))
+  else:
+    c=0
   return c
 
 def diameter(mesh):
@@ -94,6 +97,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
   print(f"analyzing model {path}")
   if features:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+<<<<<<< HEAD
                "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                "bounding_box_corners": mesh.bounds, "path": f'{path}',
                "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
@@ -104,6 +108,17 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                 "diameter": diameter(mesh),
                "eigen_x_angle": preprocess.eigen_angle(mesh),
                "compactness": compactness(mesh)}
+=======
+                 "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
+                 "bounding_box_corners": mesh.bounds, "path": f'{path}',
+                 "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
+                 "barycentre_distance": barycentre_distance(mesh),
+                 "volume": bounding_box_volume(mesh),
+                 "area": mesh.area,
+                 "eccentricity": eccentricity(mesh),
+                 "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "compactness": compactness(mesh)}
+>>>>>>> e8b751480e9eb998f8441db3b72bfb024f561143
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
@@ -112,8 +127,9 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
-                 #"eccentricity": eccentricity(mesh),
-                 #"compactness": compactness(mesh)
+                 "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 # "eccentricity": eccentricity(mesh),
+                 # "compactness": compactness(mesh)
                  }
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
@@ -147,8 +163,12 @@ def meta_data(dataframe):
   metadata["volume"] = np.mean(dataframe.loc[:, "volume"].values)
   return metadata
 
+
 def save_histogram(data, info, path):
   # the histogram of the data
+
+  #drop NA values if they exist
+  data = data[np.isfinite(data)]
   if info['skip_outliers']:
     # Remove all data below the 5th percentile and 95th percentile
     p5 = np.percentile(data, 5)
@@ -172,26 +192,50 @@ def save_histogram(data, info, path):
   plt.clf()
 
 
-def save_all_histograms(df, path):
+def save_all_histograms(df, path, features=False):
   md = meta_data(df)
-  plotInfos = [
-    {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
-     "xlabel": "Class nr", "skip_outliers": False},
-    {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
-     "xlabel": "Number of faces", "skip_outliers": True},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
-     "xlabel": "Number of vertices", "skip_outliers": True},
-    {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
-     "xlabel": "Bounding box volume", "skip_outliers": False},
-    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
-     "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
-     "xlim": 3,
-     "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
-    {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50,
-    "xlim": 3.2,
-    "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False}
-  ]
+  if not features:
+    plotInfos = [
+      {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
+       "xlabel": "Class nr", "skip_outliers": False},
+      {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Number of faces", "skip_outliers": True},
+      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Number of vertices", "skip_outliers": True},
+      {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Bounding box volume", "skip_outliers": False},
+      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
+       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
+      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
+       "xlim": 3,
+       "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
+      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50,
+       "xlim": 3.2,
+       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False}
+    ]
+  else:
+    plotInfos = [
+      {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
+       "xlabel": "Class nr", "skip_outliers": False},
+      {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Number of faces", "skip_outliers": True},
+      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Number of vertices", "skip_outliers": True},
+      {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Bounding box volume", "skip_outliers": False},
+      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
+       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
+      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
+       "xlim": 3, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
+       "skip_outliers": False},
+      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50, "xlim": 3.2,
+       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
+      {"column": "compactness", "title": "Compactness", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Compactness", "skip_outliers": True},
+      {"column": "eccentricity", "title": "Eccentricity", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Eccentricity", "skip_outliers": True}
+
+    ]
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
