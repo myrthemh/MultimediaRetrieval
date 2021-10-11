@@ -19,6 +19,7 @@ def scale_mesh(mesh, scale):
   return mesh
 
 
+
 def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
@@ -36,7 +37,7 @@ def normalize_mesh(mesh):
 
   mesh = translate_eigen(mesh)
   # Get the highest value we can scale with so it still fits within the unit cube
-  scale_value = 1 / max(abs(mesh.bounds.flatten()))
+  scale_value = 0.5 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
   return mesh
 
@@ -47,12 +48,11 @@ def eigen_values_vectors(mesh):
   # values[i] corresponds to vector[:,i}
   return values, vectors
 
-def angle(vector1, vector2):
-  return np.arccos(np.clip(np.dot(vector1, vector2), -1.0, 1.0))
+
 
 def eigen_angle(mesh):
   x, y, z = eigen_xyz(mesh)
-  return min(angle(x, [1,0,0]), angle(x, [-1,0,0]))
+  return min(utils.angle(x, [1,0,0]), utils.angle(x, [-1,0,0]))
 
 def eigen_xyz(mesh):
   values, vectors = eigen_values_vectors(mesh)

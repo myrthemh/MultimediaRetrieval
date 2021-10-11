@@ -1,3 +1,4 @@
+import collections
 import logging
 import time
 from datetime import timedelta
@@ -8,7 +9,7 @@ import trimesh
 import analyze
 import preprocess
 import utils
-
+import numpy as np
 trimesh.util.attach_to_log(level=logging.INFO)
 
 
@@ -38,9 +39,20 @@ def render(meshes, showWireframe=True):
   pyrender.Viewer(scene, use_raymond_lighting=True)
 
 
+# def make_watertight(mesh):
+#   counts = {}
+#   for index, edge in enumerate(mesh.edges):
+#     key = str(min(edge)) + '_' + str(max(edge))
+#     if key in counts:
+#       counts[key] = counts[key].concat([index])
+#     else:
+#       counts[key] = [index]
+#   x = [value for value in counts.values() if len(value) == 1]
+#   print(x)
+
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/qdb/7/m711/m711.off', force='mesh')
+  mesh = trimesh.load('testModels/db/1/m111/m111.off', force='mesh')
   render([mesh])
 
 
@@ -59,12 +71,13 @@ def compare_all():
 
 
 def main():
-  #step_1()
+  step_1()
+  compare_all()
   start_time = time.monotonic()
-  print("Analyze 1")
-  #analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
-  print("Preprocessing")
-  #preprocess.process_all()
+  # print("Analyze 1")
+  # analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
+  # print("Preprocessing")
+  # preprocess.process_all()
   print("Analyze 2")
   analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
   print("Read Excel")
