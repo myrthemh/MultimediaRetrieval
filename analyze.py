@@ -97,8 +97,42 @@ def make_bins(list, lowerbound, upperbound, nrbins):
   bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound))
   return bins[0]
 
+def select_random_number_expection(exclude, selected_vertices):
+  if len(exclude)== 1:
+    new_list = [el for el in selected_vertices if not np.array_equal(el, exclude[0])]
+    return new_list[np.random.randint(0, high=len(new_list))]
+
+
+def check_duplicates(mesh, selected_vertices, number_vertices):
+  for idx, vertice in enumerate(selected_vertices):
+
+    if number_vertices <2:
+      if np.array_equal(vertice[0], vertice[1]):
+        selected_vertices[idx, 0] = select_random_number_expection(vertice[0], mesh.vertices)
+    if number_vertices <3:
+      continue
+
+    if np.array_equal(vertice[0], vertice[2]):
+      selected_vertices[idx, 0] = select_random_number_expection(vertice[0], mesh.vertices)
+    if np.array_equal(vertice[1], vertice[2]):
+      selected_vertices[idx, 1] = select_random_number_expection(vertice[1], mesh.vertices)
+
+    if number_vertices < 4:
+      continue
+
+    if np.array_equal(vertice[0], vertice[3]):
+      selected_vertices[idx, 0], select_random_number_expection(vertice[0], mesh.vertices)
+    if np.array_equal(vertice[2], vertice[3]):
+      selected_vertices[idx, 2], select_random_number_expection(vertice[2], mesh.vertices)
+    if np.array_equal(vertice[1], vertice[3]):
+      selected_vertices[idx, 1], select_random_number_expection(vertice[1], mesh.vertices)
+
+  return selected_vertices
+
+
 def A3(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
+  random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
   return make_bins(angles, 0, math.pi, 10)
 
@@ -109,11 +143,13 @@ def D1(mesh, amount=10):
 
 def D2(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,2))]
+  random_vertices = check_duplicates(mesh, random_vertices, 2)
   distance_vertices = [math.sqrt(sum((random_vertice[0] - random_vertice[1])**2)) for random_vertice in random_vertices]
   return make_bins(distance_vertices)
 
 def D3(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
+  random_vertices = check_duplicates(mesh, random_vertices, 3)
   area_vertices =  [(math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2) for random_vertice in random_vertices]
   return area_vertices
 
@@ -126,6 +162,7 @@ def tetrahedon_volume(vertices):
 
 def D4(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,4))]
+  random_vertices = check_duplicates(mesh, random_vertices, 4)
   volumes = [tetrahedon_volume(vertices) for vertices in random_vertices]
   return make_bins(volumes, 0, 1, 10)
 
