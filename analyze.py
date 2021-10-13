@@ -114,7 +114,7 @@ def D2(mesh, amount=10):
 
 def D3(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
-  area_vertices =  [(math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2) for random_vertice in random_vertices]
+  area_vertices =  [math.sqrt((math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2)) for random_vertice in random_vertices]
   return area_vertices
 
 def tetrahedon_volume(vertices):
@@ -126,7 +126,7 @@ def tetrahedon_volume(vertices):
 
 def D4(mesh, amount=10):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,4))]
-  volumes = [tetrahedon_volume(vertices) for vertices in random_vertices]
+  volumes = [tetrahedon_volume(vertices) ** (1.0/3) for vertices in random_vertices]
   return make_bins(volumes, 0, 1, 10)
 
 def fill_mesh_info(mesh, classFolder, path, features=True):
@@ -264,5 +264,5 @@ def save_all_histograms(df, path, features=False):
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
-# mesh = trimesh.load('testModels/db/0/m1/m1.off', force='mesh')
-# D4(mesh, amount=1000)
+mesh = trimesh.load('testModels/db/0/m1/m1.off', force='mesh')
+D3(mesh, amount=1000)
