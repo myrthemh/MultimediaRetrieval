@@ -39,20 +39,11 @@ def render(meshes, showWireframe=True):
   pyrender.Viewer(scene, use_raymond_lighting=True)
 
 
-# def make_watertight(mesh):
-#   counts = {}
-#   for index, edge in enumerate(mesh.edges):
-#     key = str(min(edge)) + '_' + str(max(edge))
-#     if key in counts:
-#       counts[key] = counts[key].concat([index])
-#     else:
-#       counts[key] = [index]
-#   x = [value for value in counts.values() if len(value) == 1]
-#   print(x)
+
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/0/m9/m9.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/1/m112/m112.off', force='mesh')
   render([mesh])
 
 
@@ -79,13 +70,13 @@ def main():
   print("Preprocessing")
   preprocess.process_all()
   print("Analyze 2")
-  #analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
-  # print("Read Excel")
-  # originalDF = utils.read_excel(original=True)
-  # refinedDF = utils.read_excel(original=False)
-  # print("Save histograms")
-  # analyze.save_all_histograms(originalDF, utils.imagePath)
-  # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
+  print("Read Excel")
+  originalDF = utils.read_excel(original=True)
+  refinedDF = utils.read_excel(original=False)
+  print("Save histograms")
+  analyze.save_all_histograms(originalDF, utils.imagePath)
+  analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
 
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))

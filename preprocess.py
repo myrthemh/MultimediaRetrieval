@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import trimesh
 import itertools
-import pymeshfix
 from collections import Counter
 
 import analyze
@@ -27,18 +26,52 @@ def save_mesh(mesh, path):
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
 
-def fix_watertight(mesh):
-  if not mesh.is_watertight:
-    vertices = []
-    for broken_face_index in trimesh.repair.broken_faces(mesh):
-      broken_face = np.asarray(mesh.faces[broken_face_index])
-      vertices.append(broken_face)
-    counts = Counter([item for sublist in vertices for item in sublist])
-    broken_vertices = [item for item in counts if counts.get(item, 0) >= 2]
-    for pair in itertools.combinations(broken_vertices, 2):
-      if pair in mesh.edges or pair[::-1] in mesh.edges:
-        print(pair)
-    #work in progress
+def make_watertight(mesh):
+  #Count all edges that only occur once in the mesh, in one loop over the edges.
+  counts = {}
+  for index, edge in enumerate(mesh.edges):
+    key = str(min(edge)) + '_' + str(max(edge))
+    if key in counts:
+      counts[key] = counts[key] + [index]
+    else:
+      counts[key] = [index]
+  x = [mesh.edges[value][0] for value in counts.values() if len(value) == 1]
+
+  #Find all loops of edges that define the different holes
+  loops = []
+  while len(x) > 0:
+    loop = []
+    loop.append(x[0])
+    del x[0]
+    while loop[-1][1] != loop[0][0]:
+      check = len(x)
+      for index, edge in enumerate(x):
+        if edge[0] == loop[-1][1]:
+          loop.append(edge)
+          del x[index]
+          break
+      if len(x) == check:
+        print("Could not create loop, fixing watertightness failed")
+        return mesh
+    loops.append(loop)
+  newfaces = mesh.faces
+  newvertices = mesh.vertices
+
+  #Create a vertice in the center of each loop, and make a face by connecting each edge in the loop to the new vertice.
+  for loop in loops:
+    unique_vertices_in_loop = mesh.vertices[[x[0] for x in loop]]
+    barycentre = sum(unique_vertices_in_loop) / len(unique_vertices_in_loop)
+    newvertices = np.append(newvertices, [barycentre], axis=0)
+    for edge in loop:
+      newfaces = np.append(newfaces, [[edge[0], edge[1], len(newvertices) - 1]], axis=0)
+  newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
+  
+  # Fix normals
+  if mesh.body_count > 1:
+    trimesh.Trimesh.fix_normals(mesh, multibody=True)
+  else:
+    trimesh.Trimesh.fix_normals(mesh)
+  return newmesh
 
 def normalize_mesh(mesh):
   # Fix normals
@@ -96,7 +129,12 @@ def process_all(show_subdivide=False, show_superdivide=False):
     path = row['path']
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-
+    if not mesh.is_watertight:
+      mesh = make_watertight(mesh)
+      if not mesh.is_watertight:
+        print("Make watertight operation failed")
+      else:
+        print("Successfully made mesh watertight")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -109,7 +147,6 @@ def process_all(show_subdivide=False, show_superdivide=False):
       mesh2 = mesh
 
     mesh2 = normalize_mesh(mesh2)
-    # fix_watertight(mesh2)
     if analyze.barycentre_distance(mesh2) < 1:
       save_mesh(mesh2, refined_path)
     if not mesh.is_watertight:
