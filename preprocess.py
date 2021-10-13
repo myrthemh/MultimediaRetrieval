@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import trimesh
+import itertools
+import pymeshfix
+from collections import Counter
 
 import analyze
 import main
@@ -19,11 +22,23 @@ def scale_mesh(mesh, scale):
   return mesh
 
 
-
 def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
+
+def fix_watertight(mesh):
+  if not mesh.is_watertight:
+    vertices = []
+    for broken_face_index in trimesh.repair.broken_faces(mesh):
+      broken_face = np.asarray(mesh.faces[broken_face_index])
+      vertices.append(broken_face)
+    counts = Counter([item for sublist in vertices for item in sublist])
+    broken_vertices = [item for item in counts if counts.get(item, 0) >= 2]
+    for pair in itertools.combinations(broken_vertices, 2):
+      if pair in mesh.edges or pair[::-1] in mesh.edges:
+        print(pair)
+    #work in progress
 
 def normalize_mesh(mesh):
   # Fix normals
@@ -49,10 +64,10 @@ def eigen_values_vectors(mesh):
   return values, vectors
 
 
-
 def eigen_angle(mesh):
   x, y, z = eigen_xyz(mesh)
-  return min(utils.angle(x, [1,0,0]), utils.angle(x, [-1,0,0]))
+  return min(utils.angle(x, [1, 0, 0]), utils.angle(x, [-1, 0, 0]))
+
 
 def eigen_xyz(mesh):
   values, vectors = eigen_values_vectors(mesh)
@@ -75,11 +90,13 @@ def translate_eigen(mesh):
 def process_all(show_subdivide=False, show_superdivide=False):
   # Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
+  i = 0
+  y = 0
   for index, row in df.iterrows():
     path = row['path']
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    print(f'preprocessing model {path}')
+
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -92,5 +109,13 @@ def process_all(show_subdivide=False, show_superdivide=False):
       mesh2 = mesh
 
     mesh2 = normalize_mesh(mesh2)
+    # fix_watertight(mesh2)
     if analyze.barycentre_distance(mesh2) < 1:
       save_mesh(mesh2, refined_path)
+    if not mesh.is_watertight:
+      i += 1
+    if not mesh2.is_watertight:
+      y += 1
+
+  print(f'meshes1 not watertight: {i}')
+  print(f'meshes2 not watertight: {y}')

@@ -52,7 +52,7 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/db/1/m111/m111.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/0/m9/m9.off', force='mesh')
   render([mesh])
 
 
@@ -71,21 +71,21 @@ def compare_all():
 
 
 def main():
-  step_1()
-  compare_all()
+  #step_1()
+  # compare_all()
   start_time = time.monotonic()
-  # print("Analyze 1")
-  # analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
-  # print("Preprocessing")
-  # preprocess.process_all()
+  print("Analyze 1")
+  #analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
+  print("Preprocessing")
+  preprocess.process_all()
   print("Analyze 2")
-  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
-  print("Read Excel")
-  originalDF = utils.read_excel(original=True)
-  refinedDF = utils.read_excel(original=False)
-  print("Save histograms")
-  analyze.save_all_histograms(originalDF, utils.imagePath)
-  analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  #analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
+  # print("Read Excel")
+  # originalDF = utils.read_excel(original=True)
+  # refinedDF = utils.read_excel(original=False)
+  # print("Save histograms")
+  # analyze.save_all_histograms(originalDF, utils.imagePath)
+  # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
 
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
