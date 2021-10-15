@@ -73,7 +73,6 @@ def main():
   print("Read Excel")
   originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)
-  A3 = refinedDF.loc[:, 'A3'].values
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
