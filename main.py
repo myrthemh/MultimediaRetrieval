@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import pyrender
 import trimesh
-
+import pandas
 import analyze
 import preprocess
 import utils
@@ -65,11 +65,11 @@ def main():
   # compare_all()
   start_time = time.monotonic()
   print("Analyze 1")
-  #analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
+  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
   print("Preprocessing")
   # preprocess.process_all()
   print("Analyze 2")
-  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
+  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
   print("Read Excel")
   originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)

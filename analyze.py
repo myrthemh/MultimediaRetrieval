@@ -77,10 +77,11 @@ def bounding_box_volume(mesh):
   return volume
 
 
-def filter_database(dbPath, excelPath, features=True):
+def filter_database(dbPath, excelPath, picklePath, features=True):
   db = dbPath
   df = pd.DataFrame()
   utils.ensure_dir(excelPath)
+  utils.ensure_dir(picklePath)
   # iterate over all models:
   for classFolder in os.listdir(db):
     for modelFolder in os.listdir(db + '/' + classFolder):
