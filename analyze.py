@@ -5,7 +5,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy
 import trimesh
+from trimesh import convex
 
 import preprocess
 import utils
@@ -57,9 +59,15 @@ def compactness(mesh):
 
 
 def diameter(mesh):
-  diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  try:
+    conv_hull_points = trimesh.convex.hull_points(mesh)
+    diameter = max([max((np.linalg.norm(x - y)) for y in conv_hull_points) for x in conv_hull_points])
+  except:
+    print("error calculating hull, reverting to brute force diameter calculation")
+    diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  # print(diameter == diameter_old)
+  # print(f'difference new old {diameter - diameter_old}')
   return diameter
-
 
 def eccentricity(mesh):
   values, _ = preprocess.eigen_values_vectors(mesh)
@@ -94,6 +102,7 @@ def filter_database(dbPath, excelPath, picklePath, features=True):
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
   df.to_pickle(utils.refinedpicklePath)
+
 
 def make_bins(list, lowerbound, upperbound, nrbins):
   bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound))
@@ -135,6 +144,7 @@ def D4(mesh, amount=10):
   volumes = [tetrahedon_volume(vertices) ** (1.0/3) for vertices in random_vertices]
   return make_bins(volumes, 0, 1, 10)
 
+
 def fill_mesh_info(mesh, classFolder, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   print(f"analyzing model {path}")
@@ -148,7 +158,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "area": mesh.area,
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
-                 #"diameter": diameter(mesh),
+                 "diameter": diameter(mesh),
                  "compactness": compactness(mesh),
                  "A3": A3(mesh),
                  "D1": D1(mesh),
@@ -275,5 +285,6 @@ def save_all_histograms(df, path, features=False):
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
-# mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
-# D1(mesh, amount=100000)
+
+# mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
+# D3(mesh, amount=1000)
