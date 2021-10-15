@@ -5,6 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy
 import trimesh
 from trimesh import convex
 
@@ -58,8 +59,14 @@ def compactness(mesh):
 
 
 def diameter(mesh):
-  conv_hull_points = trimesh.convex.hull_points(mesh)
-  diameter = max([max((np.linalg.norm(x - y)) for y in conv_hull_points) for x in conv_hull_points])
+  try:
+    conv_hull_points = trimesh.convex.hull_points(mesh)
+    diameter = max([max((np.linalg.norm(x - y)) for y in conv_hull_points) for x in conv_hull_points])
+  except:
+    print("error calculating hull, reverting to brute force diameter calculation")
+    diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  # print(diameter == diameter_old)
+  # print(f'difference new old {diameter - diameter_old}')
   return diameter
 
 def eccentricity(mesh):
@@ -278,5 +285,5 @@ def save_all_histograms(df, path, features=False):
     save_histogram(df.loc[:, info['column']].values, info, path)
 
 
-mesh = trimesh.load('testModels/db/0/m1/m1.off', force='mesh')
-D3(mesh, amount=1000)
+# mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
+# D3(mesh, amount=1000)
