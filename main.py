@@ -1,6 +1,7 @@
 import collections
 import logging
 import time
+import ast
 from datetime import timedelta
 
 import pyrender
@@ -66,12 +67,13 @@ def main():
   print("Analyze 1")
   #analyze.filter_database(utils.originalDB, utils.excelPath, features=False)
   print("Preprocessing")
-  preprocess.process_all()
+  # preprocess.process_all()
   print("Analyze 2")
   analyze.filter_database(utils.refinedDB, utils.refinedexcelPath)
   print("Read Excel")
   originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)
+  A3 = refinedDF.loc[:, 'A3'].values
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)

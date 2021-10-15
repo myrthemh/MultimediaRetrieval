@@ -136,7 +136,7 @@ def process_all(show_subdivide=False, show_superdivide=False):
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
         main.compare([mesh, mesh2])
-    if row['supersampled_outlier']:
+    elif row['supersampled_outlier']:
       mesh2 = subdivision.superdivide(mesh, utils.target_faces)
       if show_superdivide:
         main.compare([mesh, mesh2])

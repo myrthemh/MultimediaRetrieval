@@ -5,6 +5,8 @@ import numpy as np
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
+picklePath = "features/original.pkl"
+refinedpicklePath = "features/refined.pkl"
 imagePath = "graphs/original/"
 refinedImagePath = "graphs/refined/"
 originalDB = "testModels/db"
