@@ -101,7 +101,7 @@ def filter_database(dbPath, excelPath, picklePath, features=True):
           mesh_info = fill_mesh_info(mesh, classFolder, path, features)
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
-  df.to_pickle(utils.refinedpicklePath)
+  df.to_pickle(picklePath)
 
 
 def make_bins(list, lowerbound, upperbound, nrbins):

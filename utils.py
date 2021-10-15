@@ -18,9 +18,9 @@ target_faces = 2000
 def read_excel(original=True):
   # Load the excel into a pandas df
   if original:
-    return pd.read_pickle(picklePath, index_col=0)
+    return pd.read_pickle(picklePath)
   else:
-    return pd.read_pickle(refinedpicklePath, index_col=0)
+    return pd.read_pickle(refinedpicklePath)
 
 
 def ensure_dir(file_path):
