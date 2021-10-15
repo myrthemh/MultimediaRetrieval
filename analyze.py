@@ -103,19 +103,22 @@ def A3(mesh, amount=10):
   return make_bins(angles, 0, math.pi, 10)
 
 def D1(mesh, amount=10):
+  #Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [ math.sqrt(sum(random_vertice**2)) for random_vertice in random_vertices ]
-  return make_bins(distance_barycentre)
+  return make_bins(distance_barycentre, 0, 2, 10)
 
 def D2(mesh, amount=10):
+  #Distance between two random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,2))]
   distance_vertices = [math.sqrt(sum((random_vertice[0] - random_vertice[1])**2)) for random_vertice in random_vertices]
-  return make_bins(distance_vertices)
+  return make_bins(distance_vertices, 0, 2, 10)
 
 def D3(mesh, amount=10):
+  #Root of area of triangle given by three random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
   area_vertices =  [math.sqrt((math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2)) for random_vertice in random_vertices]
-  return area_vertices
+  return make_bins(area_vertices, 0, 1, 10)
 
 def tetrahedon_volume(vertices):
   vector1 = vertices[0] - vertices[3]
@@ -125,6 +128,7 @@ def tetrahedon_volume(vertices):
   return volume
 
 def D4(mesh, amount=10):
+  #Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,4))]
   volumes = [tetrahedon_volume(vertices) ** (1.0/3) for vertices in random_vertices]
   return make_bins(volumes, 0, 1, 10)
@@ -143,7 +147,12 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
                  "diameter": diameter(mesh),
-                 "compactness": compactness(mesh)}
+                 "compactness": compactness(mesh),
+                 "A3": A3(mesh),
+                 "D1": D1(mesh),
+                 "D2": D2(mesh),
+                 "D3": D3(mesh),
+                 "D4": D4(mesh),}
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,

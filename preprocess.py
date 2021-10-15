@@ -3,13 +3,15 @@ import pandas as pd
 import trimesh
 import itertools
 from collections import Counter
+import trimesh.grouping as grouping
+from trimesh.util import triangle_strips_to_faces
 
 import analyze
 import main
 import subdivision
 import utils
 
-
+import pyrender
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
   scaleVector = [scale, scale, scale]
@@ -25,18 +27,12 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
-
 def make_watertight(mesh):
-  #Count all edges that only occur once in the mesh, in one loop over the edges.
-  counts = {}
-  for index, edge in enumerate(mesh.edges):
-    key = str(min(edge)) + '_' + str(max(edge))
-    if key in counts:
-      counts[key] = counts[key] + [index]
-    else:
-      counts[key] = [index]
-  x = [mesh.edges[value][0] for value in counts.values() if len(value) == 1]
-
+  edges_sorted = np.sort(mesh.edges, axis=1)
+  # group sorted edges
+  groups1 = grouping.group_rows(
+      edges_sorted, require_count=1)
+  x = list(mesh.edges[groups1])
   #Find all loops of edges that define the different holes
   loops = []
   while len(x) > 0:
@@ -65,12 +61,12 @@ def make_watertight(mesh):
     for edge in loop:
       newfaces = np.append(newfaces, [[edge[0], edge[1], len(newvertices) - 1]], axis=0)
   newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
-  
+
   # Fix normals
-  if mesh.body_count > 1:
-    trimesh.Trimesh.fix_normals(mesh, multibody=True)
+  if newmesh.body_count > 1:
+    trimesh.Trimesh.fix_normals(newmesh, multibody=True)
   else:
-    trimesh.Trimesh.fix_normals(mesh)
+    trimesh.Trimesh.fix_normals(newmesh)
   return newmesh
 
 def normalize_mesh(mesh):
@@ -130,6 +126,7 @@ def process_all(show_subdivide=False, show_superdivide=False):
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
     if not mesh.is_watertight:
+      print("--------------------------------------------------")
       mesh = make_watertight(mesh)
       if not mesh.is_watertight:
         print("Make watertight operation failed")

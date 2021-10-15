@@ -39,8 +39,6 @@ def render(meshes, showWireframe=True):
   pyrender.Viewer(scene, use_raymond_lighting=True)
 
 
-
-
 # Step 1
 def step_1():
   mesh = trimesh.load('testModels/refined_db/1/m112/m112.off', force='mesh')
