@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import trimesh
+import itertools
+from collections import Counter
 
 import analyze
 import main
@@ -19,11 +21,57 @@ def scale_mesh(mesh, scale):
   return mesh
 
 
-
 def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
+
+def make_watertight(mesh):
+  #Count all edges that only occur once in the mesh, in one loop over the edges.
+  counts = {}
+  for index, edge in enumerate(mesh.edges):
+    key = str(min(edge)) + '_' + str(max(edge))
+    if key in counts:
+      counts[key] = counts[key] + [index]
+    else:
+      counts[key] = [index]
+  x = [mesh.edges[value][0] for value in counts.values() if len(value) == 1]
+
+  #Find all loops of edges that define the different holes
+  loops = []
+  while len(x) > 0:
+    loop = []
+    loop.append(x[0])
+    del x[0]
+    while loop[-1][1] != loop[0][0]:
+      check = len(x)
+      for index, edge in enumerate(x):
+        if edge[0] == loop[-1][1]:
+          loop.append(edge)
+          del x[index]
+          break
+      if len(x) == check:
+        print("Could not create loop, fixing watertightness failed")
+        return mesh
+    loops.append(loop)
+  newfaces = mesh.faces
+  newvertices = mesh.vertices
+
+  #Create a vertice in the center of each loop, and make a face by connecting each edge in the loop to the new vertice.
+  for loop in loops:
+    unique_vertices_in_loop = mesh.vertices[[x[0] for x in loop]]
+    barycentre = sum(unique_vertices_in_loop) / len(unique_vertices_in_loop)
+    newvertices = np.append(newvertices, [barycentre], axis=0)
+    for edge in loop:
+      newfaces = np.append(newfaces, [[edge[0], edge[1], len(newvertices) - 1]], axis=0)
+  newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
+  
+  # Fix normals
+  if mesh.body_count > 1:
+    trimesh.Trimesh.fix_normals(mesh, multibody=True)
+  else:
+    trimesh.Trimesh.fix_normals(mesh)
+  return newmesh
 
 def normalize_mesh(mesh):
   # Fix normals
@@ -49,10 +97,10 @@ def eigen_values_vectors(mesh):
   return values, vectors
 
 
-
 def eigen_angle(mesh):
   x, y, z = eigen_xyz(mesh)
-  return min(utils.angle(x, [1,0,0]), utils.angle(x, [-1,0,0]))
+  return min(utils.angle(x, [1, 0, 0]), utils.angle(x, [-1, 0, 0]))
+
 
 def eigen_xyz(mesh):
   values, vectors = eigen_values_vectors(mesh)
@@ -75,11 +123,18 @@ def translate_eigen(mesh):
 def process_all(show_subdivide=False, show_superdivide=False):
   # Perform all preprocessing steps on all meshes:
   df = pd.read_excel(utils.excelPath)
+  i = 0
+  y = 0
   for index, row in df.iterrows():
     path = row['path']
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    print(f'preprocessing model {path}')
+    if not mesh.is_watertight:
+      mesh = make_watertight(mesh)
+      if not mesh.is_watertight:
+        print("Make watertight operation failed")
+      else:
+        print("Successfully made mesh watertight")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -94,3 +149,10 @@ def process_all(show_subdivide=False, show_superdivide=False):
     mesh2 = normalize_mesh(mesh2)
     if analyze.barycentre_distance(mesh2) < 1:
       save_mesh(mesh2, refined_path)
+    if not mesh.is_watertight:
+      i += 1
+    if not mesh2.is_watertight:
+      y += 1
+
+  print(f'meshes1 not watertight: {i}')
+  print(f'meshes2 not watertight: {y}')
