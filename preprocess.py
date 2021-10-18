@@ -3,11 +3,8 @@ import pandas as pd
 import trimesh
 import itertools
 from collections import Counter
-<<<<<<< HEAD
-=======
 import trimesh.grouping as grouping
 from trimesh.util import triangle_strips_to_faces
->>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
 
 import analyze
 import main
@@ -176,10 +173,7 @@ def process_all(show_subdivide=False, show_superdivide=False):
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
     if not mesh.is_watertight:
-<<<<<<< HEAD
-=======
       print("--------------------------------------------------")
->>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
       mesh = make_watertight(mesh)
       if not mesh.is_watertight:
         print("Make watertight operation failed")

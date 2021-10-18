@@ -108,7 +108,6 @@ def make_bins(list, lowerbound, upperbound, nrbins):
   bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound))
   return bins[0]
 
-<<<<<<< HEAD
 def select_random_number_expection(exclude, selected_vertices):
   if len(exclude)== 1:
     new_list = [el for el in selected_vertices if not np.array_equal(el, exclude[0])]
@@ -142,10 +141,7 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
   return selected_vertices
 
 
-def A3(mesh, amount=10):
-=======
 def A3(mesh, amount=10000):
->>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
@@ -167,14 +163,9 @@ def D2(mesh, amount=10000):
 def D3(mesh, amount=10000):
   #Root of area of triangle given by three random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
-<<<<<<< HEAD
   random_vertices = check_duplicates(mesh, random_vertices, 3)
-  area_vertices =  [(math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2) for random_vertice in random_vertices]
-  return area_vertices
-=======
   area_vertices =  [math.sqrt((math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2)) for random_vertice in random_vertices]
   return make_bins(area_vertices, 0, 1, 10)
->>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
 
 def tetrahedon_volume(vertices):
   vector1 = vertices[0] - vertices[3]
@@ -186,12 +177,8 @@ def tetrahedon_volume(vertices):
 def D4(mesh, amount=10):
   #Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,4))]
-<<<<<<< HEAD
   random_vertices = check_duplicates(mesh, random_vertices, 4)
-  volumes = [tetrahedon_volume(vertices) for vertices in random_vertices]
-=======
   volumes = [tetrahedon_volume(vertices) ** (1.0/3) for vertices in random_vertices]
->>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
   return make_bins(volumes, 0, 1, 10)
 
 
