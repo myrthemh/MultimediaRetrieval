@@ -5,6 +5,8 @@ import numpy as np
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
+picklePath = "features/original.pkl"
+refinedpicklePath = "features/refined.pkl"
 imagePath = "graphs/original/"
 refinedImagePath = "graphs/refined/"
 originalDB = "testModels/db"
@@ -16,9 +18,9 @@ target_faces = 2000
 def read_excel(original=True):
   # Load the excel into a pandas df
   if original:
-    return pd.read_excel(excelPath, index_col=0)
+    return pd.read_pickle(picklePath)
   else:
-    return pd.read_excel(refinedexcelPath, index_col=0)
+    return pd.read_pickle(refinedpicklePath)
 
 
 def ensure_dir(file_path):

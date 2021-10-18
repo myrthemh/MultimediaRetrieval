@@ -5,7 +5,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy
 import trimesh
+from trimesh import convex
 
 import preprocess
 import utils
@@ -57,9 +59,15 @@ def compactness(mesh):
 
 
 def diameter(mesh):
-  diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  try:
+    conv_hull_points = trimesh.convex.hull_points(mesh)
+    diameter = max([max((np.linalg.norm(x - y)) for y in conv_hull_points) for x in conv_hull_points])
+  except:
+    print("error calculating hull, reverting to brute force diameter calculation")
+    diameter = max([max((np.linalg.norm(x - y)) for y in mesh.vertices) for x in mesh.vertices])
+  # print(diameter == diameter_old)
+  # print(f'difference new old {diameter - diameter_old}')
   return diameter
-
 
 def eccentricity(mesh):
   values, _ = preprocess.eigen_values_vectors(mesh)
@@ -77,10 +85,11 @@ def bounding_box_volume(mesh):
   return volume
 
 
-def filter_database(dbPath, excelPath, features=True):
+def filter_database(dbPath, excelPath, picklePath, features=True):
   db = dbPath
   df = pd.DataFrame()
   utils.ensure_dir(excelPath)
+  utils.ensure_dir(picklePath)
   # iterate over all models:
   for classFolder in os.listdir(db):
     for modelFolder in os.listdir(db + '/' + classFolder):
@@ -92,11 +101,14 @@ def filter_database(dbPath, excelPath, features=True):
           mesh_info = fill_mesh_info(mesh, classFolder, path, features)
           df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
+  df.to_pickle(picklePath)
+
 
 def make_bins(list, lowerbound, upperbound, nrbins):
   bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound))
   return bins[0]
 
+<<<<<<< HEAD
 def select_random_number_expection(exclude, selected_vertices):
   if len(exclude)== 1:
     new_list = [el for el in selected_vertices if not np.array_equal(el, exclude[0])]
@@ -131,27 +143,38 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
 
 
 def A3(mesh, amount=10):
+=======
+def A3(mesh, amount=10000):
+>>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
   return make_bins(angles, 0, math.pi, 10)
 
-def D1(mesh, amount=10):
+def D1(mesh, amount=10000):
+  #Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [ math.sqrt(sum(random_vertice**2)) for random_vertice in random_vertices ]
-  return make_bins(distance_barycentre)
+  return make_bins(distance_barycentre, 0, 2, 10)
 
-def D2(mesh, amount=10):
+def D2(mesh, amount=10000):
+  #Distance between two random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,2))]
   random_vertices = check_duplicates(mesh, random_vertices, 2)
   distance_vertices = [math.sqrt(sum((random_vertice[0] - random_vertice[1])**2)) for random_vertice in random_vertices]
-  return make_bins(distance_vertices)
+  return make_bins(distance_vertices, 0, 2, 10)
 
-def D3(mesh, amount=10):
+def D3(mesh, amount=10000):
+  #Root of area of triangle given by three random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
+<<<<<<< HEAD
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   area_vertices =  [(math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2) for random_vertice in random_vertices]
   return area_vertices
+=======
+  area_vertices =  [math.sqrt((math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2])**2)) / 2)) for random_vertice in random_vertices]
+  return make_bins(area_vertices, 0, 1, 10)
+>>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
 
 def tetrahedon_volume(vertices):
   vector1 = vertices[0] - vertices[3]
@@ -161,10 +184,16 @@ def tetrahedon_volume(vertices):
   return volume
 
 def D4(mesh, amount=10):
+  #Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount,4))]
+<<<<<<< HEAD
   random_vertices = check_duplicates(mesh, random_vertices, 4)
   volumes = [tetrahedon_volume(vertices) for vertices in random_vertices]
+=======
+  volumes = [tetrahedon_volume(vertices) ** (1.0/3) for vertices in random_vertices]
+>>>>>>> 82ab2a2d51d58df9ff2c38caecd3592079795af1
   return make_bins(volumes, 0, 1, 10)
+
 
 def fill_mesh_info(mesh, classFolder, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
@@ -180,7 +209,12 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
                  "diameter": diameter(mesh),
-                 "compactness": compactness(mesh)}
+                 "compactness": compactness(mesh),
+                 "A3": A3(mesh),
+                 "D1": D1(mesh),
+                 "D2": D2(mesh),
+                 "D3": D3(mesh),
+                 "D4": D4(mesh),}
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
@@ -301,5 +335,6 @@ def save_all_histograms(df, path, features=False):
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
-# mesh = trimesh.load('testModels/db/0/m1/m1.off', force='mesh')
-# D4(mesh, amount=1000)
+
+# mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
+# D3(mesh, amount=1000)
