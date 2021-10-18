@@ -69,53 +69,6 @@ def make_watertight(mesh):
     trimesh.Trimesh.fix_normals(newmesh)
   return newmesh
 
-def make_watertight(mesh):
-  #Count all edges that only occur once in the mesh, in one loop over the edges.
-  counts = {}
-  for index, edge in enumerate(mesh.edges):
-    key = str(min(edge)) + '_' + str(max(edge))
-    if key in counts:
-      counts[key] = counts[key] + [index]
-    else:
-      counts[key] = [index]
-  x = [mesh.edges[value][0] for value in counts.values() if len(value) == 1]
-
-  #Find all loops of edges that define the different holes
-  loops = []
-  while len(x) > 0:
-    loop = []
-    loop.append(x[0])
-    del x[0]
-    while loop[-1][1] != loop[0][0]:
-      check = len(x)
-      for index, edge in enumerate(x):
-        if edge[0] == loop[-1][1]:
-          loop.append(edge)
-          del x[index]
-          break
-      if len(x) == check:
-        print("Could not create loop, fixing watertightness failed")
-        return mesh
-    loops.append(loop)
-  newfaces = mesh.faces
-  newvertices = mesh.vertices
-
-  #Create a vertice in the center of each loop, and make a face by connecting each edge in the loop to the new vertice.
-  for loop in loops:
-    unique_vertices_in_loop = mesh.vertices[[x[0] for x in loop]]
-    barycentre = sum(unique_vertices_in_loop) / len(unique_vertices_in_loop)
-    newvertices = np.append(newvertices, [barycentre], axis=0)
-    for edge in loop:
-      newfaces = np.append(newfaces, [[edge[0], edge[1], len(newvertices) - 1]], axis=0)
-  newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
-  
-  # Fix normals
-  if mesh.body_count > 1:
-    trimesh.Trimesh.fix_normals(mesh, multibody=True)
-  else:
-    trimesh.Trimesh.fix_normals(mesh)
-  return newmesh
-
 def normalize_mesh(mesh):
   # Fix normals
   if mesh.body_count > 1:

@@ -201,7 +201,8 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "D1": D1(mesh),
                  "D2": D2(mesh),
                  "D3": D3(mesh),
-                 "D4": D4(mesh),}
+                 "D4": D4(mesh),
+                 "area_faces": mesh.area_faces}
   else:
     mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
@@ -211,6 +212,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
                  "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "area_faces": mesh.area_faces,
                  # "eccentricity": eccentricity(mesh),
                  # "compactness": compactness(mesh)
                  }
@@ -319,6 +321,12 @@ def save_all_histograms(df, path, features=False):
        "xlabel": "Eccentricity", "skip_outliers": True}
 
     ]
+
+  #Area_faces plot:
+  all_areas = [values for values in df.loc[:, "area_faces"].values]
+  all_areas = np.array([value for sublist in all_areas for value in sublist])
+  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 50, "xlim": 0.0006,"ylabel": "#faces","xlabel": "face area", "skip_outliers": True}
+  save_histogram(all_areas, plotinfo, path)
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
