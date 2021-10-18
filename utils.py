@@ -1,7 +1,7 @@
 import os
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
@@ -32,11 +32,14 @@ def ensure_dir(file_path):
 def get_face_barycentre(face, vertices):
   return (vertices[face[0]] + vertices[face[1]] + vertices[face[2]]) / 3
 
+
 def refined_path(path):
   return path[:11] + 'refined_' + path[11:]
 
+
 def angle(vector1, vector2):
   return np.arccos(np.clip(np.dot(vector1, vector2), -1.0, 1.0))
+
 
 def shape_paths(dbfolder):
   paths = []

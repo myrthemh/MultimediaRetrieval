@@ -1,16 +1,14 @@
-import collections
 import logging
 import time
-import ast
 from datetime import timedelta
 
 import pyrender
 import trimesh
-import pandas
+
 import analyze
 import preprocess
 import utils
-import numpy as np
+
 trimesh.util.attach_to_log(level=logging.INFO)
 
 
@@ -61,7 +59,7 @@ def compare_all():
 
 
 def main():
-  #step_1()
+  # step_1()
   # compare_all()
   start_time = time.monotonic()
   # print("Analyze 1")

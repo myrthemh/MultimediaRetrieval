@@ -1,17 +1,14 @@
 import numpy as np
 import pandas as pd
 import trimesh
-import itertools
-from collections import Counter
 import trimesh.grouping as grouping
-from trimesh.util import triangle_strips_to_faces
 
 import analyze
 import main
 import subdivision
 import utils
 
-import pyrender
+
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
   scaleVector = [scale, scale, scale]
@@ -27,13 +24,14 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
+
 def make_watertight(mesh):
   edges_sorted = np.sort(mesh.edges, axis=1)
   # group sorted edges
   groups1 = grouping.group_rows(
-      edges_sorted, require_count=1)
+    edges_sorted, require_count=1)
   x = list(mesh.edges[groups1])
-  #Find all loops of edges that define the different holes
+  # Find all loops of edges that define the different holes
   loops = []
   while len(x) > 0:
     loop = []
@@ -53,7 +51,7 @@ def make_watertight(mesh):
   newfaces = mesh.faces
   newvertices = mesh.vertices
 
-  #Create a vertice in the center of each loop, and make a face by connecting each edge in the loop to the new vertice.
+  # Create a vertice in the center of each loop, and make a face by connecting each edge in the loop to the new vertice.
   for loop in loops:
     unique_vertices_in_loop = mesh.vertices[[x[0] for x in loop]]
     barycentre = sum(unique_vertices_in_loop) / len(unique_vertices_in_loop)
@@ -68,6 +66,7 @@ def make_watertight(mesh):
   else:
     trimesh.Trimesh.fix_normals(newmesh)
   return newmesh
+
 
 def normalize_mesh(mesh):
   # Fix normals
