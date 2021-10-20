@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import trimesh
 import trimesh.grouping as grouping
 
@@ -115,23 +114,39 @@ def translate_eigen(mesh):
   return mesh
 
 
+def normalize_histogram_feature(features):
+  df = utils.read_excel(original=False)
+  features_norm = [i+"_norm" for i in features]
+  subset = df[features]
+  subset_norm = subset.applymap(sum_divide)
+  subset_norm.columns = features_norm
+  df[features_norm] = subset_norm
+  utils.save_excel(df, original=False)
+
+
+def sum_divide(x):
+  return x / sum(x)
+
+
 def process_all(show_subdivide=False, show_superdivide=False):
   # Perform all preprocessing steps on all meshes:
-  df = pd.read_excel(utils.excelPath)
+  df = utils.read_excel(original=True)
   i = 0
   y = 0
   z = 0
   for index, row in df.iterrows():
     path = row['path']
+    print(f"preprocessing {path}")
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    if not mesh.is_watertight:
-      # print("--------------------------------------------------")
-      mesh = make_watertight(mesh)
-      # if not mesh.is_watertight:
-      #   print("Make watertight operation failed")
-      # else:
-      #   print("Successfully made mesh watertight")
+    # if not mesh.is_watertight:
+    #   print("--------------------------------------------------")
+    #   mesh = make_watertight(mesh)
+    #   if not mesh.is_watertight:
+    #     print("Make watertight operation failed")
+    #   else:
+    #     print("Successfully made mesh watertight")
+    print("remeshing")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -142,8 +157,9 @@ def process_all(show_subdivide=False, show_superdivide=False):
         main.compare([mesh, mesh2])
     else:
       mesh2 = mesh
-
+    print("normalizing")
     mesh2 = normalize_mesh(mesh2)
+    print("saving")
     if analyze.barycentre_distance(mesh2) < 1 and analyze.compactness(mesh) < 500:
       save_mesh(mesh2, refined_path)
     else:
@@ -153,6 +169,8 @@ def process_all(show_subdivide=False, show_superdivide=False):
     if not mesh2.is_watertight:
       y += 1
 
+
+  normalize_histogram_feature(features=utils.hist_features)
   print(f'meshes filtered: {z}')
   print(f'meshes1 not watertight: {i}')
   print(f'meshes2 not watertight: {y}')
