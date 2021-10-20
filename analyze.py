@@ -151,7 +151,7 @@ def A3(mesh, amount=1000, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
-  return make_bins(angles, 0, 0.5*math.pi, 10, plot)
+  return make_bins(angles, 0, 0.75*math.pi, 10, plot)
 
 
 def D1(mesh, amount=1000, plot=False):
