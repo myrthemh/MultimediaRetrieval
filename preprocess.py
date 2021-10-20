@@ -61,19 +61,13 @@ def make_watertight(mesh):
   newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
 
   # Fix normals
-  if newmesh.body_count > 1:
-    trimesh.Trimesh.fix_normals(newmesh, multibody=True)
-  else:
-    trimesh.Trimesh.fix_normals(newmesh)
+  fix_normals(newmesh)
   return newmesh
 
 
 def normalize_mesh(mesh):
   # Fix normals
-  if mesh.body_count > 1:
-    trimesh.Trimesh.fix_normals(mesh, multibody=True)
-  else:
-    trimesh.Trimesh.fix_normals(mesh)
+  fix_normals(mesh)
 
   # Center the mass of the mesh on (0,0,0)
   mesh.apply_translation(-mesh.centroid)
@@ -83,6 +77,12 @@ def normalize_mesh(mesh):
   scale_value = 0.5 / max(abs(mesh.bounds.flatten()))
   mesh = scale_mesh(mesh, scale_value)
   return mesh
+
+
+def fix_normals(mesh):
+  # check if all edge pairs are unique, if not, fix normals
+  if len(np.unique(mesh.edges, axis=0) != len(mesh.edges)):
+    trimesh.Trimesh.fix_normals(mesh, multibody=True) if mesh.body_count > 1 else trimesh.Trimesh.fix_normals(mesh)
 
 
 def eigen_values_vectors(mesh):
@@ -108,7 +108,7 @@ def eigen_xyz(mesh):
 def translate_eigen(mesh):
   eig_vector_x, eig_vector_y, eig_vector_z = eigen_xyz(mesh)
   for vertex in mesh.vertices:
-    vc = vertex - mesh.centroid
+    vc = np.copy(vertex)
     vertex[0] = np.dot(vc, eig_vector_x)
     vertex[1] = np.dot(vc, eig_vector_y)
     vertex[2] = np.dot(vc, eig_vector_z)
@@ -120,17 +120,18 @@ def process_all(show_subdivide=False, show_superdivide=False):
   df = pd.read_excel(utils.excelPath)
   i = 0
   y = 0
+  z = 0
   for index, row in df.iterrows():
     path = row['path']
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
     if not mesh.is_watertight:
-      print("--------------------------------------------------")
+      # print("--------------------------------------------------")
       mesh = make_watertight(mesh)
-      if not mesh.is_watertight:
-        print("Make watertight operation failed")
-      else:
-        print("Successfully made mesh watertight")
+      # if not mesh.is_watertight:
+      #   print("Make watertight operation failed")
+      # else:
+      #   print("Successfully made mesh watertight")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -143,12 +144,15 @@ def process_all(show_subdivide=False, show_superdivide=False):
       mesh2 = mesh
 
     mesh2 = normalize_mesh(mesh2)
-    if analyze.barycentre_distance(mesh2) < 1:
+    if analyze.barycentre_distance(mesh2) < 1 and analyze.compactness(mesh) < 500:
       save_mesh(mesh2, refined_path)
+    else:
+      z += 1
     if not mesh.is_watertight:
       i += 1
     if not mesh2.is_watertight:
       y += 1
 
+  print(f'meshes filtered: {z}')
   print(f'meshes1 not watertight: {i}')
   print(f'meshes2 not watertight: {y}')
