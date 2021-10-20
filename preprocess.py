@@ -139,13 +139,13 @@ def process_all(show_subdivide=False, show_superdivide=False):
     print(f"preprocessing {path}")
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    # if not mesh.is_watertight:
-    #   print("--------------------------------------------------")
-    #   mesh = make_watertight(mesh)
-    #   if not mesh.is_watertight:
-    #     print("Make watertight operation failed")
-    #   else:
-    #     print("Successfully made mesh watertight")
+    if not mesh.is_watertight:
+      print("--------------------------------------------------")
+      mesh = make_watertight(mesh)
+      if not mesh.is_watertight:
+        print("Make watertight operation failed")
+      else:
+        print("Successfully made mesh watertight")
     print("remeshing")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
@@ -157,13 +157,8 @@ def process_all(show_subdivide=False, show_superdivide=False):
         main.compare([mesh, mesh2])
     else:
       mesh2 = mesh
-    print("normalizing")
     mesh2 = normalize_mesh(mesh2)
-    print("saving")
-    if analyze.barycentre_distance(mesh2) < 1 and analyze.compactness(mesh) < 500:
-      save_mesh(mesh2, refined_path)
-    else:
-      z += 1
+    save_mesh(mesh2, refined_path)
     if not mesh.is_watertight:
       i += 1
     if not mesh2.is_watertight:
