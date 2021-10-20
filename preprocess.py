@@ -164,7 +164,7 @@ def process_all(show_subdivide=False, show_superdivide=False):
       y += 1
 
 
-  normalize_histogram_feature(features=utils.hist_features)
+  normalize_histogram_features(features=utils.hist_features)
   scalar_normalization(features=utils.scal_features)
   print(f'meshes filtered: {z}')
   print(f'meshes1 not watertight: {i}')
