@@ -181,3 +181,4 @@ def scalar_normalization(data, excelPath, picklePath):
 
   y = y.rename(columns=lambda x: x+"_norm")
   df[y.columns] = y
+  utils.save_excel(df, original=False)
