@@ -152,3 +152,15 @@ def process_all(show_subdivide=False, show_superdivide=False):
 
   print(f'meshes1 not watertight: {i}')
   print(f'meshes2 not watertight: {y}')
+
+def scalar_normalization(data, excelPath, picklePath):
+  df = data
+  utils.ensure_dir(excelPath)
+  utils.ensure_dir(picklePath)
+
+  features = ["area", "axis-aligned_bounding_box_distance", "diameter", "compactness", "eccentricity" ]
+  y = (df[features]-df[features].mean())/df[features].std()
+  y = (y+1) /2
+
+  y = y.rename(columns=lambda x: x+"_norm")
+  df[y.columns] = y
