@@ -13,6 +13,7 @@ originalDB = "testModels/db"
 refinedDB = "testModels/refined_db"
 target_vertices = 1000
 target_faces = 2000
+hist_features  = ['A3', 'D1', 'D2', 'D3', 'D4']
 
 
 def read_excel(original=True):
@@ -22,6 +23,13 @@ def read_excel(original=True):
   else:
     return pd.read_pickle(refinedpicklePath)
 
+def save_excel(df, original = True):
+  if original:
+    df.to_pickle(picklePath)
+    df.to_excel(excelPath)
+  else:
+    df.to_pickle(refinedpicklePath)
+    df.to_excel(refinedexcelPath)
 
 def ensure_dir(file_path):
   directory = os.path.dirname(file_path)
