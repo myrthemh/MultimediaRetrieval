@@ -13,6 +13,7 @@ originalDB = "testModels/db"
 refinedDB = "testModels/refined_db"
 target_vertices = 1000
 target_faces = 2000
+hist_features  = ['A3', 'D1', 'D2', 'D3', 'D4']
 
 
 def read_excel(original=True):
