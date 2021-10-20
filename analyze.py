@@ -188,7 +188,7 @@ def tetrahedon_volume(vertices):
   return volume
 
 
-def D4(mesh, amount=100000, plot=False):
+def D4(mesh, amount=1000, plot=False):
   # Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
   random_vertices = check_duplicates(mesh, random_vertices, 4)
