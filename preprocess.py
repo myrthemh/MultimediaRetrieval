@@ -114,7 +114,7 @@ def translate_eigen(mesh):
   return mesh
 
 
-def normalize_histogram_feature(features):
+def normalize_histogram_features(features):
   df = utils.read_excel(original=False)
   features_norm = [i+"_norm" for i in features]
   subset = df[features]
@@ -122,7 +122,6 @@ def normalize_histogram_feature(features):
   subset_norm.columns = features_norm
   df[features_norm] = subset_norm
   utils.save_excel(df, original=False)
-
 
 def sum_divide(x):
   return x / sum(x)

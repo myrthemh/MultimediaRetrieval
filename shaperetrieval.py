@@ -6,6 +6,7 @@ import numpy as np
 import trimesh
 import utils
 import analyze
+import preprocess
 
 def compute_eucledian_distance(vector1, vector2):
   return norm(vector1 - vector2)
@@ -26,7 +27,8 @@ def find_similar_meshes(mesh):
 
   #Get feature vector:
   single_vector = np.asarray([mesh_info[column] for column in single_features])
-  histogram_vector = np.concatenate(np.asarray([mesh_info[column] for column in histogram_features]))
+  histograms = np.asarray([mesh_info[column] for column in histogram_features])
+  histogram_vector = np.concatenate([preprocess.sum_divide(x) for x in histograms])
   feature_vector = np.concatenate([single_vector, histogram_vector])
 
   distances = []
