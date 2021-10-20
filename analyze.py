@@ -1,12 +1,14 @@
 import logging
 import math
 import os
+import matplotlib.ticker as mtick
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import trimesh
 from trimesh import convex
+from matplotlib.ticker import PercentFormatter
 
 import preprocess
 import utils
@@ -105,8 +107,11 @@ def filter_database(dbPath, excelPath, picklePath, features=True):
   df.to_pickle(picklePath)
 
 
-def make_bins(list, lowerbound, upperbound, nrbins):
-  bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound))
+
+def make_bins(list, lowerbound, upperbound, nrbins, plot):
+  if plot:
+    return list, {"blocksize": (upperbound/nrbins), "xlim": lowerbound, "ylabel": "Percentage"}
+  bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound), density=True)
   return bins[0]
 
 
@@ -143,37 +148,37 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
   return selected_vertices
 
 
-def A3(mesh, amount=10000):
+def A3(mesh, amount=10000, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
-  return make_bins(angles, 0, math.pi, 10)
+  return make_bins(angles, 0, 0.5*math.pi, 10, plot)
 
 
-def D1(mesh, amount=10000):
+def D1(mesh, amount=10000, plot=False):
   # Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [math.sqrt(sum(random_vertice ** 2)) for random_vertice in random_vertices]
-  return make_bins(distance_barycentre, 0, 2, 10)
+  return make_bins(distance_barycentre, 0, 0.5, 10, plot)
 
 
-def D2(mesh, amount=10000):
+def D2(mesh, amount=10000, plot=False):
   # Distance between two random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 2))]
   random_vertices = check_duplicates(mesh, random_vertices, 2)
   distance_vertices = [math.sqrt(sum((random_vertice[0] - random_vertice[1]) ** 2)) for random_vertice in
                        random_vertices]
-  return make_bins(distance_vertices, 0, 2, 10)
+  return make_bins(distance_vertices, 0, 1, 10, plot)
 
 
-def D3(mesh, amount=10000):
+def D3(mesh, amount=10000, plot=False):
   # Root of area of triangle given by three random vertices
-  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(1, 3))]
+  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   area_vertices = [math.sqrt(
     (math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2]) ** 2)) / 2))
                    for random_vertice in random_vertices]
-  return make_bins(area_vertices, 0, 1, 10)
+  return make_bins(area_vertices, 0, 0.93, 10, plot)
 
 
 def tetrahedon_volume(vertices):
@@ -184,12 +189,12 @@ def tetrahedon_volume(vertices):
   return volume
 
 
-def D4(mesh, amount=10):
+def D4(mesh, amount=100000, plot=False):
   # Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
   random_vertices = check_duplicates(mesh, random_vertices, 4)
   volumes = [tetrahedon_volume(vertices) ** (1.0 / 3) for vertices in random_vertices]
-  return make_bins(volumes, 0, 1, 10)
+  return make_bins(volumes, 0, 0.55, 10, plot)
 
 
 def fill_mesh_info(mesh, classFolder, path, features=True):
@@ -257,6 +262,23 @@ def meta_data(dataframe):
   metadata["avgbarycentre_distance"] = np.mean(dataframe.loc[:, "barycentre_distance"].values)
   metadata["volume"] = np.mean(dataframe.loc[:, "volume"].values)
   return metadata
+
+
+def histograms_all_classes(data, column):
+  fig, axs = plt.subplots(6, 3, figsize = (20,15))
+  for c in range(0, 18):
+    for i in data.loc[data["class"] == c+1, column]:
+      axs[c%6, int(c/6)].plot(i)
+      axs[c%6, int(c/6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
+      axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(50000))
+    axs[c%6, int(c/6)].set_title(str(classes[c+1]))
+
+
+  fig.tight_layout()
+  #
+  # fig.set_figheight(15)
+  # fig.set_figwidth(15)
+  fig.savefig(utils.refinedImagePath + "test" + '.png')
 
 
 def save_histogram(data, info, path):
@@ -343,3 +365,51 @@ def save_all_histograms(df, path, features=False):
 
 # mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
 # D3(mesh, amount=1000)
+
+def plot_shape_properties(feature, shape, classes=1):
+  path = utils.refinedImagePath
+  mesh = trimesh.load(shape)
+  #render([mesh])
+  if feature =="A3":
+    bins, info = A3(mesh, plot=True)
+    title = "Angle between three random points"
+  if feature == "D1":
+    bins, info = D1(mesh, plot=True)
+    title = " Distance between the barycenter and a random point"
+  if feature == "D2":
+    bins, info = D2(mesh, plot=True)
+    title = " Distance between two random point"
+  if feature == "D3":
+    bins, info = D3(mesh, plot=True)
+    title = "Square  root  of the area of triangle made by three random point"
+  if feature == "D4":
+    bins, info = D4(mesh, plot=True)
+    title = "Cube  root  of  the  volume  of  tetrahedron  made  by  three random points"
+  plt.hist(bins, facecolor='g', alpha=0.75, weights=np.ones(len(bins)) / len(bins))
+  plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+  plt.xlabel(feature)
+  plt.ylabel(info["ylabel"])
+  plt.title(title + " of class" + classes[classes])
+  plt.savefig(path + feature + shape[-8:-4] +'.png')
+
+
+def visualize_difference_features():
+  plot_shape_properties(feature="A3", shape='testModels/refined_db/1/m102/m102.off', classes=1)
+  plot_shape_properties(feature="A3", shape='testModels/refined_db/1/m105/m105.off', classes=1)
+  plot_shape_properties(feature="A3", shape='testModels/refined_db/17/m1703/m1703.off', classes=17)
+
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
+
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
+
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
+
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
