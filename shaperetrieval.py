@@ -43,8 +43,6 @@ def find_similar_meshes(mesh):
     other_single_vector = np.asarray(row[utils.scal_features_norm])
     other_histogram_vector = np.concatenate(np.asarray(row[utils.hist_features_norm]))
     other_feature_vector = np.concatenate([other_single_vector, other_histogram_vector])
-    for i in range(len(other_feature_vector)):
-      print(feature_vector[i], other_feature_vector[i])
     distance = compute_eucledian_distance(feature_vector, other_feature_vector)
     distances.append((distance, row['path'])) 
   distances.sort(key=sortmethod)
