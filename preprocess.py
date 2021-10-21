@@ -176,4 +176,8 @@ def scalar_normalization(features):
   y = (y+1) /2
   y = y.rename(columns=lambda x: x+"_norm")
   df[y.columns] = y
+  vectors = np.asarray([df[features].mean(), df[features].std(), [1,1,1,1,1], [2,2,2,2,2]])
+  #Store the values used for normalization so we can normalize new query objects
+  with open(utils.norm_vector_path, 'wb') as f:
+    np.save(f, vectors)
   utils.save_excel(df, original=False)

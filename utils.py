@@ -15,6 +15,9 @@ target_vertices = 1000
 target_faces = 2000
 hist_features  = ['A3', 'D1', 'D2', 'D3', 'D4']
 scal_features  = ["area", "axis-aligned_bounding_box_distance", "diameter", "compactness", "eccentricity" ]
+scal_features_norm = ["area_norm", "axis-aligned_bounding_box_distance_norm", "diameter_norm", "compactness_norm", "eccentricity_norm"]
+hist_features_norm = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
+norm_vector_path = "features/vector.npy"
 
 
 def read_excel(original=True):
