@@ -14,7 +14,7 @@ def get_area_indices_list(mesh):
   return area_with_index
 
 
-def subdivide(mesh, target_vertices=1000, show=True):
+def subdivide(mesh, target_vertices=1000):
   updated_vertices = np.asarray(mesh.vertices)
   updated_faces = np.asarray(mesh.faces)
   indices_to_delete = []
@@ -53,6 +53,6 @@ def subdivide(mesh, target_vertices=1000, show=True):
   return newmesh
 
 
-def superdivide(mesh, target_faces=2000, show=True):
+def superdivide(mesh, target_faces=2000):
   newmesh = trimesh.Trimesh.simplify_quadratic_decimation(mesh, target_faces)
   return newmesh

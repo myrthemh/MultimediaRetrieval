@@ -7,6 +7,7 @@ import trimesh
 import main
 import shaperetrieval
 
+
 # Function for opening the
 # file explorer window
 def browseFiles():
@@ -16,6 +17,7 @@ def browseFiles():
   # Change label contents
   label_file_explorer.configure(text="File Opened: " + filename)
   return filename
+
 
 def show_similar():
   path = browseFiles()
@@ -27,11 +29,13 @@ def show_similar():
   distances = [distance[0] for distance in distances[:5]] # todo show this in window
   meshes = [mesh] + (shaperetrieval.paths_to_meshes(paths))
   main.compare(meshes, setcolor=False)
+
+
 # Create the root window
 window = Tk()
 
 # Set window title
-window.title('File Explorer')
+window.title('Mesh Explorer')
 
 # Set window size
 window.geometry("500x500")
@@ -40,9 +44,9 @@ window.geometry("500x500")
 window.config(background="white")
 
 # Create a File Explorer label
-label_file_explorer = Label(window, text="Tkinter test", width=100, height=4, fg="blue")
+label_file_explorer = Label(window, text="Placeholder text", width=75, height=4, fg="blue")
 
-entry = Entry(window)
+# Create buttons
 button_explore = Button(window, text="Browse files", command=browseFiles)
 button_sim = Button(window, text='Show similar', command=show_similar)
 button_exit = Button(window, text="Exit", command=exit)

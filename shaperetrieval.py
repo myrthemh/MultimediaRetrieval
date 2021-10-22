@@ -1,22 +1,26 @@
-from os import path
-from numpy import histogram
 from numpy.linalg import norm
-from scipy.spatial import distance
 import numpy as np
 import trimesh
-import utils
+from numpy.linalg import norm
+from scipy.spatial import distance
+
 import analyze
 import preprocess
 from scipy.stats import wasserstein_distance
+import utils
+
 
 def compute_eucledian_distance(vector1, vector2):
   return norm(vector1 - vector2)
 
+
 def cosine_difference(vector1, vector2):
   return distance.cosine(vector1, vector2)
 
+
 def sortmethod(x):
   return x[0]
+
 
 def paths_to_meshes(paths):
   meshes = []
@@ -29,8 +33,6 @@ def find_similar_meshes(mesh_path):
   mesh = trimesh.load(mesh_path, force='mesh')
   mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
   df = utils.read_excel(original=False)
-
-  #Get feature vectors:
   single_vector = np.asarray([mesh_info[column] for column in utils.scal_features])
   histograms = np.asarray([mesh_info[column] for column in utils.hist_features])
   histogram_vector = [preprocess.sum_divide(x) for x in histograms]
@@ -40,7 +42,6 @@ def find_similar_meshes(mesh_path):
     vectors = np.load(f)
     single_vector -= vectors[0]
     single_vector /= vectors[1]
-
   distances = []
   x = [[],[],[],[],[]]
   #Compare with all meshes

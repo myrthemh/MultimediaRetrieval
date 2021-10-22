@@ -1,14 +1,14 @@
 import logging
 import math
 import os
-import matplotlib.ticker as mtick
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 import pandas as pd
 import trimesh
-from trimesh import convex
 from matplotlib.ticker import PercentFormatter
+from trimesh import convex
 
 import preprocess
 import utils
@@ -106,10 +106,9 @@ def filter_database(dbPath, excelPath, picklePath, features=True):
   df.to_pickle(picklePath)
 
 
-
 def make_bins(list, lowerbound, upperbound, nrbins, plot):
   if plot:
-    return list, {"blocksize": (upperbound/nrbins), "xlim": lowerbound, "ylabel": "Percentage"}
+    return list, {"blocksize": (upperbound / nrbins), "xlim": lowerbound, "ylabel": "Percentage"}
   bins = np.histogram(list, bins=nrbins, range=(lowerbound, upperbound), density=True)
   return bins[0]
 
@@ -151,7 +150,7 @@ def A3(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
-  return make_bins(angles, 0, 0.75*math.pi, 10, plot)
+  return make_bins(angles, 0, 0.75 * math.pi, 10, plot)
 
 
 def D1(mesh, amount=utils.hist_amount, plot=False):
@@ -176,7 +175,7 @@ def D3(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   area_vertices = [math.sqrt(
     (math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2]) ** 2)) / 2))
-                   for random_vertice in random_vertices]
+    for random_vertice in random_vertices]
   return make_bins(area_vertices, 0, 0.93, 10, plot)
 
 
@@ -264,14 +263,13 @@ def meta_data(dataframe):
 
 
 def histograms_all_classes(data, column):
-  fig, axs = plt.subplots(6, 3, figsize = (20,15))
+  fig, axs = plt.subplots(6, 3, figsize=(20, 15))
   for c in range(0, 18):
-    for i in data.loc[data["class"] == c+1, column]:
-      axs[c%6, int(c/6)].plot(i)
-      axs[c%6, int(c/6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
+    for i in data.loc[data["class"] == c + 1, column]:
+      axs[c % 6, int(c / 6)].plot(i)
+      axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
       axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
-    axs[c%6, int(c/6)].set_title(str(classes[c+1]))
-
+    axs[c % 6, int(c / 6)].set_title(str(classes[c + 1]))
 
   fig.tight_layout()
   fig.savefig(utils.refinedImagePath + "test" + '.png')
@@ -359,14 +357,15 @@ def save_all_histograms(df, path, features=False):
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
+
 # mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
 # D3(mesh, amount=utils.hist_amount)
 
 def plot_shape_properties(feature, shape, classes=1):
   path = utils.refinedImagePath
   mesh = trimesh.load(shape)
-  #render([mesh])
-  if feature =="A3":
+  # render([mesh])
+  if feature == "A3":
     bins, info = A3(mesh, plot=True)
     title = "Angle between three random points"
   if feature == "D1":
@@ -386,7 +385,7 @@ def plot_shape_properties(feature, shape, classes=1):
   plt.xlabel(feature)
   plt.ylabel(info["ylabel"])
   plt.title(title + " of class" + classes[classes])
-  plt.savefig(path + feature + shape[-8:-4] +'.png')
+  plt.savefig(path + feature + shape[-8:-4] + '.png')
 
 
 def visualize_difference_features():

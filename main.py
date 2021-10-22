@@ -44,6 +44,7 @@ def step_1():
   mesh = trimesh.load('testModels/refined_db/17/m1709/m1709.off', force='mesh')
   render([mesh])
 
+
 def load_from_file(path):
   return trimesh.load(path, force='mesh')
 
