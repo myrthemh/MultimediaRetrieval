@@ -44,6 +44,7 @@ def step_1():
   mesh = trimesh.load('testModels/refined_db/17/m1709/m1709.off', force='mesh')
   render([mesh])
 
+
 def load_from_file(path):
   return trimesh.load(path, force='mesh')
 
@@ -67,7 +68,7 @@ def main():
   # compare_all()
   start_time = time.monotonic()
   print("Analyze 1")
-  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
+  # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
   print("Preprocessing")
   # preprocess.process_all()
   print("Analyze 2")

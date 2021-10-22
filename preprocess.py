@@ -2,7 +2,6 @@ import numpy as np
 import trimesh
 import trimesh.grouping as grouping
 
-import analyze
 import main
 import subdivision
 import utils
@@ -116,12 +115,13 @@ def translate_eigen(mesh):
 
 def normalize_histogram_features(features):
   df = utils.read_excel(original=False)
-  features_norm = [i+"_norm" for i in features]
+  features_norm = [i + "_norm" for i in features]
   subset = df[features]
   subset_norm = subset.applymap(sum_divide)
   subset_norm.columns = features_norm
   df[features_norm] = subset_norm
   utils.save_excel(df, original=False)
+
 
 def sum_divide(x):
   return x / sum(x)
@@ -162,21 +162,21 @@ def process_all(show_subdivide=False, show_superdivide=False):
     if not mesh2.is_watertight:
       y += 1
 
-
   normalize_histogram_features(features=utils.hist_features)
   scalar_normalization(features=utils.scal_features)
   print(f'meshes filtered: {z}')
   print(f'meshes1 not watertight: {i}')
   print(f'meshes2 not watertight: {y}')
 
+
 def scalar_normalization(features):
   df = utils.read_excel(original=False)
-  y = (df[features]-df[features].mean())/df[features].std()
-  y = (y+1) /2
-  y = y.rename(columns=lambda x: x+"_norm")
+  y = (df[features] - df[features].mean()) / df[features].std()
+  y = (y + 1) / 2
+  y = y.rename(columns=lambda x: x + "_norm")
   df[y.columns] = y
-  vectors = np.asarray([df[features].mean(), df[features].std(), [1,1,1,1,1], [2,2,2,2,2]])
-  #Store the values used for normalization so we can normalize new query objects
+  vectors = np.asarray([df[features].mean(), df[features].std(), [1, 1, 1, 1, 1], [2, 2, 2, 2, 2]])
+  # Store the values used for normalization so we can normalize new query objects
   with open(utils.norm_vector_path, 'wb') as f:
     np.save(f, vectors)
   utils.save_excel(df, original=False)
