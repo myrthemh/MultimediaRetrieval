@@ -145,7 +145,6 @@ def process_all(show_subdivide=False, show_superdivide=False):
         print("Make watertight operation failed")
       else:
         print("Successfully made mesh watertight")
-    print("remeshing")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -183,8 +182,8 @@ def scalar_normalization(features):
 
 def hist_distance_normalization():
   df = utils.read_excel(original=False)
-  histograms = np.asarray(df[utils.hist_features])
-  distances = [[] for i in range(len(utils.hist_features))]
+  histograms = np.asarray(df[utils.hist_features_norm])
+  distances = [[] for i in range(len(utils.hist_features_norm))]
   for i in range(len(histograms)):
     for j in range(i + 1, len(histograms)):
       for k in range(len(distances)):

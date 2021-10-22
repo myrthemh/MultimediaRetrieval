@@ -13,7 +13,7 @@ trimesh.util.attach_to_log(level=logging.INFO)
 
 
 def scale_outward(mesh):
-  epsilon = 0.0002
+  epsilon = 0.00002
   normals = mesh.face_normals
   for index, face in enumerate(mesh.faces):
     for vertice in face:
@@ -21,11 +21,12 @@ def scale_outward(mesh):
   return mesh
 
 
-def render(meshes, showWireframe=True):
+def render(meshes, showWireframe=True, setcolor=True):
   scene = pyrender.Scene()
   for mesh in meshes:
-    colorvisuals = trimesh.visual.ColorVisuals(mesh, [200, 200, 200, 255])
-    mesh.visual = colorvisuals
+    if setcolor:
+      colorvisuals = trimesh.visual.ColorVisuals(mesh, [200, 200, 200, 255])
+      mesh.visual = colorvisuals
     mesh1 = pyrender.Mesh.from_trimesh(mesh, smooth=False)
     scene.add(mesh1)
   if showWireframe:
@@ -40,14 +41,17 @@ def render(meshes, showWireframe=True):
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/1/m112/m112.off', force='mesh')
+  mesh = trimesh.load('testModels/refined_db/17/m1709/m1709.off', force='mesh')
   render([mesh])
 
+def load_from_file(path):
+  return trimesh.load(path, force='mesh')
 
-def compare(meshes):
+
+def compare(meshes, setcolor=True):
   for i, m in enumerate(meshes):
     m.apply_translation([0, 0, i * 1])
-  render(meshes)
+  render(meshes, setcolor=setcolor)
 
 
 def compare_all():
@@ -61,26 +65,26 @@ def compare_all():
 def main():
   # step_1()
   # compare_all()
-  start_time = time.monotonic()
+  # start_time = time.monotonic()
   # print("Analyze 1")
   # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
   # print("Preprocessing")
-  # preprocess.process_all()
-  print("Analyze 2")
-  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
-  print("normalize")
-  preprocess.normalize_histogram_features(utils.hist_features)
-  preprocess.scalar_normalization(utils.scal_features)
+  # # preprocess.process_all()
+  # print("Analyze 2")
+  # analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
+  # print("normalize")
+  # preprocess.normalize_histogram_features(utils.hist_features)
+  # preprocess.scalar_normalization(utils.scal_features)
   preprocess.hist_distance_normalization()
-  print("Read Excel")
-  originalDF = utils.read_excel(original=True)
-  refinedDF = utils.read_excel(original=False)
+  # print("Read Excel")
+  # originalDF = utils.read_excel(original=True)
+  # refinedDF = utils.read_excel(original=False)
   # print("Save histograms")
   # analyze.save_all_histograms(originalDF, utils.imagePath)
   # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
 
-  end_time = time.monotonic()
-  print(timedelta(seconds=end_time - start_time))
+  # end_time = time.monotonic()
+  # print(timedelta(seconds=end_time - start_time))
 
 
 if __name__ == '__main__':

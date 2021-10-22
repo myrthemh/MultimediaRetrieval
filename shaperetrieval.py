@@ -18,6 +18,12 @@ def cosine_difference(vector1, vector2):
 def sortmethod(x):
   return x[0]
 
+def paths_to_meshes(paths):
+  meshes = []
+  for path in paths:
+    meshes.append(trimesh.load(path, force='mesh'))
+  return meshes
+
 def find_similar_meshes(mesh_path):
   #Analyze the mesh
   mesh = trimesh.load(mesh_path, force='mesh')
@@ -36,11 +42,12 @@ def find_similar_meshes(mesh_path):
     single_vector /= vectors[1]
 
   distances = []
+  x = [[],[],[],[],[]]
   #Compare with all meshes
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
     for index, row in df.iterrows():
-      if(mesh_path == row['path']):
+      if(mesh_path[-11:] == row['path'][-11:]):
         continue
       other_single_vector = np.asarray(row[utils.scal_features_norm])
       other_histogram_vector = np.asarray(row[utils.hist_features_norm])
@@ -49,16 +56,17 @@ def find_similar_meshes(mesh_path):
       
       #Standardize histogram distances:
       hist_distances /= emd_vector
-      distance = 0.5 * scalar_distance + sum(0.25 * hist_distances)
-      print(scalar_distance, hist_distances)
-      distances.append((distance, row['path'])) 
+      for i in range(len(hist_distances)):
+        x[i].append([hist_distances[i]])
+      distance = 0.5 * scalar_distance + sum(0.125 * hist_distances)
+      distances.append((distance, row['path']))
   distances.sort(key=sortmethod)
   return distances
 
-
-distances = find_similar_meshes('testModels/refined_db/0/m0/m0.off')
-mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
-mesh.show()
-for dist in distances:
-  meshx = trimesh.load(dist[1], force='mesh')
-  meshx.show()
+# mesh_path = 'testModels/refined_db/0/m0/m0.off'
+# mesh = trimesh.load(mesh_path, force='mesh')
+# distances = find_similar_meshes(mesh_path)
+# mesh.show()
+# for dist in distances:
+#   meshx = trimesh.load(dist[1], force='mesh')
+#   meshx.show()
