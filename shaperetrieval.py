@@ -17,6 +17,12 @@ def cosine_difference(vector1, vector2):
 def sortmethod(x):
   return x[0]
 
+def paths_to_meshes(paths):
+  meshes = []
+  for path in paths:
+    meshes.append(trimesh.load(path, force='mesh'))
+  return meshes
+
 def find_similar_meshes(mesh):
   #Analyze the mesh
   mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
@@ -48,9 +54,9 @@ def find_similar_meshes(mesh):
   distances.sort(key=sortmethod)
   return distances
 
-mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
-distances = find_similar_meshes(mesh)
-mesh.show()
-for dist in distances:
-  meshx = trimesh.load(dist[1], force='mesh')
-  meshx.show()
+# mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
+# distances = find_similar_meshes(mesh)
+# mesh.show()
+# for dist in distances:
+#   meshx = trimesh.load(dist[1], force='mesh')
+#   meshx.show()

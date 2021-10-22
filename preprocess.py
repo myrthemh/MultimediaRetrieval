@@ -145,7 +145,6 @@ def process_all(show_subdivide=False, show_superdivide=False):
         print("Make watertight operation failed")
       else:
         print("Successfully made mesh watertight")
-    print("remeshing")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:

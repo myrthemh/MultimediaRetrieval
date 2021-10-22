@@ -147,21 +147,21 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
   return selected_vertices
 
 
-def A3(mesh, amount=1000, plot=False):
+def A3(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
   return make_bins(angles, 0, 0.75*math.pi, 10, plot)
 
 
-def D1(mesh, amount=1000, plot=False):
+def D1(mesh, amount=utils.hist_amount, plot=False):
   # Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [math.sqrt(sum(random_vertice ** 2)) for random_vertice in random_vertices]
   return make_bins(distance_barycentre, 0, 0.5, 10, plot)
 
 
-def D2(mesh, amount=1000, plot=False):
+def D2(mesh, amount=utils.hist_amount, plot=False):
   # Distance between two random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 2))]
   random_vertices = check_duplicates(mesh, random_vertices, 2)
@@ -170,7 +170,7 @@ def D2(mesh, amount=1000, plot=False):
   return make_bins(distance_vertices, 0, 1, 10, plot)
 
 
-def D3(mesh, amount=1000, plot=False):
+def D3(mesh, amount=utils.hist_amount, plot=False):
   # Root of area of triangle given by three random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
@@ -188,7 +188,7 @@ def tetrahedon_volume(vertices):
   return volume
 
 
-def D4(mesh, amount=1000, plot=False):
+def D4(mesh, amount=utils.hist_amount, plot=False):
   # Cubic root of volume of tetahedron given by four random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
   random_vertices = check_duplicates(mesh, random_vertices, 4)
@@ -269,7 +269,7 @@ def histograms_all_classes(data, column):
     for i in data.loc[data["class"] == c+1, column]:
       axs[c%6, int(c/6)].plot(i)
       axs[c%6, int(c/6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
-      axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(50000))
+      axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
     axs[c%6, int(c/6)].set_title(str(classes[c+1]))
 
 
@@ -360,7 +360,7 @@ def save_all_histograms(df, path, features=False):
     save_histogram(df.loc[:, info['column']].values, info, path)
 
 # mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
-# D3(mesh, amount=1000)
+# D3(mesh, amount=utils.hist_amount)
 
 def plot_shape_properties(feature, shape, classes=1):
   path = utils.refinedImagePath
