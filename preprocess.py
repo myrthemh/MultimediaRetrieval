@@ -6,7 +6,7 @@ import analyze
 import main
 import subdivision
 import utils
-
+from scipy.stats import wasserstein_distance
 
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
@@ -173,11 +173,23 @@ def process_all(show_subdivide=False, show_superdivide=False):
 def scalar_normalization(features):
   df = utils.read_excel(original=False)
   y = (df[features]-df[features].mean())/df[features].std()
-  y = (y+1) /2
   y = y.rename(columns=lambda x: x+"_norm")
   df[y.columns] = y
-  vectors = np.asarray([df[features].mean(), df[features].std(), [1,1,1,1,1], [2,2,2,2,2]])
+  vectors = np.asarray([df[features].mean(), df[features].std()])
   #Store the values used for normalization so we can normalize new query objects
   with open(utils.norm_vector_path, 'wb') as f:
     np.save(f, vectors)
   utils.save_excel(df, original=False)
+
+def hist_distance_normalization():
+  df = utils.read_excel(original=False)
+  histograms = np.asarray(df[utils.hist_features])
+  distances = [[] for i in range(len(utils.hist_features))]
+  for i in range(len(histograms)):
+    for j in range(i + 1, len(histograms)):
+      for k in range(len(distances)):
+        distances[k].append(wasserstein_distance(histograms[i][k], histograms[j][k]))
+  distances = np.asarray(distances)
+  vector = np.array(distances.std(axis=1))
+  with open(utils.emd_norm_vector_path, 'wb') as f:
+    np.save(f, vector)

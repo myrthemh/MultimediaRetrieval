@@ -147,21 +147,21 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
   return selected_vertices
 
 
-def A3(mesh, amount=1000, plot=False):
+def A3(mesh, amount=10000, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
   return make_bins(angles, 0, 0.75*math.pi, 10, plot)
 
 
-def D1(mesh, amount=1000, plot=False):
+def D1(mesh, amount=10000, plot=False):
   # Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [math.sqrt(sum(random_vertice ** 2)) for random_vertice in random_vertices]
   return make_bins(distance_barycentre, 0, 0.5, 10, plot)
 
 
-def D2(mesh, amount=1000, plot=False):
+def D2(mesh, amount=10000, plot=False):
   # Distance between two random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 2))]
   random_vertices = check_duplicates(mesh, random_vertices, 2)
@@ -170,7 +170,7 @@ def D2(mesh, amount=1000, plot=False):
   return make_bins(distance_vertices, 0, 1, 10, plot)
 
 
-def D3(mesh, amount=1000, plot=False):
+def D3(mesh, amount=10000, plot=False):
   # Root of area of triangle given by three random vertices
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)

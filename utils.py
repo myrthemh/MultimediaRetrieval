@@ -18,6 +18,7 @@ scal_features  = ["area", "axis-aligned_bounding_box_distance", "diameter", "com
 scal_features_norm = ["area_norm", "axis-aligned_bounding_box_distance_norm", "diameter_norm", "compactness_norm", "eccentricity_norm"]
 hist_features_norm = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
 norm_vector_path = "features/vector.npy"
+emd_norm_vector_path = "features/dist_vector.npy"
 
 
 def read_excel(original=True):

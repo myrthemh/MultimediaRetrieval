@@ -7,6 +7,7 @@ import trimesh
 import utils
 import analyze
 import preprocess
+from scipy.stats import wasserstein_distance
 
 def compute_eucledian_distance(vector1, vector2):
   return norm(vector1 - vector2)
@@ -17,39 +18,46 @@ def cosine_difference(vector1, vector2):
 def sortmethod(x):
   return x[0]
 
-def find_similar_meshes(mesh):
+def find_similar_meshes(mesh_path):
   #Analyze the mesh
+  mesh = trimesh.load(mesh_path, force='mesh')
   mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
-  #Get the feature vector 
   df = utils.read_excel(original=False)
-  single_features = ["volume_norm", "area_norm", "eccentricity_norm", "eigen_x_angle_norm", "diameter_norm", "compactness_norm"]
-  histogram_features = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
 
-  #Get feature vector:
+  #Get feature vectors:
   single_vector = np.asarray([mesh_info[column] for column in utils.scal_features])
   histograms = np.asarray([mesh_info[column] for column in utils.hist_features])
-  histogram_vector = np.concatenate([preprocess.sum_divide(x) for x in histograms])
+  histogram_vector = [preprocess.sum_divide(x) for x in histograms]
+
+  #Standardize the scalar features:
   with open(utils.norm_vector_path, 'rb') as f:
     vectors = np.load(f)
     single_vector -= vectors[0]
     single_vector /= vectors[1]
-    single_vector += vectors[2]
-    single_vector /= vectors[3] 
-  feature_vector = np.concatenate([single_vector, histogram_vector])
-  
+
   distances = []
   #Compare with all meshes
-  for index, row in df.iterrows():
-    other_single_vector = np.asarray(row[utils.scal_features_norm])
-    other_histogram_vector = np.concatenate(np.asarray(row[utils.hist_features_norm]))
-    other_feature_vector = np.concatenate([other_single_vector, other_histogram_vector])
-    distance = compute_eucledian_distance(feature_vector, other_feature_vector)
-    distances.append((distance, row['path'])) 
+  with open(utils.emd_norm_vector_path, 'rb') as f:
+    emd_vector = np.load(f)
+    for index, row in df.iterrows():
+      if(mesh_path == row['path']):
+        continue
+      other_single_vector = np.asarray(row[utils.scal_features_norm])
+      other_histogram_vector = np.asarray(row[utils.hist_features_norm])
+      scalar_distance = compute_eucledian_distance(single_vector, other_single_vector)
+      hist_distances = [wasserstein_distance(histogram_vector[i], other_histogram_vector[i]) for i in range(len(histogram_vector))]
+      
+      #Standardize histogram distances:
+      hist_distances /= emd_vector
+      distance = 0.5 * scalar_distance + sum(0.25 * hist_distances)
+      print(scalar_distance, hist_distances)
+      distances.append((distance, row['path'])) 
   distances.sort(key=sortmethod)
   return distances
 
+
+distances = find_similar_meshes('testModels/refined_db/0/m0/m0.off')
 mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
-distances = find_similar_meshes(mesh)
 mesh.show()
 for dist in distances:
   meshx = trimesh.load(dist[1], force='mesh')
