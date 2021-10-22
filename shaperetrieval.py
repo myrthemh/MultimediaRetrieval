@@ -43,7 +43,6 @@ def find_similar_meshes(mesh_path):
     single_vector -= vectors[0]
     single_vector /= vectors[1]
   distances = []
-  x = [[],[],[],[],[]]
   #Compare with all meshes
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
@@ -57,8 +56,6 @@ def find_similar_meshes(mesh_path):
       
       #Standardize histogram distances:
       hist_distances /= emd_vector
-      for i in range(len(hist_distances)):
-        x[i].append([hist_distances[i]])
       distance = 0.5 * scalar_distance + sum(0.125 * hist_distances)
       distances.append((distance, row['path']))
   distances.sort(key=sortmethod)
