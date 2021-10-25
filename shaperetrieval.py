@@ -6,6 +6,7 @@ from scipy.spatial import distance
 from scipy.stats import wasserstein_distance
 
 import analyze
+import main
 import preprocess
 import utils
 
@@ -22,8 +23,8 @@ def save_map_neighbours(n_features, metric):
     v_hist = np.concatenate(np.asarray(row[utils.hist_features_norm])).ravel()
     v = np.concatenate((v_scal, v_hist))
     t.add_item(index, v)
-  t.build(10000, n_jobs=-1)
-  t.save('test.ann')
+  t.build(1000, n_jobs=-1)
+  t.save('testmodels.ann')
 
 
 def load_map_neighbours(map_path, n_features, metric):
@@ -31,6 +32,10 @@ def load_map_neighbours(map_path, n_features, metric):
   u = AnnoyIndex(f, metric)
   u.load(map_path)
   return u
+
+def neighbours_to_paths(neighbours, distances_included=True):
+    df = utils.read_excel(False).iloc[neighbours[0]] if distances_included else utils.read_excel(False).iloc[neighbours]
+    return df['path']
 
 
 def compute_euclidean_distance(vector1, vector2):
@@ -95,8 +100,11 @@ def find_similar_meshes(mesh_path):
 # for dist in distances:
 #   meshx = trimesh.load(dist[1], force='mesh')
 #   meshx.show()
-# save_map_neighbours(n_features= 54, metric="euclidean")
-u = load_map_neighbours('test.ann', 54, metric="euclidean")
-print(u)
-print(u.get_nns_by_item(3, 1000, include_distances=True))
+save_map_neighbours(n_features= 55, metric="euclidean")
+u = load_map_neighbours('testmodels.ann', 55, metric="euclidean")
+blaa = u.get_nns_by_item(209, 5, include_distances=True)
+paths = neighbours_to_paths(blaa, True)
+meshes = [trimesh.load(path, force='mesh') for path in paths]
 
+print(blaa[1])
+main.compare(meshes)
