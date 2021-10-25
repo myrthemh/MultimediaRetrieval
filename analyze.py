@@ -176,7 +176,7 @@ def D3(mesh, amount=utils.hist_amount, plot=False):
   area_vertices = [math.sqrt(
     (math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2]) ** 2)) / 2))
     for random_vertice in random_vertices]
-  return make_bins(area_vertices, 0, 0.93, 10, plot)
+  return make_bins(area_vertices, 0, 0.8*0.93, 10, plot)
 
 
 def tetrahedon_volume(vertices):
@@ -192,7 +192,7 @@ def D4(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
   random_vertices = check_duplicates(mesh, random_vertices, 4)
   volumes = [tetrahedon_volume(vertices) ** (1.0 / 3) for vertices in random_vertices]
-  return make_bins(volumes, 0, 0.55, 10, plot)
+  return make_bins(volumes, 0, 0.6*0.55, 10, plot)
 
 
 def fill_mesh_info(mesh, classFolder, path, features=True):
@@ -267,12 +267,12 @@ def histograms_all_classes(data, column):
   for c in range(0, 18):
     for i in data.loc[data["class"] == c + 1, column]:
       axs[c % 6, int(c / 6)].plot(i)
-      axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
-      axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
+      # axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
+     # axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
     axs[c % 6, int(c / 6)].set_title(str(classes[c + 1]))
 
   fig.tight_layout()
-  fig.savefig(utils.refinedImagePath + "test" + '.png')
+  fig.savefig(utils.refinedImagePath + "all_classes" + column + '.png')
 
 
 def save_histogram(data, info, path):
@@ -384,8 +384,9 @@ def plot_shape_properties(feature, shape, classes=1):
   plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
   plt.xlabel(feature)
   plt.ylabel(info["ylabel"])
-  plt.title(title + " of class" + classes[classes])
+  #plt.title(title + " of class" + classes[classes])
   plt.savefig(path + feature + shape[-8:-4] + '.png')
+  plt.show()
 
 
 def visualize_difference_features():
@@ -393,18 +394,18 @@ def visualize_difference_features():
   plot_shape_properties(feature="A3", shape='testModels/refined_db/1/m105/m105.off', classes=1)
   plot_shape_properties(feature="A3", shape='testModels/refined_db/17/m1703/m1703.off', classes=17)
 
-  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D1", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/18/m1812/m1812.off')
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/18/m1814/m1814.off')
+  plot_shape_properties(feature="D1", shape='testModels/refined_db/9/m909/m909.off')
 
-  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D2", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/16/m1601/m1601.off')
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/16/m1600/m1600.off')
+  plot_shape_properties(feature="D2", shape='testModels/refined_db/17/m1712/m1712.off')
 
-  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D3", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/14/m1402/m1402.off')
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/14/m1403/m1403.off')
+  plot_shape_properties(feature="D3", shape='testModels/refined_db/13/m1306/m1306.off')
 
-  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
-  plot_shape_properties(feature="D4", shape='testModels/refined_db/1/m112/m112.off')
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/5/m500/m500.off')
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/5/m507/m507.off')
+  plot_shape_properties(feature="D4", shape='testModels/refined_db/7/m704/m704.off')

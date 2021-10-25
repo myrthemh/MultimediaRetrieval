@@ -83,7 +83,7 @@ def find_similar_meshes(mesh_path):
 
       # Standardize histogram distances:
       hist_distances /= emd_vector
-      distance = 0.5 * scalar_distance + sum(0.125 * hist_distances)
+      distance = scalar_distance + sum(hist_distances)
       distances.append((distance, row['path']))
   distances.sort(key=sortmethod)
   return distances
