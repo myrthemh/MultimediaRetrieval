@@ -11,6 +11,7 @@ imagePath = "graphs/original/"
 refinedImagePath = "graphs/refined/"
 originalDB = "testModels/db"
 refinedDB = "testModels/refined_db"
+sim_images_path = "simimages/"
 target_vertices = 1000
 target_faces = 2000
 hist_amount = 10000

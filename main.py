@@ -8,6 +8,11 @@ import trimesh
 import analyze
 import preprocess
 import utils
+import numpy as np
+import io
+import matplotlib.pyplot as plt
+import shaperetrieval
+from PIL import Image
 
 trimesh.util.attach_to_log(level=logging.INFO)
 
@@ -36,13 +41,51 @@ def render(meshes, showWireframe=True, setcolor=True):
       mesh.visual = colorvisuals
       wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
       scene.add(wireframe)
-  pyrender.Viewer(scene, use_raymond_lighting=True)
+  pyrender.Viewer(scene, use_raymond_lighting=True, viewport_size=(512,512))
+
+def save_mesh_image(meshes, path, distance=None, showWireframe=False, setcolor=True, ):
+  scene = pyrender.Scene()
+  for mesh in meshes:
+    if setcolor:
+      colorvisuals = trimesh.visual.ColorVisuals(mesh, [200, 200, 200, 255])
+      mesh.visual = colorvisuals
+    mesh1 = pyrender.Mesh.from_trimesh(mesh, smooth=False)
+    scene.add(mesh1)
+  if showWireframe:
+    for mesh in meshes:
+      mesh = scale_outward(mesh)
+      colorvisuals = trimesh.visual.ColorVisuals(mesh, [0, 0, 0, 255])
+      mesh.visual = colorvisuals
+      wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
+      scene.add(wireframe)
+  camera = pyrender.PerspectiveCamera( yfov=np.pi / 3.0, znear=0.0000001,)
+  camera_pose =[[ 1.73205,  0.,       0.,       0.,     ],
+                [ 0.,       1.73205,  0.,       0.,     ],
+                [ 0.,       0.,      -1.,      -1.0,    ],
+                [ 0.,       0.,      0.,       1,     ]]
+  scene.add(camera, pose=camera_pose)
+
+  light = pyrender.DirectionalLight(color=[1,1,1], intensity=800)
+  scene.add(light, pose= np.eye(4) * [-1,-1,-1,1])
+  screensize = 256
+  #pyrender.Viewer(scene, use_raymond_lighting=True, viewport_size=(512,512))
+  flags = pyrender.RenderFlags.RGBA
+  r = pyrender.OffscreenRenderer(screensize, screensize)
+  color, _ = r.render(scene, flags=flags)
+  
+  plt.figure(figsize=(8,8)), plt.imshow(color)
+  plt.axis('off')
+  if distance is not None:
+    plt.text(screensize / 2 - 20, screensize - 5, "D: " + str(distance), fontsize="xx-large")
+  utils.ensure_dir(path)
+  plt.savefig(path, bbox_inches='tight')
 
 
 # Step 1
 def step_1():
-  mesh = trimesh.load('testModels/refined_db/17/m1709/m1709.off', force='mesh')
-  render([mesh])
+  for path in utils.shape_paths(utils.refinedDB):
+    mesh = trimesh.load(path, force='mesh')
+    render([mesh])
 
 
 def load_from_file(path):
@@ -62,30 +105,40 @@ def compare_all():
     meshes = [ogmesh, rfmesh]
     compare(meshes)
 
+def save_figures():
+  df = utils.read_excel(original=False)
+  for index, row in df.iterrows():
+    meshpath = row['path']
+    tuples = shaperetrieval.find_similar_meshes(meshpath)
+    mesh = trimesh.load(meshpath, force='mesh')
+    save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '-0' )
+    for i, tuple in enumerate(tuples[:5]):
+      mesh = trimesh.load(tuple[1], force='mesh')
+      save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '-' + str(i + 1), distance=round(tuple[0], 4))
 
 def main():
-  # step_1()
+  #step_1()
   # compare_all()
-  start_time = time.monotonic()
-  print("Analyze 1")
-  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
-  print("Preprocessing")
-  preprocess.process_all()
-  print("Analyze 2")
-  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
-  print("normalize")
-  preprocess.normalize_histogram_features(utils.hist_features)
-  preprocess.scalar_normalization(utils.scal_features)
-  preprocess.hist_distance_normalization()
-  print("Read Excel")
-  originalDF = utils.read_excel(original=True)
-  refinedDF = utils.read_excel(original=False)
-  print("Save histograms")
-  analyze.save_all_histograms(originalDF, utils.imagePath)
-  analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-
-  end_time = time.monotonic()
-  print(timedelta(seconds=end_time - start_time))
+  # start_time = time.monotonic()
+  # print("Analyze 1")
+  # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
+  # print("Preprocessing")
+  # preprocess.process_all()
+  # print("Analyze 2")
+  # analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
+  # print("normalize")
+  # preprocess.normalize_histogram_features(utils.hist_features)
+  # preprocess.scalar_normalization(utils.scal_features)
+  # preprocess.hist_distance_normalization()
+  # print("Read Excel")
+  # originalDF = utils.read_excel(original=True)
+  # refinedDF = utils.read_excel(original=False)
+  # print("Save histograms")
+  # analyze.save_all_histograms(originalDF, utils.imagePath)
+  # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  save_figures()  
+  # end_time = time.monotonic()
+  # print(timedelta(seconds=end_time - start_time))
 
 
 if __name__ == '__main__':
