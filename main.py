@@ -1,6 +1,8 @@
 import logging
 import time
+import gc
 from datetime import timedelta
+import matplotlib
 
 import pyrender
 import trimesh
@@ -67,18 +69,21 @@ def save_mesh_image(meshes, path, distance=None, showWireframe=False, setcolor=T
 
   light = pyrender.DirectionalLight(color=[1,1,1], intensity=800)
   scene.add(light, pose= np.eye(4) * [-1,-1,-1,1])
-  screensize = 256
   #pyrender.Viewer(scene, use_raymond_lighting=True, viewport_size=(512,512))
   flags = pyrender.RenderFlags.RGBA
-  r = pyrender.OffscreenRenderer(screensize, screensize)
+  r = pyrender.OffscreenRenderer(utils.sim_image_size, utils.sim_image_size)
   color, _ = r.render(scene, flags=flags)
-  
-  plt.figure(figsize=(8,8)), plt.imshow(color)
+  matplotlib.use('Agg')
+  plt.figure(figsize=(3,3)), plt.imshow(color)
   plt.axis('off')
   if distance is not None:
-    plt.text(screensize / 2 - 20, screensize - 5, "D: " + str(distance), fontsize="xx-large")
+    plt.text(utils.sim_image_size / 2 - 50, utils.sim_image_size - 5, "D: " + str(distance), fontsize="xx-large")
   utils.ensure_dir(path)
+  plt.show()
   plt.savefig(path, bbox_inches='tight')
+  plt.clf()
+  plt.cla()
+  plt.close('all')
 
 
 # Step 1
@@ -108,13 +113,14 @@ def compare_all():
 def save_figures():
   df = utils.read_excel(original=False)
   for index, row in df.iterrows():
-    meshpath = row['path']
-    tuples = shaperetrieval.find_similar_meshes(meshpath)
-    mesh = trimesh.load(meshpath, force='mesh')
-    save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '-0' )
+    if index % 10 == 0:
+      print(index, '/', len(df))
+    tuples = shaperetrieval.find_similar_meshes(row['path'])
+    mesh = trimesh.load(row['path'], force='mesh')
+    save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/0' )
     for i, tuple in enumerate(tuples[:5]):
       mesh = trimesh.load(tuple[1], force='mesh')
-      save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '-' + str(i + 1), distance=round(tuple[0], 4))
+      save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1), distance=round(tuple[0], 4))
 
 def main():
   #step_1()
