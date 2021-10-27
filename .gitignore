@@ -148,6 +148,6 @@ models/**
 graphs/**
 features/**
 testModels/**
-veelModels/**
 *.ann
 *.xml
+*.png
