@@ -69,3 +69,11 @@ def shape_paths(dbfolder):
       if name.endswith('.off'):
         paths.append((os.path.join(path, name)))
   return paths
+
+def image_paths():
+  paths = []
+  for path, subdirs, files in os.walk(sim_images_path):
+    for name in files:
+      if name.endswith('.png'):
+        paths.append((os.path.join(path, name)))
+  return paths

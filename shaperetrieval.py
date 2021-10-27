@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import trimesh
 from annoy import AnnoyIndex
 from numpy.linalg import norm
@@ -56,29 +57,42 @@ def paths_to_meshes(paths):
     meshes.append(trimesh.load(path, force='mesh'))
   return meshes
 
+def save_similar_meshes():
+  df = utils.read_excel(original=False)
+  column = []
+  for index, row in df.iterrows():
+    if index % 10 == 0:
+      print("Calculating similarities", index, '/', len(df))
+    distances = find_similar_meshes(row)[:5]
+    column.append(distances)
+  df['similar_meshes'] = column
+  utils.save_excel(df, original=False)
 
-def find_similar_meshes(mesh_path):
-  # Analyze the mesh
-  mesh = trimesh.load(mesh_path, force='mesh')
-  mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
+
+def find_similar_meshes(mesh_row):
+  # # Analyze the mesh
+  # mesh = trimesh.load(row['path'], force='mesh')
+  # mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
   df = utils.read_excel(original=False)
 
-  # Get feature vector:
-  single_vector = np.asarray([mesh_info[column] for column in utils.scal_features])
-  histograms = np.asarray([mesh_info[column] for column in utils.hist_features])
-  histogram_vector = [preprocess.sum_divide(x) for x in histograms]
+  # # Get feature vector:
+  # single_vector = np.asarray([mesh_info[column] for column in utils.scal_features])
+  # histograms = np.asarray([mesh_info[column] for column in utils.hist_features])
+  # histogram_vector = [preprocess.sum_divide(x) for x in histograms]
 
-  # Standardize the scalar features:
-  with open(utils.norm_vector_path, 'rb') as f:
-    vectors = np.load(f)
-    single_vector -= vectors[0]
-    single_vector /= vectors[1]
+  # # Standardize the scalar features:
+  # with open(utils.norm_vector_path, 'rb') as f:
+  #   vectors = np.load(f)
+  #   single_vector -= vectors[0]
+  #   single_vector /= vectors[1]
+  single_vector = np.asarray(mesh_row[utils.scal_features_norm])
+  histogram_vector = np.asarray(mesh_row[utils.hist_features_norm])
   distances = []
   # Compare with all meshes
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
     for index, row in df.iterrows():
-      if mesh_path[-11:] == row['path'][-11:]:
+      if mesh_row['path'][-11:] == row['path'][-11:]:
         continue
       other_single_vector = np.asarray(row[utils.scal_features_norm])
       other_histogram_vector = np.asarray(row[utils.hist_features_norm])
@@ -89,7 +103,7 @@ def find_similar_meshes(mesh_path):
       # Standardize histogram distances:
       hist_distances /= emd_vector
       distance = scalar_distance + sum(hist_distances)
-      distances.append((distance, row['path']))
+      distances.append((distance, index))
   distances.sort(key=sortmethod)
   return distances
 

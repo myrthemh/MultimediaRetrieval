@@ -79,7 +79,6 @@ def save_mesh_image(meshes, path, distance=None, showWireframe=False, setcolor=T
   if distance is not None:
     plt.text(utils.sim_image_size / 2 - 50, utils.sim_image_size - 5, "D: " + str(distance), fontsize="xx-large")
   utils.ensure_dir(path)
-  plt.show()
   plt.savefig(path, bbox_inches='tight')
   plt.clf()
   plt.cla()
@@ -114,13 +113,30 @@ def save_figures():
   df = utils.read_excel(original=False)
   for index, row in df.iterrows():
     if index % 10 == 0:
-      print(index, '/', len(df))
-    tuples = shaperetrieval.find_similar_meshes(row['path'])
+      print('Saving images', index, '/', len(df))
+    tuples = row['similar_meshes']
     mesh = trimesh.load(row['path'], force='mesh')
     save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/0' )
-    for i, tuple in enumerate(tuples[:5]):
-      mesh = trimesh.load(tuple[1], force='mesh')
+    for i, tuple in enumerate(tuples):
+      mesh_row = df.iloc[tuple[1]]
+      mesh = trimesh.load(mesh_row['path'], force='mesh')
       save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1), distance=round(tuple[0], 4))
+
+def write_html():
+  html_str = """
+    <html>
+    """
+  for index, path in enumerate(utils.image_paths()):
+    html_str += "<img src = '" + path + "'>"
+    if index % 5 == 0:
+      html_str += "<br>"
+  html_str +=  """
+      <>
+    </html>
+    """
+  Html_file= open("images.html","w")
+  Html_file.write(html_str)
+  Html_file.close()
 
 def main():
   #step_1()
@@ -142,7 +158,9 @@ def main():
   # print("Save histograms")
   # analyze.save_all_histograms(originalDF, utils.imagePath)
   # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  save_figures()  
+  shaperetrieval.save_similar_meshes()
+  # save_figures()  
+  write_html()
   # end_time = time.monotonic()
   # print(timedelta(seconds=end_time - start_time))
 
