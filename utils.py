@@ -12,6 +12,7 @@ refinedImagePath = "graphs/refined/"
 originalDB = "testModels/db"
 refinedDB = "testModels/refined_db"
 sim_images_path = "simimages/"
+ann_images_path = "annimages/"
 sim_image_size = 256
 # originalDB = "veelModels/db"
 # refinedDB = "veelModels/refined_db"
@@ -70,9 +71,13 @@ def shape_paths(dbfolder):
         paths.append((os.path.join(path, name)))
   return paths
 
-def image_paths():
+def image_paths(class_folder, ann=False):
   paths = []
-  for path, subdirs, files in os.walk(sim_images_path):
+  if ann:
+    p = ann_images_path
+  else:
+    p = sim_images_path
+  for path, subdirs, files in os.walk(p + '/' + str(class_folder)):
     for name in files:
       if name.endswith('.png'):
         paths.append((os.path.join(path, name)))

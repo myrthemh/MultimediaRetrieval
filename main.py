@@ -109,31 +109,50 @@ def compare_all():
     meshes = [ogmesh, rfmesh]
     compare(meshes)
 
-def save_figures():
+def save_figures(column):
   df = utils.read_excel(original=False)
+  if column == "similar_meshes":
+    save_path = utils.sim_images_path
+  else:
+    save_path = utils.ann_images_path
   for index, row in df.iterrows():
     if index % 10 == 0:
       print('Saving images', index, '/', len(df))
-    tuples = row['similar_meshes']
+    tuples = row[column]
     mesh = trimesh.load(row['path'], force='mesh')
-    save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/0' )
+    save_mesh_image([mesh], save_path + str(int(row['class'])) + '/' + str(index) + '/0' )
     for i, tuple in enumerate(tuples):
       mesh_row = df.iloc[tuple[1]]
       mesh = trimesh.load(mesh_row['path'], force='mesh')
-      save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1), distance=round(tuple[0], 4))
+      save_mesh_image([mesh], save_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1), distance=round(tuple[0], 4))
 
 def write_html():
   html_str = """
     <html>
+    <div style='display: flex'>
     """
-  for index, path in enumerate(utils.image_paths()):
-    html_str += "<img src = '" + path + "'>"
-    if index % 5 == 0:
-      html_str += "<br>"
+  for ann in [False, True]:
+    html_str += "<div style='flex-grow: 1'>"
+    if ann:
+      html_str += "<h1> ANN: </h1>"
+    else:
+      html_str += "<h1> Our metric: </h1>"
+    for c in range(19):
+      html_str += """<details>
+        <summary style='font-size: 30px'>""" + str(c) + """</summary>"""
+      for index, path in enumerate(utils.image_paths(c, ann=ann)):
+        if index  % 6 == 0 and index != 0:
+          html_str += "<br> <hr>"
+        html_str += "<img src = '" + path + "'>"
+      html_str += "</details>"
+    html_str += "</div>"
   html_str +=  """
-      <>
+  </div>
     </html>
     """
+  html_str += """
+  
+  """
   Html_file= open("images.html","w")
   Html_file.write(html_str)
   Html_file.close()
@@ -158,8 +177,10 @@ def main():
   # print("Save histograms")
   # analyze.save_all_histograms(originalDF, utils.imagePath)
   # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  shaperetrieval.save_similar_meshes()
-  # save_figures()  
+  # shaperetrieval.save_similar_meshes()
+  # shaperetrieval.ann_distances_to_excel()
+  # save_figures('similar_meshes')
+  # save_figures('ANN')  
   write_html()
   # end_time = time.monotonic()
   # print(timedelta(seconds=end_time - start_time))

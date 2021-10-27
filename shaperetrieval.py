@@ -39,6 +39,7 @@ def ann_distances_to_excel():
   df = utils.read_excel(False)
   save_map_neighbours(55, "euclidean", n_trees=10000)
   u = load_map_neighbours("testmodels.ann", 55, 'euclidean')
+  df['ANN'] = ""
   for index, row in df.iterrows():
     tuple_list = []
     idx, distance = u.get_nns_by_item(index, 6, include_distances=True)
@@ -140,4 +141,4 @@ def find_similar_meshes(mesh_row):
 
 # print(blaa[1])
 # main.compare(meshes)
-ann_distances_to_excel()
+#ann_distances_to_excel()
