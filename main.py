@@ -123,7 +123,8 @@ def save_figures():
       save_mesh_image([mesh], utils.sim_images_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1), distance=round(tuple[0], 4))
 
 def main():
-  #step_1()
+    #step_1()
+  shaperetrieval.tsne()
   # compare_all()
   # start_time = time.monotonic()
   # print("Analyze 1")
