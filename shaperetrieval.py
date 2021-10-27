@@ -36,6 +36,7 @@ def load_map_neighbours(map_path, n_features, metric):
 
 def ann_distances_to_excel():
   df = utils.read_excel(False)
+  save_map_neighbours(55, "euclidean", n_trees=10000)
   u = load_map_neighbours("testmodels.ann", 55, 'euclidean')
   for index, row in df.iterrows():
     tuple_list = []
