@@ -2,13 +2,27 @@ import numpy as np
 import pandas as pd
 import trimesh
 from annoy import AnnoyIndex
+from sklearn.manifold import TSNE
 from numpy.linalg import norm
 from scipy.spatial import distance
 from scipy.stats import wasserstein_distance
+import plotly.express as px
+
 
 import analyze
 import preprocess
 import utils
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('darkgrid')
+sns.set_palette('muted')
+sns.set_context("notebook", font_scale=1.5,
+                rc={"lines.linewidth": 2.5})
+
+import matplotlib.patheffects as PathEffects
+import matplotlib.pyplot as plt
 
 
 def save_map_neighbours(n_features, metric, n_trees=1000):
@@ -126,7 +140,47 @@ def find_similar_meshes(mesh_row):
   distances.sort(key=sortmethod)
   return distances
 
+def tsne():
 
+  df = utils.read_excel(original=False)
+  X = np.vstack(np.concatenate(   ( np.asarray(row[utils.scal_features_norm]), np.concatenate(np.asarray(row[utils.hist_features_norm])).ravel() )) for index, row in df.iterrows())
+
+  digits_proj = TSNE().fit_transform(X)
+
+  y = df["class"]
+  scatter(digits_proj, y)
+  plt.savefig(utils.refinedImagePath + 'tsne-generated.png', dpi=120)
+
+
+def scatter(x, colors):
+  # We choose a color palette with seaborn.
+  palette = np.array(sns.color_palette("hls", 19))
+
+  # We create a scatter plot.
+  f = plt.figure(figsize=(8, 8))
+  ax = plt.subplot(aspect='equal')
+  sc = ax.scatter(x[:, 0], x[:, 1], lw=0, s=40, c=palette[colors.astype(np.int)])
+
+
+  plt.xlim(-25, 25)
+  plt.ylim(-25, 25)
+  ax.axis('off')
+  ax.axis('tight')
+
+
+
+  # We add the labels for each digit.
+  txts = []
+  # for i in range(10):
+  #   # Position of each label.
+  #   xtext, ytext = np.median(x[colors == i, :], axis=0)
+  #   txt = ax.text(xtext, ytext, str(i), fontsize=24)
+  #   txt.set_path_effects([
+  #     PathEffects.Stroke(linewidth=5, foreground="w"),
+  #     PathEffects.Normal()])
+  #   txts.append(txt)
+
+  return f, ax, sc, txts
 # mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
 # distances = find_similar_meshes(mesh)
 # mesh.show()

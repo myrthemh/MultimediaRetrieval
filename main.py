@@ -158,7 +158,8 @@ def write_html():
   Html_file.close()
 
 def main():
-  #step_1()
+    #step_1()
+  shaperetrieval.tsne()
   # compare_all()
   # start_time = time.monotonic()
   # print("Analyze 1")
