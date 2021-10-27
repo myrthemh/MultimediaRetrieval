@@ -84,7 +84,7 @@ window = Tk()
 window.title('Mesh Explorer')
 
 # Set window size
-window.geometry("500x500")
+window.geometry("1920x1080")
 
 # Set window background color
 window.config(background="white")
@@ -94,7 +94,6 @@ label_file_explorer = Label(window, text="Placeholder text", width=75, height=4,
 
 
 def draw_grid(c):
-  print(c)
   #Imagetable
   for label in window.grid_slaves():
     if int(label.grid_info()["row"]) == 5 and int(label.grid_info()["column"]) == 1:
