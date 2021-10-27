@@ -7,12 +7,11 @@ from scipy.spatial import distance
 from scipy.stats import wasserstein_distance
 
 import analyze
-import main
 import preprocess
 import utils
 
 
-def save_map_neighbours(n_features, metric):
+def save_map_neighbours(n_features, metric, n_trees=1000):
   # Run once, this saves a mapping file
 
   # metric can be one of "angular", "euclidean", "manhattan", "hamming", or "dot"
@@ -24,7 +23,7 @@ def save_map_neighbours(n_features, metric):
     v_hist = np.concatenate(np.asarray(row[utils.hist_features_norm])).ravel()
     v = np.concatenate((v_scal, v_hist))
     t.add_item(index, v)
-  t.build(1000, n_jobs=-1)
+  t.build(n_trees, n_jobs=-1)
   t.save('testmodels.ann')
 
 
@@ -32,11 +31,30 @@ def load_map_neighbours(map_path, n_features, metric):
   f = n_features
   u = AnnoyIndex(f, metric)
   u.load(map_path)
+
   return u
 
+
+def ann_distances_to_excel():
+  df = utils.read_excel(False)
+  save_map_neighbours(55, "euclidean", n_trees=10000)
+  u = load_map_neighbours("testmodels.ann", 55, 'euclidean')
+  for index, row in df.iterrows():
+    tuple_list = []
+    idx, distance = u.get_nns_by_item(index, 6, include_distances=True)
+    # Remove distance to self
+    idx = idx[1:6]
+    distance = distance[1:6]
+    for i, item in enumerate(distance):
+      tuple_list.append((item, idx[i]))
+
+    df.at[index, "ANN"] = tuple_list
+  utils.save_excel(df, False)
+
+
 def neighbours_to_paths(neighbours, distances_included=True):
-    df = utils.read_excel(False).iloc[neighbours[0]] if distances_included else utils.read_excel(False).iloc[neighbours]
-    return df['path']
+  df = utils.read_excel(False).iloc[neighbours[0]] if distances_included else utils.read_excel(False).iloc[neighbours]
+  return df['path']
 
 
 def compute_euclidean_distance(vector1, vector2):
@@ -122,3 +140,4 @@ def find_similar_meshes(mesh_row):
 
 # print(blaa[1])
 # main.compare(meshes)
+ann_distances_to_excel()
