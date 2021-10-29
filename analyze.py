@@ -3,7 +3,6 @@ import math
 import os
 
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import numpy as np
 import pandas as pd
 import trimesh
@@ -150,14 +149,14 @@ def A3(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
-  return make_bins(angles, 0, 0.75 * math.pi, 10, plot)
+  return make_bins(angles, 0, 0.75 * math.pi, utils.nr_bins_hist, plot)
 
 
 def D1(mesh, amount=utils.hist_amount, plot=False):
   # Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = [math.sqrt(sum(random_vertice ** 2)) for random_vertice in random_vertices]
-  return make_bins(distance_barycentre, 0, 0.5, 10, plot)
+  return make_bins(distance_barycentre, 0, 0.5, utils.nr_bins_hist, plot)
 
 
 def D2(mesh, amount=utils.hist_amount, plot=False):
@@ -166,7 +165,7 @@ def D2(mesh, amount=utils.hist_amount, plot=False):
   random_vertices = check_duplicates(mesh, random_vertices, 2)
   distance_vertices = [math.sqrt(sum((random_vertice[0] - random_vertice[1]) ** 2)) for random_vertice in
                        random_vertices]
-  return make_bins(distance_vertices, 0, 1, 10, plot)
+  return make_bins(distance_vertices, 0, 1, utils.nr_bins_hist, plot)
 
 
 def D3(mesh, amount=utils.hist_amount, plot=False):
@@ -176,7 +175,15 @@ def D3(mesh, amount=utils.hist_amount, plot=False):
   area_vertices = [math.sqrt(
     (math.sqrt(sum(np.cross(random_vertice[0] - random_vertice[2], random_vertice[1] - random_vertice[2]) ** 2)) / 2))
     for random_vertice in random_vertices]
-  return make_bins(area_vertices, 0, 0.8 * 0.93, 10, plot)
+  return make_bins(area_vertices, 0, 0.8 * 0.93, utils.nr_bins_hist, plot)
+
+
+def D4(mesh, amount=utils.hist_amount, plot=False):
+  # Cubic root of volume of tetahedron given by four random vertices
+  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
+  random_vertices = check_duplicates(mesh, random_vertices, 4)
+  volumes = [tetrahedon_volume(vertices) ** (1.0 / 3) for vertices in random_vertices]
+  return make_bins(volumes, 0, 0.6 * 0.55, utils.nr_bins_hist, plot)
 
 
 def tetrahedon_volume(vertices):
@@ -185,14 +192,6 @@ def tetrahedon_volume(vertices):
   vector3 = vertices[2] - vertices[3]
   volume = abs(np.dot(vector1, (np.cross(vector2, vector3)))) / 6
   return volume
-
-
-def D4(mesh, amount=utils.hist_amount, plot=False):
-  # Cubic root of volume of tetahedron given by four random vertices
-  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 4))]
-  random_vertices = check_duplicates(mesh, random_vertices, 4)
-  volumes = [tetrahedon_volume(vertices) ** (1.0 / 3) for vertices in random_vertices]
-  return make_bins(volumes, 0, 0.6 * 0.55, 10, plot)
 
 
 def fill_mesh_info(mesh, classFolder, path, features=True):
@@ -278,7 +277,7 @@ def histograms_all_classes(data, column):
 def save_histogram(data, info, path):
   # the histogram of the data
 
-  #reset params
+  # reset params
   plt.rcParams.update(plt.rcParamsDefault)
 
   # drop NA values if they exist

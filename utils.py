@@ -18,6 +18,7 @@ sim_image_size = 256
 # refinedDB = "veelModels/refined_db"
 target_vertices = 1000
 target_faces = 2000
+nr_bins_hist = 20
 hist_amount = 10000
 hist_features = ['A3', 'D1', 'D2', 'D3', 'D4']
 scal_features = ["area", "axis-aligned_bounding_box_distance", "diameter", "compactness", "eccentricity"]
