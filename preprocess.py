@@ -1,7 +1,7 @@
 import numpy as np
+from numpy.lib.twodim_base import tri
 import trimesh
 import trimesh.grouping as grouping
-
 import main
 import subdivision
 import utils
@@ -65,7 +65,8 @@ def make_watertight(mesh):
 
 def normalize_mesh(mesh):
   # Fix normals
-  fix_normals(mesh)
+  if not mesh.is_winding_consistent:
+    fix_normals(mesh)
 
   # Center the mass of the mesh on (0,0,0)
   mesh.apply_translation(-mesh.centroid)
@@ -138,13 +139,13 @@ def process_all(show_subdivide=False, show_superdivide=False):
     print(f"preprocessing {path}")
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    if not mesh.is_watertight:
-      print("--------------------------------------------------")
-      mesh = make_watertight(mesh)
-      if not mesh.is_watertight:
-        print("Make watertight operation failed")
-      else:
-        print("Successfully made mesh watertight")
+    # if not mesh.is_watertight:
+    #   print("--------------------------------------------------")
+    #   mesh = make_watertight(mesh)
+    #   if not mesh.is_watertight:
+    #     print("Make watertight operation failed")
+    #   else:
+    #     print("Successfully made mesh watertight")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
@@ -192,3 +193,14 @@ def hist_distance_normalization():
   vector = np.array(distances.std(axis=1))
   with open(utils.emd_norm_vector_path, 'wb') as f:
     np.save(f, vector)
+
+def volume(mesh):
+  subvolume = 0
+  for index in range(len(mesh.faces)):
+    v1 = mesh.vertices[mesh.faces[index][0]] - mesh.centroid
+    v2 = mesh.vertices[mesh.faces[index][1]] - mesh.centroid
+    v3 = mesh.vertices[mesh.faces[index][2]] - mesh.centroid
+    subvolume += np.dot(np.cross(v1, v2), v3)
+  v = 1 / 6 * abs(subvolume)
+
+  return v

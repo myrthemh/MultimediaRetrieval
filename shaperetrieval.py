@@ -181,18 +181,3 @@ def scatter(x, colors):
   #   txts.append(txt)
 
   return f, ax, sc, txts
-# mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
-# distances = find_similar_meshes(mesh)
-# mesh.show()
-# for dist in distances:
-#   meshx = trimesh.load(dist[1], force='mesh')
-#   meshx.show()
-# save_map_neighbours(n_features= 55, metric="euclidean")
-# u = load_map_neighbours('testmodels.ann', 55, metric="euclidean")
-# blaa = u.get_nns_by_item(209, 5, include_distances=True)
-# paths = neighbours_to_paths(blaa, True)
-# meshes = [trimesh.load(path, force='mesh') for path in paths]
-
-# print(blaa[1])
-# main.compare(meshes)
-#ann_distances_to_excel()
