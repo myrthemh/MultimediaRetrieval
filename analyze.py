@@ -387,7 +387,7 @@ def plot_shape_properties(feature, shape, classes=1):
   plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
   plt.xlabel(feature)
   plt.ylabel(info["ylabel"])
-  plt.title(title + " of class" + classes[classes])
+  # plt.title(title + " of class" + classes[classes])
   plt.savefig(path + feature + shape[-8:-4] + '.png')
   # plt.show()
 
