@@ -177,7 +177,11 @@ def main():
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  save_figures()
+  shaperetrieval.save_similar_meshes()
+  shaperetrieval.ann_distances_to_excel()
+  save_figures('similar_meshes')
+  save_figures('ANN')  
+  write_html()
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
 

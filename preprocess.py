@@ -1,7 +1,7 @@
 import numpy as np
+from numpy.lib.twodim_base import tri
 import trimesh
 import trimesh.grouping as grouping
-
 import main
 import subdivision
 import utils
@@ -74,7 +74,8 @@ def make_watertight(mesh):
 
 def normalize_mesh(mesh):
   # Fix normals
-  fix_normals(mesh)
+  if not mesh.is_winding_consistent:
+    fix_normals(mesh)
 
   # Center the mass of the mesh on (0,0,0)
   mesh.apply_translation(-mesh.centroid)
@@ -148,13 +149,13 @@ def process_all(show_subdivide=False, show_superdivide=False):
     print(f"preprocessing {path}")
     mesh = trimesh.load(path)
     refined_path = utils.refined_path(path)
-    if not mesh.is_watertight:
-      print("--------------------------------------------------")
-      mesh = make_watertight(mesh)
-      if not mesh.is_watertight:
-        print("Make watertight operation failed")
-      else:
-        print("Successfully made mesh watertight")
+    # if not mesh.is_watertight:
+    #   print("--------------------------------------------------")
+    #   mesh = make_watertight(mesh)
+    #   if not mesh.is_watertight:
+    #     print("Make watertight operation failed")
+    #   else:
+    #     print("Successfully made mesh watertight")
     if row['subsampled_outlier']:
       mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
       if show_subdivide:
