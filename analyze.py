@@ -306,7 +306,6 @@ def save_histogram(data, info, path):
 
 
 def save_all_histograms(df, path, features=False):
-  md = meta_data(df)
   if not features:
     plotInfos = [
       {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
@@ -320,14 +319,13 @@ def save_all_histograms(df, path, features=False):
       {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
        "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
       {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
-       "xlim": 3,
-       "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
+       "xlim": 3, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
+       "skip_outliers": False},
       {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
-       "xlim": 3.2,
-       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
-       {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-       "xlim": 0,
-       "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
+       "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
+       "skip_outliers": False},
+      {"column": "area", "title": "Mesh surface area", "blocksize": 15,
+       "xlim": 0, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
     ]
   else:
     plotInfos = [
@@ -347,8 +345,7 @@ def save_all_histograms(df, path, features=False):
       {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15, "xlim": 3.2,
        "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
       {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-       "xlim": 0,
-       "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False},
+       "xlim": 0, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False},
       {"column": "compactness", "title": "Compactness", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Compactness", "skip_outliers": True},
       {"column": "eccentricity", "title": "Eccentricity", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
@@ -366,9 +363,6 @@ def save_all_histograms(df, path, features=False):
   for info in plotInfos:
     save_histogram(df.loc[:, info['column']].values, info, path)
 
-
-# mesh = trimesh.load('testModels/refined_db/9/m905/m905.off', force='mesh')
-# D3(mesh, amount=utils.hist_amount)
 
 def plot_shape_properties(feature, shape, classes=1):
   path = utils.refinedImagePath
@@ -393,9 +387,9 @@ def plot_shape_properties(feature, shape, classes=1):
   plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
   plt.xlabel(feature)
   plt.ylabel(info["ylabel"])
-  # plt.title(title + " of class" + classes[classes])
+  plt.title(title + " of class" + classes[classes])
   plt.savefig(path + feature + shape[-8:-4] + '.png')
-  plt.show()
+  # plt.show()
 
 
 def visualize_difference_features():
