@@ -22,6 +22,17 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
+#TODO
+# def fix_wind_normal(mesh):
+
+#   # face = [v1, v2, v3]
+#   # face_adjency = (f1, f2)
+#   for body in mesh.split():
+#     faces_visited = []
+#     faces_todo = body.faces
+#     for face in body.faces:
+#
+
 
 def make_watertight(mesh):
   edges_sorted = np.sort(mesh.edges, axis=1)
@@ -58,8 +69,6 @@ def make_watertight(mesh):
       newfaces = np.append(newfaces, [[edge[0], edge[1], len(newvertices) - 1]], axis=0)
   newmesh = trimesh.Trimesh(vertices=newvertices, faces=newfaces, process=True)
 
-  # Fix normals
-  fix_normals(newmesh)
   return newmesh
 
 
@@ -81,7 +90,8 @@ def normalize_mesh(mesh):
 def fix_normals(mesh):
   # check if all edge pairs are unique, if not, fix normals
   if len(np.unique(mesh.edges, axis=0) != len(mesh.edges)):
-    trimesh.Trimesh.fix_normals(mesh, multibody=True) if mesh.body_count > 1 else trimesh.Trimesh.fix_normals(mesh)
+    print("fixing normals")
+    trimesh.Trimesh.fix_normals(mesh)
 
 
 def eigen_values_vectors(mesh):
@@ -194,13 +204,5 @@ def hist_distance_normalization():
   with open(utils.emd_norm_vector_path, 'wb') as f:
     np.save(f, vector)
 
-def volume(mesh):
-  subvolume = 0
-  for index in range(len(mesh.faces)):
-    v1 = mesh.vertices[mesh.faces[index][0]] - mesh.centroid
-    v2 = mesh.vertices[mesh.faces[index][1]] - mesh.centroid
-    v3 = mesh.vertices[mesh.faces[index][2]] - mesh.centroid
-    subvolume += np.dot(np.cross(v1, v2), v3)
-  v = 1 / 6 * abs(subvolume)
-
-  return v
+# mesh = trimesh.load('testModels/refined_db/0/m0/m0.off', force='mesh')
+# fix_wind_normal(mesh)

@@ -322,7 +322,10 @@ def save_all_histograms(df, path, features=False):
        "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
       {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50,
        "xlim": 3.2,
-       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False}
+       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
+       {"column": "area", "title": "Mesh surface area", "blocksize": 15,
+       "xlim": 0,
+       "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
     ]
   else:
     plotInfos = [
@@ -341,11 +344,13 @@ def save_all_histograms(df, path, features=False):
        "skip_outliers": False},
       {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50, "xlim": 3.2,
        "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
+      {"column": "area", "title": "Mesh surface area", "blocksize": 15,
+       "xlim": 0,
+       "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False},
       {"column": "compactness", "title": "Compactness", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Compactness", "skip_outliers": True},
       {"column": "eccentricity", "title": "Eccentricity", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Eccentricity", "skip_outliers": True}
-
     ]
 
   # Area_faces plot:

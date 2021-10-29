@@ -27,7 +27,6 @@ import matplotlib.pyplot as plt
 
 def save_map_neighbours(n_features, metric, n_trees=1000):
   # Run once, this saves a mapping file
-
   # metric can be one of "angular", "euclidean", "manhattan", "hamming", or "dot"
   f = n_features
   t = AnnoyIndex(f, metric)
@@ -53,7 +52,7 @@ def ann_distances_to_excel():
   df = utils.read_excel(False)
   save_map_neighbours(55, "euclidean", n_trees=10000)
   u = load_map_neighbours("testmodels.ann", 55, 'euclidean')
-  df['ANN'] = ""
+  df["ANN"] = ""
   for index, row in df.iterrows():
     tuple_list = []
     idx, distance = u.get_nns_by_item(index, 6, include_distances=True)
