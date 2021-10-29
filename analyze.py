@@ -278,6 +278,9 @@ def histograms_all_classes(data, column):
 def save_histogram(data, info, path):
   # the histogram of the data
 
+  #reset params
+  plt.rcParams.update(plt.rcParamsDefault)
+
   # drop NA values if they exist
   data = data[np.isfinite(data)]
   if info['skip_outliers']:
@@ -309,18 +312,18 @@ def save_all_histograms(df, path, features=False):
     plotInfos = [
       {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
        "xlabel": "Class nr", "skip_outliers": False},
-      {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of faces", "skip_outliers": True},
-      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of vertices", "skip_outliers": True},
-      {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "volume", "title": "Bounding box volume", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Bounding box volume", "skip_outliers": False},
       {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
        "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
+      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
        "xlim": 3,
        "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box", "skip_outliers": False},
-      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50,
+      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
        "xlim": 3.2,
        "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False}
     ]
@@ -328,30 +331,31 @@ def save_all_histograms(df, path, features=False):
     plotInfos = [
       {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
        "xlabel": "Class nr", "skip_outliers": False},
-      {"column": "nrfaces", "title": "Face distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of faces", "skip_outliers": True},
-      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of vertices", "skip_outliers": True},
-      {"column": "volume", "title": "Bounding box volume", "blocksize": 100, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "volume", "title": "Bounding box volume", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Bounding box volume", "skip_outliers": False},
-      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
+      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 15, "xlim": 1,
        "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 50,
+      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
        "xlim": 3, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
        "skip_outliers": False},
-      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 50, "xlim": 3.2,
+      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15, "xlim": 3.2,
        "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
-      {"column": "compactness", "title": "Compactness", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "compactness", "title": "Compactness", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Compactness", "skip_outliers": True},
-      {"column": "eccentricity", "title": "Eccentricity", "blocksize": 50, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Eccentricity", "skip_outliers": True}
-
+      {"column": "eccentricity", "title": "Eccentricity", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Eccentricity", "skip_outliers": True},
+      {"column": "diameter", "title": "Diameter", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
+       "xlabel": "Diameter", "skip_outliers": False}
     ]
 
   # Area_faces plot:
   all_areas = [values for values in df.loc[:, "area_faces"].values]
   all_areas = np.array([value for sublist in all_areas for value in sublist])
-  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 50, "xlim": 0.0006, "ylabel": "#faces",
+  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 25, "xlim": 0.0006, "ylabel": "#faces",
               "xlabel": "face area", "skip_outliers": True}
   save_histogram(all_areas, plotinfo, path)
   for info in plotInfos:
