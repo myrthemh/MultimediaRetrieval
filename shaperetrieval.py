@@ -6,6 +6,7 @@ from sklearn.manifold import TSNE
 from numpy.linalg import norm
 from scipy.spatial import distance
 from scipy.stats import wasserstein_distance
+import pandas as pd
 import plotly.express as px
 
 
@@ -142,39 +143,65 @@ def tsne():
   df = utils.read_excel(original=False)
   X = np.vstack(np.concatenate(   ( np.asarray(row[utils.scal_features_norm]), np.concatenate(np.asarray(row[utils.hist_features_norm])).ravel() )) for index, row in df.iterrows())
 
-  digits_proj = TSNE().fit_transform(X)
-
+  perplexity = 20
+  n_iter = 3000
+  digits_proj = TSNE(perplexity=perplexity, n_iter=n_iter).fit_transform(X)
   y = df["class"]
-  scatter(digits_proj, y)
+  images = df["path"].str.split("/").str[-1]
+  eccentricity = df["eccentricity"]
+  compactness = df["compactness"]
+  diameter = df["diameter"]
+
+
+  scatter(digits_proj, y, perplexity, n_iter, images, eccentricity, compactness, diameter)
   plt.savefig(utils.refinedImagePath + 'tsne-generated.png', dpi=120)
 
 
-def scatter(x, colors):
+def scatter(x, colors, perplexity, n_iter, images, eccentricity, compactness, diameter):
   # We choose a color palette with seaborn.
-  palette = np.array(sns.color_palette("hls", 19))
 
   # We create a scatter plot.
   f = plt.figure(figsize=(8, 8))
   ax = plt.subplot(aspect='equal')
-  sc = ax.scatter(x[:, 0], x[:, 1], lw=0, s=40, c=palette[colors.astype(np.int)])
+  test1 = x[:, 0]
+  test2 = x[:, 1]
+  classes = []
+  for color in colors:
+    classes.append(analyze.classes[int(color)])
+
+  data = pd.DataFrame({"x": test1, "y": test2, "color": classes, "image": images,
+                       "eccentricity": eccentricity, "compactness": compactness, "diameter": diameter })
+
+  sc = px.scatter(data, x="x", y="y", color="color", color_discrete_sequence= px.colors.qualitative.Dark24,
+                  title="Visual map",
+                  labels={
+                    "x": "Reduced Feature 1",
+                    "y": "Reduced Feature 2",
+                    "color": "Classes"
+                  },
+                  hover_data=["eccentricity", "compactness", "diameter"],
+                  hover_name= "image"
+
+                  )
+
+  sc.update_layout(
+    legend=dict(
+        x=0,
+        y=1,
+        traceorder="reversed",
+        title_font_family="Times New Roman",
+        font=dict(
+            family="Courier",
+            size=12,
+            color="black"
+        ),
+        bgcolor="LightSteelBlue",
+        bordercolor="Black",
+        borderwidth=2
+    )
+)
 
 
-  plt.xlim(-25, 25)
-  plt.ylim(-25, 25)
-  ax.axis('off')
-  ax.axis('tight')
+  sc.show()
 
-
-
-  # We add the labels for each digit.
-  txts = []
-  # for i in range(10):
-  #   # Position of each label.
-  #   xtext, ytext = np.median(x[colors == i, :], axis=0)
-  #   txt = ax.text(xtext, ytext, str(i), fontsize=24)
-  #   txt.set_path_effects([
-  #     PathEffects.Stroke(linewidth=5, foreground="w"),
-  #     PathEffects.Normal()])
-  #   txts.append(txt)
-
-  return f, ax, sc, txts
+  return f, ax, sc
