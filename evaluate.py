@@ -1,9 +1,65 @@
 from matplotlib.pyplot import yscale
 from numpy.lib.shape_base import dsplit
+from matplotlib.ticker import PercentFormatter
 import utils
 from sklearn.metrics import roc_curve
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+def evaluate_score(DB, metric):
+  metric_performance_class = list(np.repeat(0, len(utils.classes)))
+  metric_performance_avg = 0
+
+  for query_result, class_value in zip(DB["similar_meshes"], DB["class"]):
+    if metric == "ktier":
+      score = ktier(query_result, class_value)
+
+    if metric == "roc":
+      score = roc(query_result, class_value)
+
+    metric_performance_class[int(class_value)] += score
+    metric_performance_avg += score
+
+  for c in range(len(utils.classes)):
+    metric_performance_class[c] /= len(DB[DB["class"] == c])
+
+  metric_performance_avg = metric_performance_avg /len(DB)
+  return metric_performance_class, metric_performance_avg
+
+def evaluate_ktier(DB):
+  # info = {"xlabel": }
+  for c, value in enumerate(utils.classes):
+    results = []
+    for query_result in DB.loc[DB["class"] == c, "similar_meshes" ]:
+      results.append(ktier(query_result, c))
+
+    plt.hist(results,  weights=np.ones(len(results)) / len(results))
+
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.xlim(1,5)
+    plt.xlabel("Tier")
+    plt.ylabel("Percentage returned in tier")
+    plt.title("Percentage of total {} correctly returned in first five tiers".format(str(utils.classes[int(c)])))
+
+    path = utils.refinedImagePath
+    utils.ensure_dir(path)
+    plt.savefig(path + "tierOfClass" + str(c) + '.png')
+    plt.show()
+
+
+
+def ktier(query_result, class_value):
+  tier = 0
+  for q in query_result:
+    if q[2] == class_value:
+      tier += 1
+    else:
+      return tier
+  return tier
+
+
+
 def roc():
   df = utils.read_excel(original=False)
   for class_number in range(len(utils.classes)):
@@ -30,5 +86,5 @@ def roc():
     plt.legend(loc="lower right")
     plt.show()
     print(lw)
-roc()
+#roc()
 

@@ -14,6 +14,7 @@ import numpy as np
 import io
 import matplotlib.pyplot as plt
 import shaperetrieval
+import evaluate
 from PIL import Image
 
 trimesh.util.attach_to_log(level=logging.INFO)
