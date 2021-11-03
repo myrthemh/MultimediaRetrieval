@@ -9,33 +9,12 @@ import trimesh
 from matplotlib.ticker import PercentFormatter
 from trimesh import convex
 
-import preprocess
 import utils
 
 trimesh.util.attach_to_log()
 logging.getLogger('matplotlib.font_manager').disabled = True
 
-classes = [
-  "Insect",  # 0
-  "Farm animal",  # 1
-  "People",  # 2
-  "Face",  # 3
-  "Building",  # 4
-  "Container",  # 5
-  "LampOrWatch",  # 6
-  "Stabweapon",  # 7
-  "Chair",  # 8
-  "Table",  # 9
-  "Flowerpot",  # 10
-  "Tool",  # 11
-  "Airplane",  # 12
-  "Aircraft",  # 13
-  "Spacecraft",  # 14
-  "Car",  # 15
-  "Chess piece",  # 16
-  "DoorOrChest",  # 17
-  "Satellite"  # 18
-]
+
 
 
 def volume(mesh):
@@ -71,7 +50,7 @@ def diameter(mesh):
 
 
 def eccentricity(mesh):
-  values, _ = preprocess.eigen_values_vectors(mesh)
+  values, _ = utils.eigen_values_vectors(mesh)
   ecc = values[np.argmin(values)] / values[np.argmax(values)]
   return ecc
 
@@ -206,7 +185,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
                  "eccentricity": eccentricity(mesh),
-                 "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "eigen_x_angle": utils.eigen_angle(mesh),
                  "diameter": diameter(mesh),
                  "compactness": compactness(mesh),
                  "A3": A3(mesh),
@@ -223,7 +202,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": bounding_box_volume(mesh),
                  "area": mesh.area,
-                 "eigen_x_angle": preprocess.eigen_angle(mesh),
+                 "eigen_x_angle": utils.eigen_angle(mesh),
                  "area_faces": mesh.area_faces,
                  # "eccentricity": eccentricity(mesh),
                  # "compactness": compactness(mesh)
@@ -268,7 +247,7 @@ def histograms_all_classes(data, column):
       axs[c % 6, int(c / 6)].plot(i)
       # axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
     # axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
-    axs[c % 6, int(c / 6)].set_title(str(classes[c + 1]))
+    axs[c % 6, int(c / 6)].set_title(str(utils.classes[c + 1]))
 
   fig.tight_layout()
   fig.savefig(utils.refinedImagePath + "all_classes" + column + '.png')

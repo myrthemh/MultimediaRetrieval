@@ -1,3 +1,5 @@
+from math import sin
+from os import path
 import numpy as np
 import pandas as pd
 import trimesh
@@ -99,31 +101,20 @@ def save_similar_meshes():
   df['similar_meshes'] = column
   utils.save_excel(df, original=False)
 
-
 def find_similar_meshes(mesh_row):
-  # # Analyze the mesh
-  # mesh = trimesh.load(row['path'], force='mesh')
-  # mesh_info = analyze.fill_mesh_info(mesh, -1, "path", features=True)
-  df = utils.read_excel(original=False)
-
-  # # Get feature vector:
-  # single_vector = np.asarray([mesh_info[column] for column in utils.scal_features])
-  # histograms = np.asarray([mesh_info[column] for column in utils.hist_features])
-  # histogram_vector = [preprocess.sum_divide(x) for x in histograms]
-
-  # # Standardize the scalar features:
-  # with open(utils.norm_vector_path, 'rb') as f:
-  #   vectors = np.load(f)
-  #   single_vector -= vectors[0]
-  #   single_vector /= vectors[1]
+  #Find similar meshes based on an existing row in the shape database
   single_vector = np.asarray(mesh_row[utils.scal_features_norm])
   histogram_vector = np.asarray(mesh_row[utils.hist_features_norm])
+  return get_distances(single_vector, histogram_vector, mesh_row['path'])
+  
+def get_distances(single_vector, histogram_vector, path):
+  df = utils.read_excel(original=False)
   distances = []
   # Compare with all meshes
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
     for index, row in df.iterrows():
-      if mesh_row['path'][-11:] == row['path'][-11:]:
+      if path[-11:] == row['path'][-11:]:
         continue
       other_single_vector = np.asarray(row[utils.scal_features_norm])
       other_histogram_vector = np.asarray(row[utils.hist_features_norm])
@@ -134,9 +125,28 @@ def find_similar_meshes(mesh_row):
       # Standardize histogram distances:
       hist_distances /= emd_vector
       distance = scalar_distance + sum(hist_distances)
-      distances.append((distance, index))
+      distances.append((distance, index, row['class']))
   distances.sort(key=sortmethod)
   return distances
+
+def query(meshpath):
+  mesh = trimesh.load(meshpath, force='mesh')
+  row  = analyze.fill_mesh_info(mesh, 20, '', features=False)
+  #Proprocess the mesh:
+  preprocessed_mesh = preprocess.preprocess_single_mesh(mesh, row)
+  features = analyze.fill_mesh_info(preprocessed_mesh, '-1', '', features=True)
+
+  #Get feature vectores
+  single_vector = np.asarray([features[x] for x in utils.scal_features])
+  histogram_vector = np.asarray([features[x] for x in utils.hist_features])
+
+  #Normalize the vectores
+  with open(utils.norm_vector_path, 'rb') as f:
+    vector = np.load(f)
+    single_vector_norm = (single_vector - vector[0]) / vector[1]
+    histogram_vector_norm = [x / sum(x) for x in histogram_vector]
+  results = get_distances(single_vector_norm, histogram_vector_norm, meshpath)
+  return results, preprocessed_mesh
 
 def tsne():
 
@@ -205,3 +215,4 @@ def scatter(x, colors, perplexity, n_iter, images, eccentricity, compactness, di
   sc.show()
 
   return f, ax, sc
+# query('testModels/refined_db/0/m0/m0.off')

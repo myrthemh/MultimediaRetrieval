@@ -93,29 +93,8 @@ def fix_normals(mesh):
     print("fixing normals")
     trimesh.Trimesh.fix_normals(mesh)
 
-
-def eigen_values_vectors(mesh):
-  covm = np.cov(mesh.vertices.T)
-  values, vectors = np.linalg.eig(covm)
-  # values[i] corresponds to vector[:,i}
-  return values, vectors
-
-
-def eigen_angle(mesh):
-  x, y, z = eigen_xyz(mesh)
-  return min(utils.angle(x, [1, 0, 0]), utils.angle(x, [-1, 0, 0]))
-
-
-def eigen_xyz(mesh):
-  values, vectors = eigen_values_vectors(mesh)
-  eig_vector_x = vectors[:, np.argmax(values)]  # largest
-  eig_vector_y = vectors[:, np.argsort(values)[1]]  # second largest
-  eig_vector_z = np.cross(eig_vector_x, eig_vector_y)
-  return eig_vector_x, eig_vector_y, eig_vector_z
-
-
 def translate_eigen(mesh):
-  eig_vector_x, eig_vector_y, eig_vector_z = eigen_xyz(mesh)
+  eig_vector_x, eig_vector_y, eig_vector_z = utils.eigen_xyz(mesh)
   for vertex in mesh.vertices:
     vc = np.copy(vertex)
     vertex[0] = np.dot(vc, eig_vector_x)
@@ -137,19 +116,8 @@ def normalize_histogram_features(features):
 def sum_divide(x):
   return x / sum(x)
 
-
-def process_all(show_subdivide=False, show_superdivide=False):
-  # Perform all preprocessing steps on all meshes:
-  df = utils.read_excel(original=True)
-  i = 0
-  y = 0
-  z = 0
-  for index, row in df.iterrows():
-    path = row['path']
-    print(f"preprocessing {path}")
-    mesh = trimesh.load(path)
-    refined_path = utils.refined_path(path)
-    # if not mesh.is_watertight:
+def preprocess_single_mesh(mesh, row, show_subdivide=False, show_superdivide=False):
+  # if not mesh.is_watertight:
     #   print("--------------------------------------------------")
     #   mesh = make_watertight(mesh)
     #   if not mesh.is_watertight:
@@ -167,6 +135,20 @@ def process_all(show_subdivide=False, show_superdivide=False):
     else:
       mesh2 = mesh
     mesh2 = normalize_mesh(mesh2)
+    return mesh2
+
+def process_all(show_subdivide=False, show_superdivide=False):
+  # Perform all preprocessing steps on all meshes:
+  df = utils.read_excel(original=True)
+  i = 0
+  y = 0
+  z = 0
+  for index, row in df.iterrows():
+    path = row['path']
+    print(f"preprocessing {path}")
+    mesh = trimesh.load(path)
+    refined_path = utils.refined_path(path)
+    mesh2 = preprocess_single_mesh(mesh, row, show_subdivide=show_subdivide, show_superdivide=show_superdivide)
     save_mesh(mesh2, refined_path)
     if not mesh.is_watertight:
       i += 1

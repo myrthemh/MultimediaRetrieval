@@ -58,12 +58,16 @@ def browseFiles():
 def show_similar():
   path = browseFiles()
   mesh = main.load_from_file(path)
-  colorvisuals = trimesh.visual.ColorVisuals(mesh, [255, 0, 0, 200])
-  mesh.visual = colorvisuals
-  distances = shaperetrieval.find_similar_meshes(path)
-  paths = [distance[1] for distance in distances[:5]]
+  
+  distances, processed_mesh = shaperetrieval.query(path)
+  colorvisuals = trimesh.visual.ColorVisuals(processed_mesh, [255, 0, 0, 200])
+  processed_mesh.visual = colorvisuals
+  df = utils.read_excel(original=False)
+  indices = [distance[1] for distance in distances[:5]]
+  rows = df.iloc[indices]
+  paths = list(rows['path'])
   distances = [distance[0] for distance in distances[:5]] # todo show this in window
-  meshes = [mesh] + (shaperetrieval.paths_to_meshes(paths))
+  meshes = [processed_mesh] + (shaperetrieval.paths_to_meshes(paths))
   main.compare(meshes, setcolor=False)
 
 def get_image_paths(shape_class):
