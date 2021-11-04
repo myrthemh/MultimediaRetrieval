@@ -119,7 +119,7 @@ def save_figures(column):
   for index, row in df.iterrows():
     if index % 10 == 0:
       print('Saving images', index, '/', len(df))
-    tuples = row[column]
+    tuples = row[column][:utils.query_size]
     mesh = trimesh.load(row['path'], force='mesh')
     save_mesh_image([mesh], save_path + str(int(row['class'])) + '/' + str(index) + '/0' )
     for i, tuple in enumerate(tuples):

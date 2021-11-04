@@ -96,7 +96,7 @@ def save_similar_meshes():
   for index, row in df.iterrows():
     if index % 10 == 0:
       print("Calculating similarities", index, '/', len(df))
-    distances = find_similar_meshes(row)[:5]
+    distances = find_similar_meshes(row)
     column.append(distances)
   df['similar_meshes'] = column
   utils.save_excel(df, original=False)
