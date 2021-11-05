@@ -96,16 +96,16 @@ def roc_plots():
       # Plot
       lw = 2
       plt.plot(
-        specificities,
-        sensitivities,
-        lw=lw,
-        label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
+          sensitivities,
+          specificities,
+          lw=lw,
+          label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
       )
       plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
       plt.xlim([0.0, 1.01])
       plt.ylim([0.0, 1.01])
-      plt.xlabel("Specificity")
-      plt.ylabel("Sensitivity")
+      plt.xlabel("Sensitivity")
+      plt.ylabel("Specificity")
       plt.legend(loc="lower left")
     if column == "similar_meshes":
       save_path = "our_roc"
@@ -125,16 +125,16 @@ def roc_plots():
     all_correct_classes = np.concatenate(np.asarray(data))
     sensitivities, specificities = roc(all_correct_classes)
     plt.plot(
-      specificities,
       sensitivities,
+      specificities,
       lw=lw,
       label=f"{['Ours', 'ANN'][i]}, Area = {round(auc(sensitivities, specificities), 3)}",
     )
     plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
     plt.xlim([0.0, 1.01])
     plt.ylim([0.0, 1.01])
-    plt.xlabel("Specificity")
-    plt.ylabel("Sensitivity")
+    plt.xlabel("Sensitivity")
+    plt.ylabel("Specificity")
     plt.legend(loc="lower left")
     plt.title("ROC curve averaged over all queries over all classes")
     path = F"{utils.eval_images_path}{save_path}_avgallclasses.png"
@@ -177,6 +177,6 @@ def boxplot_queries(show=False):
   if show:
     plt.show()
 
-boxplot_queries()
+# boxplot_queries()
 
 # roc()

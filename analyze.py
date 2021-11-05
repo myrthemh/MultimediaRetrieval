@@ -275,9 +275,12 @@ def save_histogram(data, info, path):
     bins = np.arange(0, info["xlim"], info["xlim"] / info["blocksize"])
   else:
     bins = info["blocksize"]
-  plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
   if 'column' in info and info['column'] == 'class':
+    bins = bins - 0.5
     plt.xticks(rotation=90)
+    plt.subplots_adjust(bottom=0.30)
+    plt.xticks(range(len(bins)))
+  plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])

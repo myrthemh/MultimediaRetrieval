@@ -71,7 +71,7 @@ def show_similar():
   main.compare(meshes, setcolor=False)
 
 def get_image_paths(shape_class):
-  classpath = utils.sim_images_path + str(shape_class) + '/'
+  classpath = utils.sim_images_path + shape_class + '/'
   paths = []
   for classFolder in os.listdir(classpath):
     images = []
@@ -80,7 +80,7 @@ def get_image_paths(shape_class):
     paths.append(images)
   return paths  
 
-x = get_image_paths(18)
+#x = get_image_paths(18)
 # Create the root window
 window = Tk()
 
