@@ -113,5 +113,5 @@ def roc(allclasses=False):
     path = F"{utils.eval_images_path}roc/allclasses.png"
     utils.ensure_dir(path)
     plt.savefig(path, bbox_inches='tight')
-roc()
+# roc()
 
