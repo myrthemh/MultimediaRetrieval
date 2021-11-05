@@ -31,7 +31,7 @@ def evaluate_ktier(DB):
   # info = {"xlabel": }
   for c, value in enumerate(utils.classes):
     results = []
-    for query_result in DB.loc[DB["class"] == c, "similar_meshes" ]:
+    for query_result in DB.loc[DB["class"] == value, "similar_meshes" ]:
       results.append(ktier(query_result, c))
 
     plt.hist(results,  weights=np.ones(len(results)) / len(results))
@@ -79,10 +79,12 @@ def roc_plots():
     plt.clf()
     plt.figure(figsize=(15, 15), dpi=80)
     all_correct_classes = []
-    for class_number in range(len(utils.classes)):
-      class_rows = df.loc[df['class'] == class_number]
+    for shape_class in utils.classes:
+      class_rows = df.loc[df['class'] == shape_class]
+      if len(class_rows) == 0:
+        continue
       distances  = class_rows[column]
-      correct_classes = np.array(list(distances.map(lambda shape: [1 if int(x[2]) == class_number else 0 for x in shape])))
+      correct_classes = np.array(list(distances.map(lambda shape: [1 if x[2] == shape_class else 0 for x in shape])))
       all_correct_classes.append(correct_classes)
       sensitivities, specificities = roc(correct_classes)
       #Plot
@@ -91,7 +93,7 @@ def roc_plots():
           specificities,
           sensitivities,
           lw=lw,
-          label=f"Class: {utils.classes[class_number]}, Area = {round(auc(sensitivities, specificities), 3)}",
+          label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
       )
       plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
       plt.xlim([0.0, 1.01])

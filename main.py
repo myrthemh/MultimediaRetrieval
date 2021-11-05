@@ -122,11 +122,11 @@ def save_figures(column):
       print('Saving images', index, '/', len(df))
     tuples = row[column][:utils.query_size]
     mesh = trimesh.load(row['path'], force='mesh')
-    save_mesh_image([mesh], save_path + str(int(row['class'])) + '/' + str(index) + '/0')
+    save_mesh_image([mesh], save_path + row['class'] + '/' + str(index) + '/0')
     for i, tuple in enumerate(tuples):
       mesh_row = df.iloc[tuple[1]]
       mesh = trimesh.load(mesh_row['path'], force='mesh')
-      save_mesh_image([mesh], save_path + str(int(row['class'])) + '/' + str(index) + '/' + str(i + 1),
+      save_mesh_image([mesh], save_path + row['class'] + '/' + str(index) + '/' + str(i + 1),
                       distance=round(tuple[0], 4))
 
 
@@ -141,9 +141,9 @@ def write_html():
       html_str += "<h1> ANN: </h1>"
     else:
       html_str += "<h1> Our metric: </h1>"
-    for c in range(19):
+    for c in range(15):
       html_str += """<details>
-        <summary style='font-size: 30px'>""" + str(c) + """</summary>"""
+        <summary style='font-size: 30px'>""" + str(utils.classes[c]) + """</summary>"""
       for index, path in enumerate(utils.image_paths(c, ann=ann)):
         if index % 6 == 0 and index != 0:
           html_str += "<br> <hr>"
@@ -166,28 +166,30 @@ def main():
   # step_1()
   # compare_all()
   start_time = time.monotonic()
-  print("Analyze 1")
-  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
-  print("Preprocessing")
-  preprocess.process_all()
-  print("Analyze 2")
-  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
-  print("normalize")
-  preprocess.normalize_histogram_features(utils.hist_features)
-  preprocess.scalar_normalization(utils.scal_features)
-  preprocess.hist_distance_normalization()
-  print("Read Excel")
-  originalDF = utils.read_excel(original=True)
-  refinedDF = utils.read_excel(original=False)
-  print("Save histograms")
-  analyze.save_all_histograms(originalDF, utils.imagePath)
-  analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  analyze.visualize_difference_features()
-  shaperetrieval.save_similar_meshes()
-  shaperetrieval.ann_distances_to_excel()
-  save_figures('similar_meshes')
-  save_figures('ANN')
+  # print("Analyze 1")
+  # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
+  # print("Preprocessing")
+  # preprocess.process_all()
+  # print("Analyze 2")
+  # analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
+  # print("normalize")
+  # preprocess.normalize_histogram_features(utils.hist_features)
+  # preprocess.scalar_normalization(utils.scal_features)
+  # preprocess.hist_distance_normalization()
+  # print("Read Excel")
+  # originalDF = utils.read_excel(original=True)
+  # refinedDF = utils.read_excel(original=False)
+  # print("Save histograms")
+  # analyze.save_all_histograms(originalDF, utils.imagePath)
+  # analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  # analyze.visualize_difference_features()
+  # shaperetrieval.save_similar_meshes()
+  # shaperetrieval.ann_distances_to_excel()
+  # save_figures('similar_meshes')
+  # save_figures('ANN')
   write_html()
+  evaluate.roc_plots()
+  shaperetrieval.tsne()
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
 

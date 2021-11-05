@@ -158,17 +158,16 @@ def tsne():
   perplexity = 20
   n_iter = 3000
   digits_proj = TSNE(perplexity=perplexity, n_iter=n_iter).fit_transform(X)
-  y = df["class"]
   images = df["path"].str.split("/").str[-1]
   eccentricity = df["eccentricity"]
   compactness = df["compactness"]
   diameter = df["diameter"]
 
-  scatter(digits_proj, y, perplexity, n_iter, images, eccentricity, compactness, diameter)
+  scatter(digits_proj, df['class'], perplexity, n_iter, images, eccentricity, compactness, diameter)
   plt.savefig(utils.refinedImagePath + 'tsne-generated.png', dpi=120)
 
 
-def scatter(x, colors, perplexity, n_iter, images, eccentricity, compactness, diameter):
+def scatter(x, classes, perplexity, n_iter, images, eccentricity, compactness, diameter):
   # We choose a color palette with seaborn.
 
   # We create a scatter plot.
@@ -176,9 +175,6 @@ def scatter(x, colors, perplexity, n_iter, images, eccentricity, compactness, di
   ax = plt.subplot(aspect='equal')
   test1 = x[:, 0]
   test2 = x[:, 1]
-  classes = []
-  for color in colors:
-    classes.append(utils.classes[int(color)])
 
   data = pd.DataFrame({"x": test1, "y": test2, "color": classes, "image": images,
                        "eccentricity": eccentricity, "compactness": compactness, "diameter": diameter})
@@ -215,5 +211,3 @@ def scatter(x, colors, perplexity, n_iter, images, eccentricity, compactness, di
   sc.show()
 
   return f, ax, sc
-# query('testModels/refined_db/0/m0/m0.off')
-tsne()
