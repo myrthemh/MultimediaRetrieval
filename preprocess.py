@@ -22,17 +22,6 @@ def save_mesh(mesh, path):
   utils.ensure_dir(path)
   trimesh.exchange.export.export_mesh(mesh, path, file_type="off")
 
-#TODO
-# def fix_wind_normal(mesh):
-
-#   # face = [v1, v2, v3]
-#   # face_adjency = (f1, f2)
-#   for body in mesh.split():
-#     faces_visited = []
-#     faces_todo = body.faces
-#     for face in body.faces:
-#
-
 
 def make_watertight(mesh):
   edges_sorted = np.sort(mesh.edges, axis=1)
