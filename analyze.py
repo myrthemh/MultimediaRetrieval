@@ -70,16 +70,20 @@ def filter_database(dbPath, excelPath, picklePath, features=True):
   df = pd.DataFrame()
   utils.ensure_dir(excelPath)
   utils.ensure_dir(picklePath)
+  index_to_class, class_sizes = utils.class_dictionaries()
   # iterate over all models:
   for classFolder in os.listdir(db):
     for modelFolder in os.listdir(db + '/' + classFolder):
       for filename in os.listdir(db + '/' + classFolder + '/' + modelFolder):
         if filename.endswith('.off'):
           # Find the relevant info for the mesh:
-          path = db + '/' + classFolder + '/' + modelFolder + '/' + filename
-          mesh = trimesh.load(path, force='mesh')
-          mesh_info = fill_mesh_info(mesh, classFolder, path, features)
-          df = df.append(mesh_info, ignore_index=True)
+          file_number = int(filename[1:-4])
+          shape_class = index_to_class[file_number]
+          if shape_class in class_sizes:
+            path = db + '/' + classFolder + '/' + modelFolder + '/' + filename
+            mesh = trimesh.load(path, force='mesh')
+            mesh_info = fill_mesh_info(mesh, shape_class, path, features)
+            df = df.append(mesh_info, ignore_index=True)
   df.to_excel(excelPath)
   df.to_pickle(picklePath)
 
@@ -173,11 +177,11 @@ def tetrahedon_volume(vertices):
   return volume
 
 
-def fill_mesh_info(mesh, classFolder, path, features=True):
+def fill_mesh_info(mesh, shape_class, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
   print(f"analyzing model {path}")
   if features:
-    mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+    mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
                  "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
@@ -195,7 +199,7 @@ def fill_mesh_info(mesh, classFolder, path, features=True):
                  "D4": D4(mesh),
                  "area_faces": mesh.area_faces}
   else:
-    mesh_info = {"class": int(classFolder), "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
+    mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
                  "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
@@ -241,13 +245,14 @@ def meta_data(dataframe):
 
 
 def histograms_all_classes(data, column):
-  fig, axs = plt.subplots(6, 3, figsize=(20, 15))
-  for c in range(0, 18):
-    for i in data.loc[data["class"] == c + 1, column]:
-      axs[c % 6, int(c / 6)].plot(i)
+  fig, axs = plt.subplots(5, 3, figsize=(20, 15))
+  index_to_class, class_sizes = utils.class_dictionaries()
+  for index, c in enumerate(class_sizes.keys()):
+    for i in data.loc[data["class"] == c, column]:
+      axs[index % 5, int(c / 5)].plot(i)
       # axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
     # axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
-    axs[c % 6, int(c / 6)].set_title(str(utils.classes[c + 1]))
+    axs[index % 5, int(index / 5)].set_title(c)
 
   fig.tight_layout()
   fig.savefig(utils.refinedImagePath + "all_classes" + column + '.png')
@@ -260,7 +265,6 @@ def save_histogram(data, info, path):
   plt.rcParams.update(plt.rcParamsDefault)
 
   # drop NA values if they exist
-  data = data[np.isfinite(data)]
   if info['skip_outliers']:
     # Remove all data below the 5th percentile and 95th percentile
     p5 = np.percentile(data, 5)
@@ -271,6 +275,11 @@ def save_histogram(data, info, path):
     bins = np.arange(0, info["xlim"], info["xlim"] / info["blocksize"])
   else:
     bins = info["blocksize"]
+  if 'column' in info and info['column'] == 'class':
+    bins = bins - 0.5
+    plt.xticks(rotation=90)
+    plt.subplots_adjust(bottom=0.30)
+    plt.xticks(range(len(bins)))
   plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
@@ -287,8 +296,8 @@ def save_histogram(data, info, path):
 def save_all_histograms(df, path, features=False):
   if not features:
     plotInfos = [
-      {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
-       "xlabel": "Class nr", "skip_outliers": False},
+      {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylabel": "#Meshes",
+       "xlabel": "Class name", "skip_outliers": False},
       {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of faces", "skip_outliers": True},
       {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
@@ -308,8 +317,8 @@ def save_all_histograms(df, path, features=False):
     ]
   else:
     plotInfos = [
-      {"column": "class", "title": "Class distribution", "blocksize": 19, "xlim": 18, "ylabel": "#Meshes",
-       "xlabel": "Class nr", "skip_outliers": False},
+      {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylabel": "#Meshes",
+       "xlabel": "Class name", "skip_outliers": False},
       {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
        "xlabel": "Number of faces", "skip_outliers": True},
       {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",

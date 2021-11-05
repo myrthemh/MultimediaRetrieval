@@ -2,7 +2,7 @@ from matplotlib.pyplot import yscale
 from numpy.lib.shape_base import dsplit
 from matplotlib.ticker import PercentFormatter
 import utils
-from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,9 +31,9 @@ def plot_ktier(DB):
   # info = {"xlabel": }
   plt.rcParams.update(plt.rcParamsDefault)
   for c, value in enumerate(utils.classes):
-    c_len = len(DB.loc[DB["class"] == c])
+    c_len = len(DB.loc[DB["class"] == value])
     result = list(np.zeros(6))
-    for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
+    for query_result in DB.loc[DB["class"] == value, 'similar_meshes']:
       result = ktier(result, query_result, c, c_len)
 
     results = [i+1 for i in range(0, 6) for j in range(0, int(result[i]))]
@@ -74,32 +74,82 @@ def ktier(result, query_result, class_value, clen):
         result[i] += 1
 
   return result
+ 
+ def roc(correct_classes):
+   sensitivities = []
+   specificities = []
+   for i in range(0, correct_classes.shape[1]):
+     TP = np.sum(correct_classes[:, :i]) #Correct objects returned in the query
+     FN = np.sum(correct_classes[:, i:]) #Correct objects not returned in the query
+     FP = correct_classes[:, :i].size - TP #Objects returned in the query that should not have been returned
+     TN = correct_classes[:, i:].size - FN #Objects not returned in the query that should indeed not be returned
+     sensitivity = TP / (TP + FN)
+     specificity = TN / (FP + TN)
+     sensitivities.append(sensitivity)
+     specificities.append(specificity)
+   return sensitivities, specificities
 
-def roc():
+ def roc_plots():
+
   df = utils.read_excel(original=False)
-  for class_number in range(len(utils.classes)):
-    class_rows = df.loc[df['class'] == class_number]
-    distances = np.asarray(class_rows['similar_meshes'])
-    y_score =  np.array([1 if int(x[2]) == class_number else 0 for tuples in distances for x in tuples])
-    y_true = np.array([int(x[2]) for tuples in distances for x in tuples])
-    fpr, tpr, thresholds = roc_curve(y_true, y_score, pos_label=class_number)
-    plt.figure()
-    lw = 2
-    plt.plot(
-        fpr,
-        tpr,
-        color="darkorange",
-        lw=lw,
-        label="ROC curve (area = %0.2f)",
-    )
-    plt.plot([0, 1], [0, 1], color="navy", lw=lw, linestyle="--")
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("Receiver operating characteristic example")
-    plt.legend(loc="lower right")
-    plt.show()
-    print(lw)
-#roc()
+  plot_data = []
+  for column in ["similar_meshes", "ANN"]:
+    plt.clf()
+    plt.figure(figsize=(15, 15), dpi=80)
+    all_correct_classes = []
+    for shape_class in utils.classes:
+      class_rows = df.loc[df['class'] == shape_class]
+      if len(class_rows) == 0:
+        continue
+      distances  = class_rows[column]
+      correct_classes = np.array(list(distances.map(lambda shape: [1 if x[2] == shape_class else 0 for x in shape])))
+      all_correct_classes.append(correct_classes)
+      sensitivities, specificities = roc(correct_classes)
+      #Plot
+      lw = 2
+      plt.plot(
+          sensitivities,
+          specificities,
+          lw=lw,
+          label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
+      )
+      plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
+      plt.xlim([0.0, 1.01])
+      plt.ylim([0.0, 1.01])
+      plt.xlabel("Sensitivity")
+      plt.ylabel("Specificity")
+      plt.legend(loc="lower left")
+    if column == "similar_meshes":
+      save_path = "our_roc"
+    else:
+      save_path = "ann_roc"
+    #Plot all classes in the same plot
+    plt.title("Receiver operating characteristic curve")
+    path = F"{utils.eval_images_path}{save_path}_allclasses.png"
+    utils.ensure_dir(path)
+    plt.savefig(path, bbox_inches='tight')
+    plot_data.append(all_correct_classes)
 
+  #plot average of all classes for ANN and Ours
+  plt.clf()
+  plt.figure()
+  for i, data in enumerate(plot_data):
+    all_correct_classes = np.concatenate(np.asarray(data))
+    sensitivities, specificities = roc(all_correct_classes)
+    plt.plot(
+      sensitivities,
+      specificities,
+      lw=lw,
+      label=f"{['Ours', 'ANN'][i]}, Area = {round(auc(sensitivities, specificities), 3)}",
+    )
+    plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
+    plt.xlim([0.0, 1.01])
+    plt.ylim([0.0, 1.01])
+    plt.xlabel("Sensitivity")
+    plt.ylabel("Specificity")
+    plt.legend(loc="lower left")
+    plt.title("ROC curve averaged over all queries over all classes")
+    path = F"{utils.eval_images_path}{save_path}_avgallclasses.png"
+    utils.ensure_dir(path)
+    plt.savefig(path, bbox_inches='tight')
+# roc()

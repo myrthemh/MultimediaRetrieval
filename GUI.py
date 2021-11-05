@@ -71,7 +71,7 @@ def show_similar():
   main.compare(meshes, setcolor=False)
 
 def get_image_paths(shape_class):
-  classpath = utils.sim_images_path + str(shape_class) + '/'
+  classpath = utils.sim_images_path + shape_class + '/'
   paths = []
   for classFolder in os.listdir(classpath):
     images = []
@@ -80,7 +80,7 @@ def get_image_paths(shape_class):
     paths.append(images)
   return paths  
 
-x = get_image_paths(18)
+#x = get_image_paths(18)
 # Create the root window
 window = Tk()
 
@@ -96,24 +96,10 @@ window.config(background="white")
 # Create a File Explorer label
 label_file_explorer = Label(window, text="Placeholder text", width=75, height=4, fg="blue")
 
-
-def draw_grid(c):
-  #Imagetable
-  for label in window.grid_slaves():
-    if int(label.grid_info()["row"]) == 5 and int(label.grid_info()["column"]) == 1:
-      label.grid_forget()
-  paths = get_image_paths(c)
-  imgs = [[PhotoImage(file=p) for p in list] for list in paths]
-  label_grid = LabelGrid(window, imgs)
-  label_grid.grid(column=1, row=5)
-
 # Create buttons
 button_explore = Button(window, text="Browse files", command=browseFiles)
 button_sim = Button(window, text='Show similar', command=show_similar)
 button_exit = Button(window, text="Exit", command=exit)
-for i in range(19):
-  action = partial(draw_grid, i)
-  Button(window, text=str(i), command=action).grid(column=2 + int(i/3), row=i%3)
 
 # Grid method is chosen for placing
 # the widgets at respective positions
