@@ -29,17 +29,23 @@ def evaluate_score(DB, metric):
 
 def evaluate_ktier(DB):
   # info = {"xlabel": }
+  plt.rcParams.update(plt.rcParamsDefault)
   for c, value in enumerate(utils.classes):
-    results = []
-    for query_result in DB.loc[DB["class"] == c, "similar_meshes" ]:
-      results.append(ktier(query_result, c))
+    c_len = len(DB.loc[DB["class"] == c])
+    result = list(np.zeros(6))
+    for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
+      result = ktier(result, query_result, c, c_len)
 
-    plt.hist(results,  weights=np.ones(len(results)) / len(results))
+    results = [i+1 for i in range(0, 6) for j in range(0, int(result[i]))]
+
+    plt.hist(results, bins=np.arange(0, 7, 1),  weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
-    plt.xlim(1,5)
+    plt.ylim(0, 1)
+    plt.xlim(1, 6)
+
     plt.xlabel("Tier")
-    plt.ylabel("Percentage returned in tier")
+    plt.ylabel("Hoi Percentage returned in tier")
     plt.title("Percentage of total {} correctly returned in first five tiers".format(str(utils.classes[int(c)])))
 
     path = utils.refinedImagePath
@@ -47,9 +53,7 @@ def evaluate_ktier(DB):
     plt.savefig(path + "tierOfClass" + str(c) + '.png')
     plt.show()
 
-
-
-def ktier(query_result, class_value):
+def lasttier(query_result, class_value):
   tier = 0
   for q in query_result:
     if q[2] == class_value:
@@ -58,7 +62,18 @@ def ktier(query_result, class_value):
       return tier
   return tier
 
+def ktier(result, query_result, class_value, clen):
+  tier = 0
 
+  # for c, value in enumerate(utils.classes):
+  #   for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
+  for i in range(0, 6):
+
+    for j in range(0, clen):
+       if query_result[i+j][2] == class_value:
+        result[i] += 1
+
+  return result
 
 def roc():
   df = utils.read_excel(original=False)
