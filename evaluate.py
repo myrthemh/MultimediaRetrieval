@@ -27,7 +27,7 @@ def evaluate_score(DB, metric):
   metric_performance_avg = metric_performance_avg /len(DB)
   return metric_performance_class, metric_performance_avg
 
-def evaluate_ktier(DB):
+def plot_ktier(DB):
   # info = {"xlabel": }
   plt.rcParams.update(plt.rcParamsDefault)
   for c, value in enumerate(utils.classes):
