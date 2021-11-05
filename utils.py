@@ -82,8 +82,12 @@ def refined_path(path):
   return path[:11] + 'refined_' + path[11:]
 
 
+def unit_vector(vector):
+  return vector / np.linalg.norm(vector)
+
+
 def angle(vector1, vector2):
-  return np.arccos(np.clip(np.dot(vector1, vector2), -1.0, 1.0))
+  return np.arccos(np.clip(np.dot(unit_vector(vector1), unit_vector(vector2)), -1.0, 1.0))
 
 
 def shape_paths(dbfolder):
@@ -93,6 +97,7 @@ def shape_paths(dbfolder):
       if name.endswith('.off'):
         paths.append((os.path.join(path, name)))
   return paths
+
 
 def image_paths(class_folder, ann=False):
   paths = []
