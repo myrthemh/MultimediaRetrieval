@@ -72,27 +72,28 @@ def ktier(result, query_result, class_value, clen):
   # for c, value in enumerate(utils.classes):
   #   for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
   for i in range(0, 6):
-
     for j in range(0, clen):
        if query_result[i+j][2] == class_value:
         result[i] += 1
 
   return result
  
- def roc(correct_classes):
-   sensitivities = []
-   specificities = []
-   for i in range(0, correct_classes.shape[1]):
-     TP = np.sum(correct_classes[:, :i]) #Correct objects returned in the query
-     FN = np.sum(correct_classes[:, i:]) #Correct objects not returned in the query
-     FP = correct_classes[:, :i].size - TP #Objects returned in the query that should not have been returned
-     TN = correct_classes[:, i:].size - FN #Objects not returned in the query that should indeed not be returned
-     sensitivity = TP / (TP + FN)
-     specificity = TN / (FP + TN)
-     sensitivities.append(sensitivity)
-     specificities.append(specificity)
-   return sensitivities, specificities
+def roc(correct_classes):
+  sensitivities = []
+  specificities = []
+  for i in range(0, correct_classes.shape[1]):
+    TP = np.sum(correct_classes[:, :i]) #Correct objects returned in the query
+    FN = np.sum(correct_classes[:, i:]) #Correct objects not returned in the query
+    FP = correct_classes[:, :i].size - TP #Objects returned in the query that should not have been returned
+    TN = correct_classes[:, i:].size - FN #Objects not returned in the query that should indeed not be returned
+    sensitivity = TP / (TP + FN)
+    specificity = TN / (FP + TN)
+    sensitivities.append(sensitivity)
+    specificities.append(specificity)
+  return sensitivities, specificities
 
+
+def roc_plots():
   df = utils.read_excel(original=False)
   plot_data = []
   for column in ["similar_meshes", "ANN"]:
