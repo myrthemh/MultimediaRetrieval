@@ -56,12 +56,12 @@ def ann_distances_to_excel():
   df["ANN"] = ""
   for index, row in df.iterrows():
     tuple_list = []
-    idx, distance = u.get_nns_by_item(index, 6, include_distances=True)
+    idx, distance = u.get_nns_by_item(index, len(df), include_distances=True)
     # Remove distance to self
-    idx = idx[1:6]
-    distance = distance[1:6]
+    idx = idx[1:]
+    distance = distance[1:]
     for i, item in enumerate(distance):
-      tuple_list.append((item, idx[i]))
+      tuple_list.append((item, idx[i], df.iloc[idx[i]]['class']))
 
     df.at[index, "ANN"] = tuple_list
   utils.save_excel(df, False)
