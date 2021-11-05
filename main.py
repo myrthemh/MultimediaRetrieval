@@ -189,6 +189,7 @@ def main():
   save_figures('ANN')
   write_html()
   evaluate.roc_plots()
+  evaluate.boxplot_queries()
   shaperetrieval.tsne()
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))

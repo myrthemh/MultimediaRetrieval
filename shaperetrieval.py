@@ -1,5 +1,4 @@
 import numpy as np
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import seaborn as sns
@@ -47,8 +46,8 @@ def load_map_neighbours(map_path, n_features, metric):
 
 def ann_distances_to_excel():
   df = utils.read_excel(False)
-  save_map_neighbours(105, "euclidean", n_trees=10000)
-  u = load_map_neighbours("testmodels.ann", 105, 'euclidean')
+  save_map_neighbours(106, "euclidean", n_trees=10000)
+  u = load_map_neighbours("testmodels.ann", 106, 'euclidean')
   df["ANN"] = ""
   for index, row in df.iterrows():
     tuple_list = []
