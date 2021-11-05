@@ -276,7 +276,7 @@ def save_histogram(data, info, path):
   else:
     bins = info["blocksize"]
   plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
-  if info['column'] == 'class':
+  if 'column' in info and info['column'] == 'class':
     plt.xticks(rotation=90)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])

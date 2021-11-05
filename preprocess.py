@@ -1,11 +1,11 @@
 import numpy as np
-from numpy.lib.twodim_base import tri
 import trimesh
 import trimesh.grouping as grouping
-import main
+from scipy.stats import wasserstein_distance
+
 import subdivision
 import utils
-from scipy.stats import wasserstein_distance
+
 
 def scale_mesh(mesh, scale):
   # Make a vector to scale x, y and z in the mesh to this value
@@ -82,6 +82,7 @@ def fix_normals(mesh):
     print("fixing normals")
     trimesh.Trimesh.fix_normals(mesh)
 
+
 def translate_eigen(mesh):
   eig_vector_x, eig_vector_y, eig_vector_z = utils.eigen_xyz(mesh)
   for vertex in mesh.vertices:
@@ -105,26 +106,28 @@ def normalize_histogram_features(features):
 def sum_divide(x):
   return x / sum(x)
 
+
 def preprocess_single_mesh(mesh, row, show_subdivide=False, show_superdivide=False):
   # if not mesh.is_watertight:
-    #   print("--------------------------------------------------")
-    #   mesh = make_watertight(mesh)
-    #   if not mesh.is_watertight:
-    #     print("Make watertight operation failed")
-    #   else:
-    #     print("Successfully made mesh watertight")
-    if row['subsampled_outlier']:
-      mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
-      if show_subdivide:
-        main.compare([mesh, mesh2])
-    elif row['supersampled_outlier']:
-      mesh2 = subdivision.superdivide(mesh, utils.target_faces)
-      if show_superdivide:
-        main.compare([mesh, mesh2])
-    else:
-      mesh2 = mesh
-    mesh2 = normalize_mesh(mesh2)
-    return mesh2
+  #   print("--------------------------------------------------")
+  #   mesh = make_watertight(mesh)
+  #   if not mesh.is_watertight:
+  #     print("Make watertight operation failed")
+  #   else:
+  #     print("Successfully made mesh watertight")
+  if row['subsampled_outlier']:
+    mesh2 = subdivision.subdivide(mesh, utils.target_vertices)
+    # if show_subdivide:
+    #   main.compare([mesh, mesh2])
+  elif row['supersampled_outlier']:
+    mesh2 = subdivision.superdivide(mesh, utils.target_faces)
+    # if show_superdivide:
+    #   main.compare([mesh, mesh2])
+  else:
+    mesh2 = mesh
+  mesh2 = normalize_mesh(mesh2)
+  return mesh2
+
 
 def process_all(show_subdivide=False, show_superdivide=False):
   # Perform all preprocessing steps on all meshes:
@@ -153,14 +156,15 @@ def process_all(show_subdivide=False, show_superdivide=False):
 
 def scalar_normalization(features):
   df = utils.read_excel(original=False)
-  y = (df[features]-df[features].mean())/df[features].std()
-  y = y.rename(columns=lambda x: x+"_norm")
+  y = (df[features] - df[features].mean()) / df[features].std()
+  y = y.rename(columns=lambda x: x + "_norm")
   df[y.columns] = y
   vectors = np.asarray([df[features].mean(), df[features].std()])
-  #Store the values used for normalization so we can normalize new query objects
+  # Store the values used for normalization so we can normalize new query objects
   with open(utils.norm_vector_path, 'wb') as f:
     np.save(f, vectors)
   utils.save_excel(df, original=False)
+
 
 def hist_distance_normalization():
   df = utils.read_excel(original=False)

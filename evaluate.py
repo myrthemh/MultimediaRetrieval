@@ -1,10 +1,14 @@
-from matplotlib.pyplot import yscale
-from numpy.lib.shape_base import dsplit
-from matplotlib.ticker import PercentFormatter
-import utils
-from sklearn.metrics import auc
-import numpy as np
+import random
+import time
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.ticker import PercentFormatter
+from sklearn.metrics import auc
+
+import shaperetrieval
+import utils
 
 
 def evaluate_score(DB, metric):
@@ -24,20 +28,21 @@ def evaluate_score(DB, metric):
   for c in range(len(utils.classes)):
     metric_performance_class[c] /= len(DB[DB["class"] == c])
 
-  metric_performance_avg = metric_performance_avg /len(DB)
+  metric_performance_avg = metric_performance_avg / len(DB)
   return metric_performance_class, metric_performance_avg
+
 
 def evaluate_ktier(DB):
   # info = {"xlabel": }
   for c, value in enumerate(utils.classes):
     results = []
-    for query_result in DB.loc[DB["class"] == value, "similar_meshes" ]:
+    for query_result in DB.loc[DB["class"] == value, "similar_meshes"]:
       results.append(ktier(query_result, c))
 
-    plt.hist(results,  weights=np.ones(len(results)) / len(results))
+    plt.hist(results, weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
-    plt.xlim(1,5)
+    plt.xlim(1, 5)
     plt.xlabel("Tier")
     plt.ylabel("Percentage returned in tier")
     plt.title("Percentage of total {} correctly returned in first five tiers".format(str(utils.classes[int(c)])))
@@ -46,7 +51,6 @@ def evaluate_ktier(DB):
     utils.ensure_dir(path)
     plt.savefig(path + "tierOfClass" + str(c) + '.png')
     plt.show()
-
 
 
 def ktier(query_result, class_value):
@@ -58,19 +62,21 @@ def ktier(query_result, class_value):
       return tier
   return tier
 
+
 def roc(correct_classes):
   sensitivities = []
   specificities = []
   for i in range(0, correct_classes.shape[1]):
-    TP = np.sum(correct_classes[:, :i]) #Correct objects returned in the query
-    FN = np.sum(correct_classes[:, i:]) #Correct objects not returned in the query
-    FP = correct_classes[:, :i].size - TP #Objects returned in the query that should not have been returned
-    TN = correct_classes[:, i:].size - FN #Objects not returned in the query that should indeed not be returned
+    TP = np.sum(correct_classes[:, :i])  # Correct objects returned in the query
+    FN = np.sum(correct_classes[:, i:])  # Correct objects not returned in the query
+    FP = correct_classes[:, :i].size - TP  # Objects returned in the query that should not have been returned
+    TN = correct_classes[:, i:].size - FN  # Objects not returned in the query that should indeed not be returned
     sensitivity = TP / (TP + FN)
     specificity = TN / (FP + TN)
     sensitivities.append(sensitivity)
     specificities.append(specificity)
   return sensitivities, specificities
+
 
 def roc_plots():
   df = utils.read_excel(original=False)
@@ -83,17 +89,17 @@ def roc_plots():
       class_rows = df.loc[df['class'] == shape_class]
       if len(class_rows) == 0:
         continue
-      distances  = class_rows[column]
+      distances = class_rows[column]
       correct_classes = np.array(list(distances.map(lambda shape: [1 if x[2] == shape_class else 0 for x in shape])))
       all_correct_classes.append(correct_classes)
       sensitivities, specificities = roc(correct_classes)
-      #Plot
+      # Plot
       lw = 2
       plt.plot(
-          specificities,
-          sensitivities,
-          lw=lw,
-          label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
+        specificities,
+        sensitivities,
+        lw=lw,
+        label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
       )
       plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
       plt.xlim([0.0, 1.01])
@@ -105,14 +111,14 @@ def roc_plots():
       save_path = "our_roc"
     else:
       save_path = "ann_roc"
-    #Plot all classes in the same plot
+    # Plot all classes in the same plot
     plt.title("Receiver operating characteristic curve")
     path = F"{utils.eval_images_path}{save_path}_allclasses.png"
     utils.ensure_dir(path)
     plt.savefig(path, bbox_inches='tight')
     plot_data.append(all_correct_classes)
 
-  #plot average of all classes for ANN and Ours
+  # plot average of all classes for ANN and Ours
   plt.clf()
   plt.figure()
   for i, data in enumerate(plot_data):
@@ -134,5 +140,43 @@ def roc_plots():
     path = F"{utils.eval_images_path}{save_path}_avgallclasses.png"
     utils.ensure_dir(path)
     plt.savefig(path, bbox_inches='tight')
-# roc()
 
+
+def time_queries(runs=100):
+  ann_times = []
+  custom_times = []
+  df = utils.read_excel(original=False)
+  len_df = len(df.index)
+  u = shaperetrieval.load_map_neighbours("testmodels.ann", 106, 'euclidean')
+  for i in range(runs):
+    print(i)
+    random_number = random.randint(0, len_df - 1)
+    start = time.perf_counter()
+    shaperetrieval.find_similar_meshes(df.iloc[random_number])
+    end = time.perf_counter()
+    custom_times.append(end - start)
+    start = time.perf_counter()
+    u.get_nns_by_item(i, len_df, include_distances=True)
+    end = time.perf_counter()
+    ann_times.append(end - start)
+  return ann_times, custom_times
+
+
+def boxplot_queries(show=False):
+  plt.rcParams.update(plt.rcParamsDefault)
+  ann_times, custom_times = time_queries()
+  df = pd.DataFrame(columns=("Annoy", "Custom"))
+  df = df.assign(Annoy=ann_times, Custom=custom_times)
+  fig1, ax1 = plt.subplots()
+  ax1.set_title('Query times for Annoy and custom')
+  ax1.boxplot(df)
+  plt.xticks([1, 2], ["Annoy", "Custom"])
+  plt.ylabel("Time (seconds)")
+  plt.xlabel("Query method")
+  plt.savefig('./evalimages/querytimes.png' )
+  if show:
+    plt.show()
+
+boxplot_queries()
+
+# roc()
