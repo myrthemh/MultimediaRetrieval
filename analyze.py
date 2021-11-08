@@ -129,7 +129,7 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
 
 
 def A3(mesh, amount=utils.hist_amount, plot=False):
-  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
+  random_vertices =  mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = [utils.angle(x[0] - x[1], x[0] - x[2]) for x in random_vertices]
   return make_bins(angles, 0, 0.75 * math.pi, utils.nr_bins_hist, plot)
@@ -249,7 +249,7 @@ def histograms_all_classes(data, column):
   index_to_class, class_sizes = utils.class_dictionaries()
   for index, c in enumerate(class_sizes.keys()):
     for i in data.loc[data["class"] == c, column]:
-      axs[index % 5, int(c / 5)].plot(i)
+      axs[index % 5, int(index / 5)].plot(i)
       # axs[c % 6, int(c / 6)].xaxis.set_major_formatter(mtick.PercentFormatter(10))
     # axs[c % 6, int(c / 6)].yaxis.set_major_formatter(mtick.PercentFormatter(20000))
     axs[index % 5, int(index / 5)].set_title(c)
@@ -276,15 +276,15 @@ def save_histogram(data, info, path):
   else:
     bins = info["blocksize"]
   if 'column' in info and info['column'] == 'class':
-    bins = bins - 0.5
+    bins = np.concatenate([bins, [15.0]]) -0.5
     plt.xticks(rotation=90)
-    plt.subplots_adjust(bottom=0.30)
-    plt.xticks(range(len(bins)))
+    plt.subplots_adjust(bottom=0.34)
+    plt.xlim(-0.5, info["xlim"] - 0.5)
   plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
-  if info["xlim"] != 0:
+  if info["xlim"] != 0 and not ('column' in info and info['column'] == 'class'):
     plt.xlim(0, info["xlim"])
   # plt.grid(True)
   plt.gcf().subplots_adjust(left=0.15)

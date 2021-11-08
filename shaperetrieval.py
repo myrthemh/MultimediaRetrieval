@@ -86,22 +86,22 @@ def paths_to_meshes(paths):
   return meshes
 
 
-def save_similar_meshes():
+def save_similar_meshes(weight_vector):
   df = utils.read_excel(original=False)
   column = []
   for index, row in df.iterrows():
     if index % 10 == 0:
       print("Calculating similarities", index, '/', len(df))
-    distances = find_similar_meshes(row)
+    distances = find_similar_meshes(row, weight_vector)
     column.append(distances)
   df['similar_meshes'] = column
   utils.save_excel(df, original=False)
 
 
-def find_similar_meshes(mesh_row):
+def find_similar_meshes(mesh_row, weight_vector):
   # Find similar meshes based on an existing row in the shape database
-  single_vector = np.asarray(mesh_row[utils.scal_features_norm])
-  histogram_vector = np.asarray(mesh_row[utils.hist_features_norm])
+  single_vector = np.asarray(mesh_row[utils.scal_features_norm]) * weight_vector[:6]
+  histogram_vector = np.asarray(mesh_row[utils.hist_features_norm]) * weight_vector[6:]
   return get_distances(single_vector, histogram_vector, mesh_row['path'])
 
 
@@ -154,8 +154,8 @@ def tsne():
     (np.asarray(row[utils.scal_features_norm]), np.concatenate(np.asarray(row[utils.hist_features_norm])).ravel())) for
                 index, row in df.iterrows())
 
-  perplexity = 20
-  n_iter = 3000
+  perplexity = 30
+  n_iter = 2000
   digits_proj = TSNE(perplexity=perplexity, n_iter=n_iter).fit_transform(X)
   images = df["path"].str.split("/").str[-1]
   eccentricity = df["eccentricity"]

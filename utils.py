@@ -10,18 +10,18 @@ picklePath = "features/original.pkl"
 refinedpicklePath = "features/refined.pkl"
 imagePath = "graphs/original/"
 refinedImagePath = "graphs/refined/"
-originalDB = "testModels/db"
-refinedDB = "testModels/refined_db"
+# originalDB = "testModels/db"
+# refinedDB = "testModels/refined_db"
 sim_images_path = "simimages/"
 ann_images_path = "annimages/"
 eval_images_path = "evalimages/"
 sim_image_size = 256
-# originalDB = "veelModels/db"
-# refinedDB = "veelModels/refined_db"
+originalDB = "veelModels/db"
+refinedDB = "veelModels/refined_db"
 target_vertices = 1000
 target_faces = 2000
 nr_bins_hist = 20
-hist_amount = 10000
+hist_amount = 100000
 query_size = 5
 hist_features = ['A3', 'D1', 'D2', 'D3', 'D4']
 scal_features = ["area", "axis-aligned_bounding_box_distance", "diameter", "compactness", "eccentricity", "volume"]
@@ -30,6 +30,8 @@ scal_features_norm = ["area_norm", "axis-aligned_bounding_box_distance_norm", "d
 hist_features_norm = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
 norm_vector_path = "features/vector.npy"
 emd_norm_vector_path = "features/dist_vector.npy"
+weight_vectors = np.array([[2,2,2,2,2,2,1,1,1,1,1],
+                          [1,1,1,1,1,1,1,0.5,0.5,1,1]])
 
 
 def read_excel(original=True):
@@ -70,6 +72,8 @@ def unit_vector(vector):
 def angle(vector1, vector2):
   return np.arccos(np.clip(np.dot(unit_vector(vector1), unit_vector(vector2)), -1.0, 1.0))
 
+def angle_points(points):
+  return np.arccos(np.clip(np.dot(unit_vector(points[0] - points[1]), unit_vector(points[0] - points[2])), -1.0, 1.0))
 
 def shape_paths(dbfolder):
   paths = []

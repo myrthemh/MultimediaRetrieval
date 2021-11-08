@@ -36,25 +36,25 @@ def plot_ktier(DB):
   plt.rcParams.update(plt.rcParamsDefault)
   for c, value in enumerate(utils.classes):
     c_len = len(DB.loc[DB["class"] == value])
-    result = list(np.zeros(6))
+    result = list(np.zeros(5))
     for query_result in DB.loc[DB["class"] == value, 'similar_meshes']:
-      result = ktier(result, query_result, c, c_len)
+      result = ktier(result, query_result, value, c_len)
 
-    results = [i+1 for i in range(0, 6) for j in range(0, int(result[i]))]
+    results = [i+1 for i in range(0, 5) for j in range(0, int(result[i]))]
 
-    plt.hist(results, bins=np.arange(0, 7, 1),  weights=np.ones(len(results)) / len(results))
+    plt.hist(results, bins=np.arange(0, 6, 1),  weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
     plt.ylim(0, 1)
-    plt.xlim(1, 6)
+    plt.xlim(1, 5)
 
     plt.xlabel("Tier")
-    plt.ylabel("Hoi Percentage returned in tier")
+    plt.ylabel("Percentage returned in tier")
     plt.title("Percentage of total {} correctly returned in first five tiers".format(str(utils.classes[int(c)])))
 
     path = utils.refinedImagePath
     utils.ensure_dir(path)
-    plt.savefig(path + "tierOfClass" + str(c) + '.png')
+    plt.savefig(path + "tierOfClass" + str(value) + '.png')
     plt.show()
 
 def lasttier(query_result, class_value):
@@ -71,9 +71,9 @@ def ktier(result, query_result, class_value, clen):
 
   # for c, value in enumerate(utils.classes):
   #   for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
-  for i in range(0, 6):
+  for i in range(0, 5):
     for j in range(0, clen):
-       if query_result[i+j][2] == class_value:
+       if query_result[i * clen +j][2] == class_value:
         result[i] += 1
 
   return result
@@ -93,7 +93,7 @@ def roc(correct_classes):
   return sensitivities, specificities
 
 
-def roc_plots():
+def roc_plots(vindex):
   df = utils.read_excel(original=False)
   plot_data = []
   for column in ["similar_meshes", "ANN"]:
@@ -128,7 +128,7 @@ def roc_plots():
       save_path = "ann_roc"
     # Plot all classes in the same plot
     plt.title("Receiver operating characteristic curve")
-    path = F"{utils.eval_images_path}{save_path}_allclasses.png"
+    path = F"{utils.eval_images_path}{save_path}_allclasses{vindex}.png"
     utils.ensure_dir(path)
     plt.savefig(path, bbox_inches='tight')
     plot_data.append(all_correct_classes)
@@ -152,7 +152,7 @@ def roc_plots():
     plt.ylabel("Specificity")
     plt.legend(loc="lower left")
     plt.title("ROC curve averaged over all queries over all classes")
-    path = F"{utils.eval_images_path}{save_path}_avgallclasses.png"
+    path = F"{utils.eval_images_path}{save_path}_avgallclasses{vindex}.png"
     utils.ensure_dir(path)
     plt.savefig(path, bbox_inches='tight')
 
