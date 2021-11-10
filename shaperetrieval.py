@@ -88,12 +88,12 @@ def paths_to_meshes(paths):
 
 def save_similar_meshes(weight_vector):
   df = utils.read_excel(original=False)
-  column = []
-  for index, row in df.iterrows():
-    if index % 10 == 0:
-      print("Calculating similarities", index, '/', len(df))
-    distances = find_similar_meshes(row, weight_vector)
-    column.append(distances)
+  column = df.apply(lambda x: find_similar_meshes(x, weight_vector), axis=1)
+  # for index, row in df.iterrows():
+  #   if index % 10 == 0:
+  #     print("Calculating similarities", index, '/', len(df))
+  #   distances = find_similar_meshes(row, weight_vector)
+  #   column.append(distances)
   df['similar_meshes'] = column
   utils.save_excel(df, original=False)
 
@@ -111,19 +111,31 @@ def get_distances(single_vector, histogram_vector, path):
   # Compare with all meshes
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
-    for index, row in df.iterrows():
-      if path[-11:] == row['path'][-11:]:
-        continue
-      other_single_vector = np.asarray(row[utils.scal_features_norm])
-      other_histogram_vector = np.asarray(row[utils.hist_features_norm])
-      scalar_distance = compute_euclidean_distance(single_vector, other_single_vector)
-      hist_distances = [wasserstein_distance(histogram_vector[i], other_histogram_vector[i]) for i in
-                        range(len(histogram_vector))]
+    # for index, row in df.iterrows():
+    #   if path[-11:] == row['path'][-11:]:
+    #     continue
+    #   other_single_vector = np.asarray(row[utils.scal_features_norm])
+    #   other_histogram_vector = np.asarray(row[utils.hist_features_norm])
+    #   scalar_distance = compute_euclidean_distance(single_vector, other_single_vector)
+    #   hist_distances = [wasserstein_distance(histogram_vector[i], other_histogram_vector[i]) for i in
+    #                     range(len(histogram_vector))]
 
-      # Standardize histogram distances:
-      hist_distances /= emd_vector
-      distance = scalar_distance + sum(hist_distances)
-      distances.append((distance, index, row['class']))
+    #   # Standardize histogram distances:
+    #   hist_distances /= emd_vector
+    #   distance = scalar_distance + sum(hist_distances)
+    #   distances.append((distance, index, row['class']))
+    other_single_vectors = np.asarray(df[utils.scal_features_norm])
+    other_histogram_vectors = np.asarray(df[utils.hist_features_norm])
+    scalar_distances = list(map(lambda x: compute_euclidean_distance(single_vector, x), other_single_vectors))
+    hist_distancess = list(map(lambda x: 
+                                list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]), range(len(histogram_vector))))
+                                , other_histogram_vectors)) 
+
+    # Standardize histogram distances:
+    hist_distancess /= emd_vector
+    distances = scalar_distances + np.sum(hist_distancess, axis=1)
+    distances = list(np.dstack((distances, list(range(len(df))), df['class']))[0])
+    #distances.append((distance, index, row['class']))
   distances.sort(key=sortmethod)
   return distances
 
