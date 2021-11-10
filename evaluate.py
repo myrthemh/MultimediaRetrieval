@@ -164,7 +164,8 @@ def time_queries(runs=100):
   len_df = len(df.index)
   u = shaperetrieval.load_map_neighbours("testmodels.ann", 106, 'euclidean')
   for i in range(runs):
-    print(i)
+    if i % 10 == 0:
+      print(f'{i} / {runs} timed')
     random_number = random.randint(0, len_df - 1)
     start = time.perf_counter()
     shaperetrieval.find_similar_meshes(df.iloc[random_number])
@@ -192,6 +193,3 @@ def boxplot_queries(show=False):
   if show:
     plt.show()
 
-# boxplot_queries()
-
-# roc()

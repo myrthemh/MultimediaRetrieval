@@ -147,8 +147,6 @@ def process_all(show_subdivide=False, show_superdivide=False):
     if not mesh2.is_watertight:
       y += 1
 
-  normalize_histogram_features(features=utils.hist_features)
-  scalar_normalization(features=utils.scal_features)
   print(f'meshes filtered: {z}')
   print(f'meshes1 not watertight: {i}')
   print(f'meshes2 not watertight: {y}')

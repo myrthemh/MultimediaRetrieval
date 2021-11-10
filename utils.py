@@ -21,7 +21,7 @@ sim_image_size = 256
 target_vertices = 1000
 target_faces = 2000
 nr_bins_hist = 20
-hist_amount = 10000
+hist_amount = 100000
 query_size = 5
 hist_features = ['A3', 'D1', 'D2', 'D3', 'D4']
 scal_features = ["area", "axis-aligned_bounding_box_distance", "diameter", "compactness", "eccentricity", "volume"]
@@ -63,8 +63,12 @@ def refined_path(path):
   return path[:11] + 'refined_' + path[11:]
 
 
-def unit_vector(vector):
-  return vector / np.linalg.norm(vector)
+def unit_vector(vector, transpose=False):
+  if transpose:
+    # print(np.divide(vector.T, np.linalg.norm(vector, axis=1)).T)
+    return np.divide(vector.T, np.linalg.norm(vector, axis=1)).T
+  # print(np.divide(vector, np.linalg.norm(vector)))
+  return np.divide(vector, np.linalg.norm(vector))
 
 
 def angle(vector1, vector2):
