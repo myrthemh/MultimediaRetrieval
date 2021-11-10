@@ -182,15 +182,18 @@ def main():
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  analyze.visualize_difference_features()
-  shaperetrieval.save_similar_meshes()
+  for column in utils.hist_features_norm:
+    analyze.histograms_all_classes(refinedDF, column)
+  # # for index, vector in enumerate(utils.weight_vectors):
+  shaperetrieval.save_similar_meshes(utils.weight_vectors[0])
+  evaluate.roc_plots(0)
   shaperetrieval.ann_distances_to_excel()
   save_figures('similar_meshes')
   save_figures('ANN')
   write_html()
-  evaluate.roc_plots()
   evaluate.boxplot_queries()
   shaperetrieval.tsne()
+  evaluate.plot_ktier(refinedDF)
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
 

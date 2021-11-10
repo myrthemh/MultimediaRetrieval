@@ -1,3 +1,4 @@
+from math import inf
 import numpy as np
 import trimesh
 import trimesh.grouping as grouping
