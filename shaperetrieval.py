@@ -46,8 +46,9 @@ def load_map_neighbours(map_path, n_features, metric):
 
 def ann_distances_to_excel():
   df = utils.read_excel(False)
-  save_map_neighbours(106, "euclidean", n_trees=10000)
-  u = load_map_neighbours("testmodels.ann", 106, 'euclidean')
+  f = len(df['A3'][0]) * len(utils.hist_features_norm) + len(utils.scal_features_norm)
+  save_map_neighbours(f, "euclidean", n_trees=10000)
+  u = load_map_neighbours("testmodels.ann", f, 'euclidean')
   df["ANN"] = ""
   for index, row in df.iterrows():
     tuple_list = []
@@ -91,7 +92,7 @@ def save_similar_meshes(weight_vector):
   with open(utils.emd_norm_vector_path, 'rb') as f:
     emd_vector = np.load(f)
     column = df.apply(lambda x: find_similar_meshes(x, weight_vector, emd_vector, df), axis=1)
-  
+
     df['similar_meshes'] = column
     utils.save_excel(df, original=False)
   # for index, row in df.iterrows():
@@ -112,7 +113,7 @@ def find_similar_meshes(mesh_row, weight_vector, emd_vector, df):
 def get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector, path):
   distances = []
   # Compare with all meshes
-  
+
     # for index, row in df.iterrows():
     #   if path[-11:] == row['path'][-11:]:
     #     continue
@@ -129,9 +130,9 @@ def get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector
   other_single_vectors = np.asarray(df[utils.scal_features_norm]) * weight_vector[:6]
   other_histogram_vectors = np.asarray(df[utils.hist_features_norm]) * weight_vector[6:]
   scalar_distances = list(map(lambda x: compute_euclidean_distance(single_vector, x), other_single_vectors))
-  hist_distancess = list(map(lambda x: 
+  hist_distancess = list(map(lambda x:
                               list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]), range(len(histogram_vector))))
-                              , other_histogram_vectors)) 
+                              , other_histogram_vectors))
 
   # Standardize histogram distances:
   hist_distancess /= emd_vector
@@ -224,3 +225,4 @@ def scatter(x, classes, perplexity, n_iter, images, eccentricity, compactness, d
   sc.show()
 
   return f, ax, sc
+

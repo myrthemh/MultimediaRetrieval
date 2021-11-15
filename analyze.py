@@ -140,7 +140,7 @@ def A3(mesh, amount=utils.hist_amount, plot=False):
   return make_bins(angles, 0, math.pi, utils.nr_bins_hist, plot)
 
 
-def D1(mesh, amount=utils.hist_amount, plot=False):
+def D1(mesh, amount=utils.target_vertices, plot=False):
   # Distance barycentre to random vertice
   random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount))]
   distance_barycentre = np.sqrt(np.sum(np.power(random_vertices, 2), axis=1))
@@ -215,19 +215,17 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
                  "volume": volume(mesh),
                  "area": mesh.area,
                  "eigen_x_angle": utils.eigen_angle(mesh),
-                 "area_faces": mesh.area_faces,
-                 # "eccentricity": eccentricity(mesh),
-                 # "compactness": compactness(mesh)
+                 "area_faces": mesh.area_faces
                  }
   mesh_info = detect_outliers(mesh, mesh_info)
   return mesh_info
 
 
 def detect_outliers(mesh, mesh_info):
-  if len(mesh.vertices) < 900:
+  if len(mesh.vertices) < utils.target_vertices * 0.9:
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif len(mesh.vertices) > 1100:
+  elif len(mesh.vertices) > utils.target_vertices * 1.1:
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:

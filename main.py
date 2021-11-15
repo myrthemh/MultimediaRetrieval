@@ -187,6 +187,9 @@ def main():
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  print("ANN")
+  shaperetrieval.ann_distances_to_excel()
+  print("histograms all classes")
   for column in utils.hist_features_norm:
     analyze.histograms_all_classes(refinedDF, column)
   for index, vector in enumerate(utils.weight_vectors):
@@ -198,7 +201,6 @@ def main():
     evaluate.roc_plots(index)
     end_time = time.monotonic()
     print(timedelta(seconds=end_time - start_time))
-  shaperetrieval.ann_distances_to_excel()
   write_html()
   evaluate.boxplot_queries()
   shaperetrieval.tsne()
