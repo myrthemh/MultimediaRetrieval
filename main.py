@@ -167,8 +167,8 @@ def write_html():
 
 
 def main():
-  # step_1()
-  # compare_all()
+  step_1()
+  compare_all()
   start_time = time.monotonic()
   print("Analyze 1")
   analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
@@ -190,6 +190,8 @@ def main():
   for column in utils.hist_features_norm:
     analyze.histograms_all_classes(refinedDF, column)
   for index, vector in enumerate(utils.weight_vectors):
+    if index < 2:
+      continue
     start_time = time.monotonic()
     print(index)
     shaperetrieval.save_similar_meshes(vector)

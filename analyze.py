@@ -58,7 +58,14 @@ def bounding_box_volume(mesh):
   volume = (x[1][0] - x[0][0]) * (x[1][1] - x[0][1]) * (x[1][2] - x[0][2])
   return volume
 
-
+def merge_bins():
+  df = utils.read_excel(original=False)
+  for column in df[utils.hist_features]:
+    values = np.asarray(df[column])
+    newvalues = list(map(lambda x: x[np.arange(0, 20, step=2)] + x[np.arange(1, 21, step=2)], values))
+    df[column] = newvalues
+  utils.save_excel(df, original=False)
+    
 def filter_database(dbPath, excelPath, picklePath, features=True):
   db = dbPath
   df = pd.DataFrame()
