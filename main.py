@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyrender
 import trimesh
+from trimesh import util
 
 import analyze
 import preprocess
@@ -111,29 +112,20 @@ def compare_all():
     compare(meshes)
 
 
-def save_figures(column):
+def save_figures():
   df = utils.read_excel(original=False)
-  if column == "similar_meshes":
-    save_path = utils.sim_images_path
-  else:
-    save_path = utils.ann_images_path
   for index, row in df.iterrows():
     if index % 10 == 0:
       print('Saving images', index, '/', len(df))
-    tuples = row[column][:utils.query_size]
     mesh = trimesh.load(row['path'], force='mesh')
-    save_mesh_image([mesh], save_path + row['class'] + '/' + str(index) + '/0')
-    for i, tuple in enumerate(tuples):
-      mesh_row = df.iloc[tuple[1]]
-      mesh = trimesh.load(mesh_row['path'], force='mesh')
-      save_mesh_image([mesh], save_path + row['class'] + '/' + str(index) + '/' + str(i + 1),
-                      distance=round(tuple[0], 4))
-
+    save_path = f"{row['path'][:-4]}.png"
+    save_mesh_image([mesh], save_path)
 
 def write_html():
+  df = utils.read_excel(original=False)
   html_str = """
     <html>
-    <div style='display: flex'>
+    <div style='display: flex; font-family: Tahoma, sans-serif;'>
     """
   for ann in [False, True]:
     html_str += "<div style='flex-grow: 1'>"
@@ -142,12 +134,24 @@ def write_html():
     else:
       html_str += "<h1> Our metric: </h1>"
     for c in range(15):
+      rows = df.loc[df['class'] == utils.classes[c]]
       html_str += """<details>
         <summary style='font-size: 30px'>""" + str(utils.classes[c]) + """</summary>"""
-      for index, path in enumerate(utils.image_paths(c, ann=ann)):
-        if index % 6 == 0 and index != 0:
-          html_str += "<br> <hr>"
-        html_str += "<img src = '" + path + "'>"
+      for index, row in rows.iterrows():
+        html_str += "<div style='display: flex;'>"
+        html_str += "<img src = '" + f"{row['path'][:-4]}.png" + "'>"
+        if ann:
+          distances = row['ANN'][:5]
+        else:
+          distances = row['similar_meshes'][:5]
+        for distance in distances:
+          html_str += "<div style='position: relative'>"
+          path = f"{df.iloc[distance[1]]['path'][:-4]}.png"
+          html_str += f"<img src = '{path}'>"
+          html_str += f"<p style='position: absolute; bottom: 0%; left:32%; font-size: 32px; font-weight: bold'>{round(distance[0], 3)}</p>"
+          html_str += "</div>"
+        html_str += "</div>"
+        html_str += "<br> <hr>"
       html_str += "</details>"
     html_str += "</div>"
   html_str += """
@@ -166,10 +170,11 @@ def main():
   # step_1()
   # compare_all()
   start_time = time.monotonic()
-  # print("Analyze 1")
-  # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
-  # print("Preprocessing")
-  # preprocess.process_all()
+  print("Analyze 1")
+  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
+  print("Preprocessing")
+  preprocess.process_all()
+  save_figures()
   print("Analyze 2")
   analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
   print("normalize")
@@ -182,18 +187,18 @@ def main():
   print("Save histograms")
   analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
+  print("ANN")
+  shaperetrieval.ann_distances_to_excel()
   print("histograms all classes")
   for column in utils.hist_features_norm:
     analyze.histograms_all_classes(refinedDF, column)
-  # for index, vector in enumerate(utils.weight_vectors):
-  print("similar meshes")
-  shaperetrieval.save_similar_meshes(utils.weight_vectors[0])
-  print("ANN")
-  shaperetrieval.ann_distances_to_excel()
-  print("roc")
-  save_figures('similar_meshes')
-  save_figures('ANN')
-  evaluate.roc_plots(0)
+  for index, vector in enumerate(utils.weight_vectors):
+    start_time = time.monotonic()
+    print(index)
+    shaperetrieval.save_similar_meshes(vector)
+    evaluate.roc_plots(index)
+    end_time = time.monotonic()
+    print(timedelta(seconds=end_time - start_time))
   write_html()
   evaluate.boxplot_queries()
   shaperetrieval.tsne()

@@ -41,13 +41,11 @@ def plot_ktier(DB):
       result = ktier(result, query_result, value, c_len)
 
     results = [i+1 for i in range(0, 5) for j in range(0, int(result[i]))]
-
-    plt.hist(results, bins=np.arange(0, 6, 1),  weights=np.ones(len(results)) / len(results))
+    plt.hist(results, bins=np.arange(-.5, 6.5, 1),  weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
     plt.ylim(0, 1)
-    plt.xlim(1, 5)
-
+    plt.xlim(0.5, 5.5)
     plt.xlabel("Tier")
     plt.ylabel("Percentage returned in tier")
     plt.title("Percentage of total {} correctly returned in first five tiers".format(str(utils.classes[int(c)])))

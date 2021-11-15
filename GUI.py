@@ -47,7 +47,7 @@ class LabelGrid(Frame):
 # Function for opening the
 # file explorer window
 def browseFiles():
-  filename = filedialog.askopenfilename(initialdir="./testModels/", title="Select a File",
+  filename = filedialog.askopenfilename(initialdir="./demo_models/", title="Select a File",
                                         filetypes=(("all files", "*.*"), ("Text files", "*.txt*")))
 
   # Change label contents
