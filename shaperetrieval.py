@@ -127,9 +127,8 @@ def get_distances(single_vector, histogram_vector, path):
     other_single_vectors = np.asarray(df[utils.scal_features_norm])
     other_histogram_vectors = np.asarray(df[utils.hist_features_norm])
     scalar_distances = list(map(lambda x: compute_euclidean_distance(single_vector, x), other_single_vectors))
-    hist_distancess = list(map(lambda x: 
-                                list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]), range(len(histogram_vector))))
-                                , other_histogram_vectors)) 
+    hist_distancess = list(map(lambda x: list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]), range(len(histogram_vector))))
+                                , other_histogram_vectors))
 
     # Standardize histogram distances:
     hist_distancess /= emd_vector
