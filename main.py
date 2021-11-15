@@ -193,12 +193,9 @@ def main():
   for column in utils.hist_features_norm:
     analyze.histograms_all_classes(refinedDF, column)
   for index, vector in enumerate(utils.weight_vectors):
-    start_time = time.monotonic()
-    print(index)
+    print(f"Testing weights: {index}")
     shaperetrieval.save_similar_meshes(vector)
     evaluate.roc_plots(index)
-    end_time = time.monotonic()
-    print(timedelta(seconds=end_time - start_time))
   write_html()
   evaluate.boxplot_queries()
   shaperetrieval.tsne()
