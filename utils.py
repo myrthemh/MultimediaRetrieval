@@ -3,6 +3,7 @@ from matplotlib.pyplot import cla
 
 import numpy as np
 import pandas as pd
+from trimesh import util
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
@@ -30,8 +31,28 @@ scal_features_norm = ["area_norm", "axis-aligned_bounding_box_distance_norm", "d
 hist_features_norm = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
 norm_vector_path = "features/vector.npy"
 emd_norm_vector_path = "features/dist_vector.npy"
-weight_vectors = np.array([[2,2,2,2,2,2,1,1,1,1,1],
-                          [1,1,1,1,1,1,1,0.5,0.5,1,1]])
+weight_vectors = np.array([[1,0,0,0,0,0,0,0,0,0,0],
+                            [0,1,0,0,0,0,0,0,0,0,0],
+                            [0,0,1,0,0,0,0,0,0,0,0],
+                            [0,0,0,1,0,0,0,0,0,0,0],
+                            [0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,1,0,0,0,0,0],
+                            [0,0,0,0,0,0,1,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0],
+                            [0,0,0,0,0,0,0,0,1,0,0],
+                            [0,0,0,0,0,0,0,0,0,1,0],
+                            [0,0,0,0,0,0,0,0,0,0,1],
+                            [0,1,1,1,1,1,1,1,1,1,1],
+                            [1,0,1,1,1,1,1,1,1,1,1],
+                            [1,1,0,1,1,1,1,1,1,1,1],
+                            [1,1,1,0,1,1,1,1,1,1,1],
+                            [1,1,1,1,0,1,1,1,1,1,1],
+                            [1,1,1,1,1,0,1,1,1,1,1],
+                            [1,1,1,1,1,1,0,1,1,1,1],
+                            [1,1,1,1,1,1,1,0,1,1,1],
+                            [1,1,1,1,1,1,1,1,0,1,1],
+                            [1,1,1,1,1,1,1,1,1,0,1],
+                            [1,1,1,1,1,1,1,1,1,1,0],])
 
 
 def read_excel(original=True):
@@ -89,6 +110,7 @@ def shape_paths(dbfolder):
 
 
 def image_paths(class_folder, ann=False):
+  df = read_excel(original=False)
   paths = []
   if ann:
     p = ann_images_path

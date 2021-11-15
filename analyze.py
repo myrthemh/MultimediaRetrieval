@@ -186,7 +186,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
                  "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                  "barycentre_distance": barycentre_distance(mesh),
-                 "volume": bounding_box_volume(mesh),
+                 "volume": volume(mesh),
                  "area": mesh.area,
                  "eccentricity": eccentricity(mesh),
                  "eigen_x_angle": utils.eigen_angle(mesh),
@@ -205,7 +205,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
                  "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                  "barycentre_distance": barycentre_distance(mesh),
-                 "volume": bounding_box_volume(mesh),
+                 "volume": volume(mesh),
                  "area": mesh.area,
                  "eigen_x_angle": utils.eigen_angle(mesh),
                  "area_faces": mesh.area_faces,
@@ -278,10 +278,12 @@ def save_histogram(data, info, path):
     bins = info["blocksize"]
   if 'column' in info and info['column'] == 'class':
     bins = np.concatenate([bins, [15.0]]) -0.5
+    plt.xlim(-0.5, info["xlim"] - 0.5)
     plt.xticks(rotation=90)
     plt.subplots_adjust(bottom=0.34)
-    plt.xlim(-0.5, info["xlim"] - 0.5)
   plt.hist(data, bins=bins, facecolor='g', alpha=0.75)
+  if info["ylim"] > 0:
+    plt.ylim(0, info["ylim"])
   plt.xlabel(info["xlabel"])
   plt.ylabel(info["ylabel"])
   plt.title(info["title"])
@@ -295,58 +297,40 @@ def save_histogram(data, info, path):
 
 
 def save_all_histograms(df, path, features=False):
-  if not features:
-    plotInfos = [
-      {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylabel": "#Meshes",
-       "xlabel": "Class name", "skip_outliers": False},
-      {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Number of faces", "skip_outliers": True},
-      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Number of vertices", "skip_outliers": True},
-      {"column": "volume", "title": "Bounding box volume", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Bounding box volume", "skip_outliers": False},
-      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1,
-       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
-       "xlim": 3, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
-       "skip_outliers": False},
-      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
-       "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
-       "skip_outliers": False},
-      {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-       "xlim": 0, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
-    ]
-  else:
-    plotInfos = [
-      {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylabel": "#Meshes",
-       "xlabel": "Class name", "skip_outliers": False},
-      {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Number of faces", "skip_outliers": True},
-      {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Number of vertices", "skip_outliers": True},
-      {"column": "volume", "title": "Bounding box volume", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
-       "xlabel": "Bounding box volume", "skip_outliers": False},
-      {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 15, "xlim": 1,
-       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-      {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
-       "xlim": 3, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
-       "skip_outliers": False},
-      {"column": "eigen_x_angle", "title": "Angle largest eigenvector - x-axis", "blocksize": 15, "xlim": 3.2,
-       "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis", "skip_outliers": False},
-      {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-       "xlim": 0, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False},
-      {"column": "compactness", "title": "Compactness", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
+  plotInfos = [
+    {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
+      "xlabel": "Class name", "skip_outliers": False},
+    {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylim": 750, "ylabel": "#Meshes",
+      "xlabel": "Number of faces", "skip_outliers": True},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 650, "ylabel": "#Meshes",
+      "xlabel": "Number of vertices", "skip_outliers": True},
+    {"column": "volume", "title": "Mesh volume", "blocksize": 15, "xlim": 0, "ylim": 1400, "ylabel": "#Meshes",
+      "xlabel": "Mesh volume", "skip_outliers": False},
+    {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1, "ylim": 1400,
+      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
+    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
+      "xlim": 3, "ylim": 650, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
+      "skip_outliers": False},
+    {"column": "eigen_x_angle", "ylim": 1400, "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
+      "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
+      "skip_outliers": False},
+    {"column": "area", "title": "Mesh surface area", "blocksize": 15,
+      "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
+  ]
+  if features:
+    plotInfos += [
+      {"column": "compactness", "title": "Compactness", "blocksize": 15, "xlim": 0, "ylim": 0, "ylabel": "#Meshes",
        "xlabel": "Compactness", "skip_outliers": True},
-      {"column": "eccentricity", "title": "Eccentricity", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "eccentricity", "title": "Eccentricity", "blocksize": 15, "xlim": 0, "ylim": 0, "ylabel": "#Meshes",
        "xlabel": "Eccentricity", "skip_outliers": True},
-      {"column": "diameter", "title": "Diameter", "blocksize": 15, "xlim": 0, "ylabel": "#Meshes",
+      {"column": "diameter", "title": "Diameter", "blocksize": 15, "xlim": 0, "ylim": 0, "ylabel": "#Meshes",
        "xlabel": "Diameter", "skip_outliers": False}
     ]
 
   # Area_faces plot:
   all_areas = [values for values in df.loc[:, "area_faces"].values]
   all_areas = np.array([value for sublist in all_areas for value in sublist])
-  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 25, "xlim": 0.0006, "ylabel": "#faces",
+  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 25, "xlim": 0.0006, "ylim": 0, "ylabel": "#faces",
               "xlabel": "face area", "skip_outliers": True}
   save_histogram(all_areas, plotinfo, path)
   for info in plotInfos:
