@@ -215,10 +215,10 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
 
 
 def detect_outliers(mesh, mesh_info):
-  if len(mesh.vertices) < 900:
+  if len(mesh.vertices) < utils.target_vertices * 0.9:
     mesh_info["subsampled_outlier"] = True
     mesh_info["supersampled_outlier"] = False
-  elif len(mesh.vertices) > 1100:
+  elif len(mesh.vertices) > utils.target_vertices * 1.1:
     mesh_info["supersampled_outlier"] = True
     mesh_info["subsampled_outlier"] = False
   else:

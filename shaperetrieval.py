@@ -46,8 +46,9 @@ def load_map_neighbours(map_path, n_features, metric):
 
 def ann_distances_to_excel():
   df = utils.read_excel(False)
-  save_map_neighbours(106, "euclidean", n_trees=10000)
-  u = load_map_neighbours("testmodels.ann", 106, 'euclidean')
+  f = len(df['A3'][0]) * len(utils.hist_features_norm) + len(utils.scal_features_norm)
+  save_map_neighbours(f, "euclidean", n_trees=10000)
+  u = load_map_neighbours("testmodels.ann", f, 'euclidean')
   df["ANN"] = ""
   for index, row in df.iterrows():
     tuple_list = []
@@ -224,3 +225,4 @@ def scatter(x, classes, perplexity, n_iter, images, eccentricity, compactness, d
   sc.show()
 
   return f, ax, sc
+
