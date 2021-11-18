@@ -107,10 +107,11 @@ def find_similar_meshes(mesh_row, weight_vector, emd_vector, df):
   # Find similar meshes based on an existing row in the shape database
   single_vector = np.asarray(mesh_row[utils.scal_features_norm]) * weight_vector[:6]
   histogram_vector = np.asarray(mesh_row[utils.hist_features_norm]) * weight_vector[6:]
-  return get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector, mesh_row['path'])
+  distances = [distance for distance in get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector) if distance[1] != mesh_row.name]
+  return distances
 
 
-def get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector, path):
+def get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector):
   distances = []
   # Compare with all meshes
 

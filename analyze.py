@@ -4,7 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import pandas as pd 
 import trimesh
 from matplotlib.ticker import PercentFormatter
 from scipy.spatial.distance import cdist
@@ -191,7 +191,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
     mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
-                 "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
+                 "axis-aligned_bounding_box_v": np.sqrt(sum(np.power((mesh.bounds[0] - mesh.bounds[1]), 2))), # np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": volume(mesh),
                  "area": mesh.area,
@@ -210,7 +210,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
     mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
-                 "axis-aligned_bounding_box_distance": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
+                 "axis-aligned_bounding_box_volume": np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": volume(mesh),
                  "area": mesh.area,
@@ -269,7 +269,7 @@ def save_histogram(data, info, path):
 
   # reset params
   plt.rcParams.update(plt.rcParamsDefault)
-
+  plt.figure()
   # drop NA values if they exist
   if info['skip_outliers']:
     # Remove all data below the 5th percentile and 95th percentile
@@ -299,22 +299,23 @@ def save_histogram(data, info, path):
   utils.ensure_dir(path)
   plt.savefig(path + info["title"] + '.png')
   plt.clf()
+  plt.cla()
 
 
 def save_all_histograms(df, path, features=False):
   plotInfos = [
-    {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
-      "xlabel": "Class name", "skip_outliers": False},
+    # {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
+    #   "xlabel": "Class name", "skip_outliers": False},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylim": 750, "ylabel": "#Meshes",
       "xlabel": "Number of faces", "skip_outliers": True},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 650, "ylabel": "#Meshes",
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 800, "ylabel": "#Meshes",
       "xlabel": "Number of vertices", "skip_outliers": True},
     {"column": "volume", "title": "Mesh volume", "blocksize": 15, "xlim": 0, "ylim": 1400, "ylabel": "#Meshes",
       "xlabel": "Mesh volume", "skip_outliers": False},
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1, "ylim": 1400,
       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
-    {"column": "axis-aligned_bounding_box_distance", "title": "Axis-aligned bounding box distance", "blocksize": 15,
-      "xlim": 3, "ylim": 650, "ylabel": "#Meshes", "xlabel": "Diagonal distance of axis aligned bounding box",
+    {"column": "axis-aligned_bounding_box_volume", "title": "Axis-aligned bounding box volume", "blocksize": 15,
+      "xlim": 3, "ylim": 650, "ylabel": "#Meshes", "xlabel": "Volume of axis aligned bounding box",
       "skip_outliers": False},
     {"column": "eigen_x_angle", "ylim": 1400, "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
       "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
