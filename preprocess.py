@@ -18,6 +18,23 @@ def scale_mesh(mesh, scale):
   mesh.apply_transform(matrix)
   return mesh
 
+def orientation_flip_mesh(mesh):
+  face_vertices = np.array([np.array([mesh.vertices[a], mesh.vertices[b], mesh.vertices[c]]) for (a,b,c) in mesh.faces])
+  barycentres = np.divide(face_vertices[:, 0] + face_vertices[:, 1] + face_vertices[:, 2], 3) # * mesh.area_faces
+  signx = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 0]), np.power(barycentres[:, 0], 2))))
+  signy = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 1]), np.power(barycentres[:, 0], 2))))
+  signz = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 2]), np.power(barycentres[:, 0], 2))))
+  scaleVector = [signx, signy, signz]
+
+  # Create transformation matrix
+  matrix = np.eye(4)
+  matrix[:3, :3] *= scaleVector
+  mesh.apply_transform(matrix)
+  return mesh
+
+
+
+
 
 def save_mesh(mesh, path):
   utils.ensure_dir(path)
@@ -73,6 +90,7 @@ def normalize_mesh(mesh):
   mesh = translate_eigen(mesh)
   # Get the highest value we can scale with so it still fits within the unit cube
   scale_value = 0.5 / max(abs(mesh.bounds.flatten()))
+  mesh = orientation_flip_mesh(mesh)
   mesh = scale_mesh(mesh, scale_value)
   return mesh
 

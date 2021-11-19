@@ -26,7 +26,7 @@ def volume(mesh):
 
 def compactness(mesh):
   if mesh.area > 0:
-    c = np.divide(np.power(mesh.area, 3), np.power((36 * np.pi * volume(mesh)), 2))
+    c = np.divide(np.power(mesh.area, 3), (36 * np.pi * np.power(volume(mesh), 2)))
   else:
     c = 0
   return c if not np.isnan(c) else 0
@@ -183,6 +183,11 @@ def tetrahedon_volume(vertices):
   volume = abs(np.dot(vector1, (np.cross(vector2, vector3)))) / 6
   return volume
 
+def AABB_volume(mesh):
+  x = abs(mesh.bounds[0][0] - mesh.bounds[1][0])
+  y = abs(mesh.bounds[0][1] - mesh.bounds[1][1])
+  z = abs(mesh.bounds[0][2] - mesh.bounds[1][2])
+  return x * y * z
 
 def fill_mesh_info(mesh, shape_class, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
@@ -191,7 +196,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
     mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
-                 "axis-aligned_bounding_box_v": np.sqrt(sum(np.power((mesh.bounds[0] - mesh.bounds[1]), 2))), # np.linalg.norm(mesh.bounds[0] - mesh.bounds[1]),
+                 "axis-aligned_bounding_box_volume":AABB_volume(mesh),
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": volume(mesh),
                  "area": mesh.area,
@@ -321,7 +326,7 @@ def save_all_histograms(df, path, features=False):
       "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
       "skip_outliers": False},
     {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-      "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": False}
+      "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": True}
   ]
   if features:
     plotInfos += [

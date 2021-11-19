@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import PercentFormatter
 from sklearn.metrics import auc
+from trimesh import util
 
 import shaperetrieval
 import utils
@@ -161,18 +162,20 @@ def time_queries(runs=100):
   df = utils.read_excel(original=False)
   len_df = len(df.index)
   u = shaperetrieval.load_map_neighbours("testmodels.ann", 106, 'euclidean')
-  for i in range(runs):
-    if i % 10 == 0:
-      print(f'{i} / {runs} timed')
-    random_number = random.randint(0, len_df - 1)
-    start = time.perf_counter()
-    shaperetrieval.find_similar_meshes(df.iloc[random_number])
-    end = time.perf_counter()
-    custom_times.append(end - start)
-    start = time.perf_counter()
-    u.get_nns_by_item(i, len_df, include_distances=True)
-    end = time.perf_counter()
-    ann_times.append(end - start)
+  with open(utils.emd_norm_vector_path, 'rb') as f:
+    emd_vector = np.load(f)
+    for i in range(runs):
+      if i % 10 == 0:
+        print(f'{i} / {runs} timed')
+      random_number = random.randint(0, len_df - 1)
+      start = time.perf_counter()
+      shaperetrieval.find_similar_meshes(df.iloc[random_number], utils.weight_vectors[0], emd_vector, df)
+      end = time.perf_counter()
+      custom_times.append(end - start)
+      start = time.perf_counter()
+      u.get_nns_by_item(i, len_df, include_distances=True)
+      end = time.perf_counter()
+      ann_times.append(end - start)
   return ann_times, custom_times
 
 

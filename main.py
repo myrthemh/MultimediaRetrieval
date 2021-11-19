@@ -15,6 +15,7 @@ import preprocess
 import shaperetrieval
 import utils
 import evaluate
+import copy
 from PIL import Image
 
 trimesh.util.attach_to_log(level=logging.INFO)
@@ -173,37 +174,43 @@ def main():
   # print("Analyze 1")
   # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
   # print("Preprocessing")
-  # preprocess.process_all()
-  # save_figures()
-  # print("Analyze 2")
-  # analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
-  # print("normalize")
-  # analyze.merge_bins()
-  # preprocess.normalize_histogram_features(utils.hist_features)
-  # preprocess.scalar_normalization(utils.scal_features)
-  # preprocess.hist_distance_normalization()
-  # print("Read Excel")
-  # originalDF = utils.read_excel(original=True)
+  preprocess.process_all()
+  save_figures()
+  print("Analyze 2")
+  analyze.filter_database(utils.refinedDB, utils.refinedexcelPath, utils.refinedpicklePath)
+  print("normalize")
+  preprocess.normalize_histogram_features(utils.hist_features)
+  preprocess.scalar_normalization(utils.scal_features)
+  preprocess.hist_distance_normalization()
+  print("Read Excel")
+  originalDF = utils.read_excel(original=True)
   refinedDF = utils.read_excel(original=False)
-  # print("Save histograms")
-  # analyze.save_all_histograms(originalDF, utils.imagePath)
+  print("Save histograms")
+  analyze.save_all_histograms(originalDF, utils.imagePath)
   analyze.save_all_histograms(refinedDF, utils.refinedImagePath, features=True)
-  # print("ANN")
-  # shaperetrieval.ann_distances_to_excel()
-  # print("histograms all classes")
-  # for column in utils.hist_features_norm:
-  #   analyze.histograms_all_classes(refinedDF, column)
-  # for index, vector in enumerate(utils.weight_vectors):
-  #   print(f"Testing weights: {index}")
-  #   shaperetrieval.save_similar_meshes(vector)
-  #   evaluate.roc_plots(index)
-  # write_html()
-  # evaluate.boxplot_queries()
-  # shaperetrieval.tsne()
-  # evaluate.plot_ktier(refinedDF)
+  print("ANN")
+  shaperetrieval.ann_distances_to_excel()
+  print("histograms all classes")
+  for column in utils.hist_features_norm:
+    analyze.histograms_all_classes(refinedDF, column)
+  for index, vector in enumerate(utils.weight_vectors):
+    print(f"Testing weights: {index}")
+    shaperetrieval.save_similar_meshes(vector)
+    evaluate.roc_plots(index)
+  write_html()
+  evaluate.boxplot_queries()
+  shaperetrieval.tsne()
+  evaluate.plot_ktier(refinedDF)
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
 
 
 if __name__ == '__main__':
-  main()
+  # 369, 351, 1394
+  df = utils.read_excel(original=False)
+  for _, row in df.iterrows():
+    path = row['path']
+    mesh = trimesh.load(path, force='mesh')
+    flippedMesh = preprocess.orientation_flip_mesh(trimesh.load(path, force='mesh'))
+    compare([mesh, flippedMesh])
+  #main()
