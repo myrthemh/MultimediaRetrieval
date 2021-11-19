@@ -171,9 +171,9 @@ def main():
   # step_1()
   # compare_all()
   start_time = time.monotonic()
-  # print("Analyze 1")
-  # analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
-  # print("Preprocessing")
+  print("Analyze 1")
+  analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
+  print("Preprocessing")
   preprocess.process_all()
   save_figures()
   print("Analyze 2")
@@ -207,10 +207,4 @@ def main():
 
 if __name__ == '__main__':
   # 369, 351, 1394
-  df = utils.read_excel(original=False)
-  for _, row in df.iterrows():
-    path = row['path']
-    mesh = trimesh.load(path, force='mesh')
-    flippedMesh = preprocess.orientation_flip_mesh(trimesh.load(path, force='mesh'))
-    compare([mesh, flippedMesh])
-  #main()
+  main()

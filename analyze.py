@@ -320,7 +320,7 @@ def save_all_histograms(df, path, features=False):
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1, "ylim": 1400,
       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
     {"column": "axis-aligned_bounding_box_volume", "title": "Axis-aligned bounding box volume", "blocksize": 15,
-      "xlim": 3, "ylim": 650, "ylabel": "#Meshes", "xlabel": "Volume of axis aligned bounding box",
+      "xlim": 0, "ylim": 0, "ylabel": "#Meshes", "xlabel": "Volume of axis aligned bounding box",
       "skip_outliers": False},
     {"column": "eigen_x_angle", "ylim": 1400, "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
       "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
