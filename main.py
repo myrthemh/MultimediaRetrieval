@@ -169,7 +169,6 @@ def write_html():
 
 def main():
   # step_1()
-  # compare_all()
   start_time = time.monotonic()
   print("Analyze 1")
   analyze.filter_database(utils.originalDB, utils.excelPath, utils.picklePath, features=False)
@@ -206,5 +205,4 @@ def main():
 
 
 if __name__ == '__main__':
-  # 369, 351, 1394
   main()

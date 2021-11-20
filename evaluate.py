@@ -35,6 +35,7 @@ def evaluate_score(DB, metric):
 def plot_ktier(DB):
   # info = {"xlabel": }
   plt.rcParams.update(plt.rcParamsDefault)
+  
   for c, value in enumerate(utils.classes):
     c_len = len(DB.loc[DB["class"] == value])
     result = list(np.zeros(5))
@@ -42,6 +43,7 @@ def plot_ktier(DB):
       result = ktier(result, query_result, value, c_len)
 
     results = [i+1 for i in range(0, 5) for j in range(0, int(result[i]))]
+    plt.figure()
     plt.hist(results, bins=np.arange(-.5, 6.5, 1),  weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -54,7 +56,7 @@ def plot_ktier(DB):
     path = utils.refinedImagePath
     utils.ensure_dir(path)
     plt.savefig(path + "tierOfClass" + str(value) + '.png')
-    plt.show()
+    #plt.show()
 
 def lasttier(query_result, class_value):
   tier = 0
