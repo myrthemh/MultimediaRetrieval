@@ -94,7 +94,8 @@ def test_subdivide(mesh, target_vertices=1000):
 
     # adjacent face
     for edge_index, edge in enumerate(mesh.edges):
-      if edge.tolist() == [face[sorted_vertices[0]], face[sorted_vertices[1]]] or edge.tolist() == [face[sorted_vertices[1]], face[sorted_vertices[0]]]:
+      if edge.tolist() == [face[sorted_vertices[0]], face[sorted_vertices[1]]] or edge.tolist() == [
+        face[sorted_vertices[1]], face[sorted_vertices[0]]]:
         face_index_edge = mesh.edges_face[edge_index]
         if face_index_edge != index:
           v4 = np.setdiff1d(updated_faces[face_index_edge], edge).item()
@@ -113,7 +114,6 @@ def test_subdivide(mesh, target_vertices=1000):
 def superdivide(mesh, target_faces=2000):
   newmesh = trimesh.Trimesh.simplify_quadratic_decimation(mesh, target_faces)
   return newmesh
-
 
 # mesh = trimesh.load('testModels/db/0/m3/m3.off', force='mesh')
 # mesh2 = new_subdivide(mesh)

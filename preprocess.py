@@ -1,4 +1,3 @@
-from math import inf
 import numpy as np
 import trimesh
 import trimesh.grouping as grouping
@@ -18,9 +17,11 @@ def scale_mesh(mesh, scale):
   mesh.apply_transform(matrix)
   return mesh
 
+
 def orientation_flip_mesh(mesh):
-  face_vertices = np.array([np.array([mesh.vertices[a], mesh.vertices[b], mesh.vertices[c]]) for (a,b,c) in mesh.faces])
-  barycentres = np.divide(face_vertices[:, 0] + face_vertices[:, 1] + face_vertices[:, 2], 3) # * mesh.area_faces
+  face_vertices = np.array(
+    [np.array([mesh.vertices[a], mesh.vertices[b], mesh.vertices[c]]) for (a, b, c) in mesh.faces])
+  barycentres = np.divide(face_vertices[:, 0] + face_vertices[:, 1] + face_vertices[:, 2], 3)  # * mesh.area_faces
   signx = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 0]), np.power(barycentres[:, 0], 2))))
   signy = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 1]), np.power(barycentres[:, 0], 2))))
   signz = np.sign(np.sum(np.multiply(np.sign(barycentres[:, 2]), np.power(barycentres[:, 0], 2))))
@@ -31,9 +32,6 @@ def orientation_flip_mesh(mesh):
   matrix[:3, :3] *= scaleVector
   mesh.apply_transform(matrix)
   return mesh
-
-
-
 
 
 def save_mesh(mesh, path):

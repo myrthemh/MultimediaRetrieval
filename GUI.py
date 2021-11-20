@@ -1,14 +1,14 @@
+import os
 from tkinter import *
 # import filedialog module
 from tkinter import filedialog
-from functools import partial
+
 import trimesh
-from trimesh import util
 
 import main
 import shaperetrieval
 import utils
-import os
+
 
 class LabelGrid(Frame):
   """
@@ -58,7 +58,7 @@ def browseFiles():
 def show_similar():
   path = browseFiles()
   mesh = main.load_from_file(path)
-  
+
   distances, processed_mesh = shaperetrieval.query(path)
   colorvisuals = trimesh.visual.ColorVisuals(processed_mesh, [255, 0, 0, 200])
   processed_mesh.visual = colorvisuals
@@ -66,9 +66,10 @@ def show_similar():
   indices = [distance[1] for distance in distances[:5]]
   rows = df.iloc[indices]
   paths = list(rows['path'])
-  distances = [distance[0] for distance in distances[:5]] # todo show this in window
+  distances = [distance[0] for distance in distances[:5]]  # todo show this in window
   meshes = [processed_mesh] + (shaperetrieval.paths_to_meshes(paths))
   main.compare(meshes, setcolor=False)
+
 
 def get_image_paths(shape_class):
   classpath = utils.sim_images_path + shape_class + '/'
@@ -78,9 +79,10 @@ def get_image_paths(shape_class):
     for image in os.listdir(classpath + classFolder):
       images.append(classpath + classFolder + '/' + image)
     paths.append(images)
-  return paths  
+  return paths
 
-#x = get_image_paths(18)
+
+# x = get_image_paths(18)
 # Create the root window
 window = Tk()
 

@@ -96,11 +96,13 @@ def save_similar_meshes(weight_vector):
     df['similar_meshes'] = column
     utils.save_excel(df, original=False)
 
+
 def find_similar_meshes(mesh_row, weight_vector, emd_vector, df):
   # Find similar meshes based on an existing row in the shape database
   single_vector = np.asarray(mesh_row[utils.scal_features_norm]) * weight_vector[:6]
   histogram_vector = np.asarray(mesh_row[utils.hist_features_norm]) * weight_vector[6:]
-  distances = [distance for distance in get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector) if distance[1] != mesh_row.name]
+  distances = [distance for distance in get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector) if
+               distance[1] != mesh_row.name]
   return distances
 
 
@@ -111,8 +113,9 @@ def get_distances(single_vector, histogram_vector, emd_vector, df, weight_vector
   other_histogram_vectors = np.asarray(df[utils.hist_features_norm]) * weight_vector[6:]
   scalar_distances = list(map(lambda x: compute_euclidean_distance(single_vector, x), other_single_vectors))
   hist_distancess = list(map(lambda x:
-                              list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]), range(len(histogram_vector))))
-                              , other_histogram_vectors))
+                             list(map(lambda i: wasserstein_distance(histogram_vector[i], x[i]),
+                                      range(len(histogram_vector))))
+                             , other_histogram_vectors))
 
   # Standardize histogram distances:
   hist_distancess /= emd_vector
@@ -204,4 +207,3 @@ def scatter(x, classes, perplexity, n_iter, images, eccentricity, compactness, d
   sc.show()
 
   return f, ax, sc
-

@@ -4,7 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd 
+import pandas as pd
 import trimesh
 from matplotlib.ticker import PercentFormatter
 from scipy.spatial.distance import cdist
@@ -58,6 +58,7 @@ def bounding_box_volume(mesh):
   volume = (x[1][0] - x[0][0]) * (x[1][1] - x[0][1]) * (x[1][2] - x[0][2])
   return volume
 
+
 def merge_bins():
   df = utils.read_excel(original=False)
   for column in df[utils.hist_features]:
@@ -65,7 +66,8 @@ def merge_bins():
     newvalues = list(map(lambda x: x[np.arange(0, 20, step=2)] + x[np.arange(1, 21, step=2)], values))
     df[column] = newvalues
   utils.save_excel(df, original=False)
-    
+
+
 def filter_database(dbPath, excelPath, picklePath, features=True):
   db = dbPath
   df = pd.DataFrame()
@@ -131,7 +133,7 @@ def check_duplicates(mesh, selected_vertices, number_vertices):
 
 
 def A3(mesh, amount=utils.hist_amount, plot=False):
-  random_vertices =  mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
+  random_vertices = mesh.vertices[np.random.randint(0, high=len(mesh.vertices), size=(amount, 3))]
   random_vertices = check_duplicates(mesh, random_vertices, 3)
   angles = np.arccos(
     np.clip(np.sum(utils.unit_vector(np.subtract(random_vertices[::, 0], random_vertices[::, 1]), transpose=True) *
@@ -183,11 +185,13 @@ def tetrahedon_volume(vertices):
   volume = abs(np.dot(vector1, (np.cross(vector2, vector3)))) / 6
   return volume
 
+
 def AABB_volume(mesh):
   x = abs(mesh.bounds[0][0] - mesh.bounds[1][0])
   y = abs(mesh.bounds[0][1] - mesh.bounds[1][1])
   z = abs(mesh.bounds[0][2] - mesh.bounds[1][2])
   return x * y * z
+
 
 def fill_mesh_info(mesh, shape_class, path, features=True):
   face_sizes = list(map(lambda x: len(x), mesh.faces))
@@ -196,7 +200,7 @@ def fill_mesh_info(mesh, shape_class, path, features=True):
     mesh_info = {"class": shape_class, "nrfaces": len(mesh.faces), "nrvertices": len(mesh.vertices),
                  "containsTriangles": 3 in face_sizes, "containsQuads": 4 in face_sizes,
                  "bounding_box_corners": mesh.bounds, "path": f'{path}',
-                 "axis-aligned_bounding_box_volume":AABB_volume(mesh),
+                 "axis-aligned_bounding_box_volume": AABB_volume(mesh),
                  "barycentre_distance": barycentre_distance(mesh),
                  "volume": volume(mesh),
                  "area": mesh.area,
@@ -287,7 +291,7 @@ def save_histogram(data, info, path):
   else:
     bins = info["blocksize"]
   if 'column' in info and info['column'] == 'class':
-    bins = np.concatenate([bins, [15.0]]) -0.5
+    bins = np.concatenate([bins, [15.0]]) - 0.5
     plt.xlim(-0.5, info["xlim"] - 0.5)
     plt.xticks(rotation=90)
     plt.subplots_adjust(bottom=0.34)
@@ -310,23 +314,24 @@ def save_histogram(data, info, path):
 def save_all_histograms(df, path, features=False):
   plotInfos = [
     {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
-      "xlabel": "Class name", "skip_outliers": False},
+     "xlabel": "Class name", "skip_outliers": False},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylim": 750, "ylabel": "#Meshes",
-      "xlabel": "Number of faces", "skip_outliers": True},
-    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 800, "ylabel": "#Meshes",
-      "xlabel": "Number of vertices", "skip_outliers": True},
+     "xlabel": "Number of faces", "skip_outliers": True},
+    {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 800,
+     "ylabel": "#Meshes",
+     "xlabel": "Number of vertices", "skip_outliers": True},
     {"column": "volume", "title": "Mesh volume", "blocksize": 15, "xlim": 0, "ylim": 1400, "ylabel": "#Meshes",
-      "xlabel": "Mesh volume", "skip_outliers": True},
+     "xlabel": "Mesh volume", "skip_outliers": True},
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1, "ylim": 1400,
-      "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
+     "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
     {"column": "axis-aligned_bounding_box_volume", "title": "Axis-aligned bounding box volume", "blocksize": 15,
-      "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Volume of axis aligned bounding box",
-      "skip_outliers": False},
+     "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Volume of axis aligned bounding box",
+     "skip_outliers": False},
     {"column": "eigen_x_angle", "ylim": 1400, "title": "Angle largest eigenvector - x-axis", "blocksize": 15,
-      "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
-      "skip_outliers": False},
+     "xlim": 3.2, "ylabel": "#Meshes", "xlabel": "Radian angle between largest eigenvector and x-axis",
+     "skip_outliers": False},
     {"column": "area", "title": "Mesh surface area", "blocksize": 15,
-      "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": True}
+     "xlim": 0, "ylim": 1400, "ylabel": "#Meshes", "xlabel": "Total surface area of the mesh", "skip_outliers": True}
   ]
   if features:
     plotInfos += [
@@ -341,7 +346,8 @@ def save_all_histograms(df, path, features=False):
   # Area_faces plot:
   all_areas = [values for values in df.loc[:, "area_faces"].values]
   all_areas = np.array([value for sublist in all_areas for value in sublist])
-  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 25, "xlim": 0.0006, "ylim": 0, "ylabel": "#faces",
+  plotinfo = {"title": "Face area distribution over all meshes", "blocksize": 25, "xlim": 0.0006, "ylim": 0,
+              "ylabel": "#faces",
               "xlabel": "face area", "skip_outliers": True}
   save_histogram(all_areas, plotinfo, path)
   for info in plotInfos:
@@ -396,8 +402,6 @@ def visualize_difference_features():
   plot_shape_properties(feature="D4", shape='testModels/refined_db/5/m500/m500.off')
   plot_shape_properties(feature="D4", shape='testModels/refined_db/5/m507/m507.off')
   plot_shape_properties(feature="D4", shape='testModels/refined_db/7/m704/m704.off')
-
-
 
 # mesh = trimesh.load('testModels/refined_db/1/m104/m104.off', force='mesh')
 # diameter(mesh)

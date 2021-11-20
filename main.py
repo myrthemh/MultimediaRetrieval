@@ -1,6 +1,5 @@
 import logging
 import time
-import gc
 from datetime import timedelta
 
 import matplotlib
@@ -8,15 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyrender
 import trimesh
-from trimesh import util
 
 import analyze
+import evaluate
 import preprocess
 import shaperetrieval
 import utils
-import evaluate
-import copy
-from PIL import Image
 
 trimesh.util.attach_to_log(level=logging.INFO)
 
@@ -63,11 +59,11 @@ def save_mesh_image(meshes, path, distance=None, showWireframe=False, setcolor=T
       mesh.visual = colorvisuals
       wireframe = pyrender.Mesh.from_trimesh(mesh, wireframe=True, smooth=False)
       scene.add(wireframe)
-  camera = pyrender.PerspectiveCamera( yfov=np.pi / 3.0, znear=0.0000001,)
-  camera_pose =[[ 1.73205,  0.,       0.,       0.,     ],
-                [ 0.,       1.73205,  0.,       0.,     ],
-                [ 0.,       0.,      -1.,      -1.0,    ],
-                [ 0.,       0.,      0.,       1,     ]]
+  camera = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, znear=0.0000001, )
+  camera_pose = [[1.73205, 0., 0., 0., ],
+                 [0., 1.73205, 0., 0., ],
+                 [0., 0., -1., -1.0, ],
+                 [0., 0., 0., 1, ]]
   scene.add(camera, pose=camera_pose)
 
   light = pyrender.DirectionalLight(color=[1, 1, 1], intensity=800)
@@ -77,7 +73,7 @@ def save_mesh_image(meshes, path, distance=None, showWireframe=False, setcolor=T
   r = pyrender.OffscreenRenderer(utils.sim_image_size, utils.sim_image_size)
   color, _ = r.render(scene, flags=flags)
   matplotlib.use('Agg')
-  plt.figure(figsize=(3,3)), plt.imshow(color)
+  plt.figure(figsize=(3, 3)), plt.imshow(color)
   plt.axis('off')
   if distance is not None:
     plt.text(utils.sim_image_size / 2 - 50, utils.sim_image_size - 5, "D: " + str(distance), fontsize="xx-large")
@@ -121,6 +117,7 @@ def save_figures():
     mesh = trimesh.load(row['path'], force='mesh')
     save_path = f"{row['path'][:-4]}.png"
     save_mesh_image([mesh], save_path)
+
 
 def write_html():
   df = utils.read_excel(original=False)

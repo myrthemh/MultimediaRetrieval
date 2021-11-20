@@ -1,9 +1,7 @@
 import os
-from matplotlib.pyplot import cla
 
 import numpy as np
 import pandas as pd
-from trimesh import util
 
 excelPath = "features/original.xlsx"
 refinedexcelPath = "features/refined.xlsx"
@@ -33,8 +31,8 @@ norm_vector_path = "features/vector.npy"
 emd_norm_vector_path = "features/dist_vector.npy"
 
 weight_vectors = np.array([[1, 1, 0.01, 0.05, 1, 1.5, 1.25, 0.25, 0.75, 0.02, 1],
-                          [1,1 , 0, 0, 1, 1.5, 1.25, 0.25, 0.75, 0, 1],
-                        ])
+                           [1, 1, 0, 0, 1, 1.5, 1.25, 0.25, 0.75, 0, 1],
+                           ])
 
 
 def read_excel(original=True):
@@ -79,8 +77,10 @@ def unit_vector(vector, transpose=False):
 def angle(vector1, vector2):
   return np.arccos(np.clip(np.dot(unit_vector(vector1), unit_vector(vector2)), -1.0, 1.0))
 
+
 def angle_points(points):
   return np.arccos(np.clip(np.dot(unit_vector(points[0] - points[1]), unit_vector(points[0] - points[2])), -1.0, 1.0))
+
 
 def shape_paths(dbfolder):
   paths = []
@@ -104,6 +104,7 @@ def image_paths(class_folder, ann=False):
         paths.append((os.path.join(path, name)))
   return paths
 
+
 def eigen_values_vectors(mesh):
   covm = np.cov(mesh.vertices.T)
   values, vectors = np.linalg.eig(covm)
@@ -123,13 +124,14 @@ def eigen_xyz(mesh):
   eig_vector_z = np.cross(eig_vector_x, eig_vector_y)
   return eig_vector_x, eig_vector_y, eig_vector_z
 
+
 def class_dictionaries():
   f = open("veelModels/classification/v1/coarse1/coarse1Train.cla", "r")
   f2 = open("veelModels/classification/v1/coarse1/coarse1Test.cla", "r")
   index_to_class = {}
   class_sizes = {}
   class_indices = {}
-  for file in [f,f2]:
+  for file in [f, f2]:
     for x in file:
       words = x.split()
       if len(words) == 3:
@@ -142,6 +144,7 @@ def class_dictionaries():
         index_to_class[int(words[0])] = currentClass
   sorted_list = dict(sorted(class_sizes.items(), key=lambda item: item[1], reverse=True)[:15])
   return index_to_class, sorted_list
+
 
 classes = list(class_dictionaries()[1].keys())
 class_dictionaries()

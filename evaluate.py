@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import PercentFormatter
 from sklearn.metrics import auc
-from trimesh import util
 
 import shaperetrieval
 import utils
@@ -32,19 +31,20 @@ def evaluate_score(DB, metric):
   metric_performance_avg = metric_performance_avg / len(DB)
   return metric_performance_class, metric_performance_avg
 
+
 def plot_ktier(DB):
   # info = {"xlabel": }
   plt.rcParams.update(plt.rcParamsDefault)
-  
+
   for c, value in enumerate(utils.classes):
     c_len = len(DB.loc[DB["class"] == value])
     result = list(np.zeros(5))
     for query_result in DB.loc[DB["class"] == value, 'similar_meshes']:
       result = ktier(result, query_result, value, c_len)
 
-    results = [i+1 for i in range(0, 5) for j in range(0, int(result[i]))]
+    results = [i + 1 for i in range(0, 5) for j in range(0, int(result[i]))]
     plt.figure()
-    plt.hist(results, bins=np.arange(-.5, 6.5, 1),  weights=np.ones(len(results)) / len(results))
+    plt.hist(results, bins=np.arange(-.5, 6.5, 1), weights=np.ones(len(results)) / len(results))
 
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
     plt.ylim(0, 1)
@@ -56,7 +56,8 @@ def plot_ktier(DB):
     path = utils.refinedImagePath
     utils.ensure_dir(path)
     plt.savefig(path + "tierOfClass" + str(value) + '.png')
-    #plt.show()
+    # plt.show()
+
 
 def lasttier(query_result, class_value):
   tier = 0
@@ -67,6 +68,7 @@ def lasttier(query_result, class_value):
       return tier
   return tier
 
+
 def ktier(result, query_result, class_value, clen):
   tier = 0
 
@@ -74,19 +76,20 @@ def ktier(result, query_result, class_value, clen):
   #   for query_result in DB.loc[DB["class"] == c, 'similar_meshes']:
   for i in range(0, 5):
     for j in range(0, clen):
-       if query_result[i * clen +j][2] == class_value:
+      if query_result[i * clen + j][2] == class_value:
         result[i] += 1
 
   return result
- 
+
+
 def roc(correct_classes):
   sensitivities = []
   specificities = []
   for i in range(0, correct_classes.shape[1]):
-    TP = np.sum(correct_classes[:, :i]) #Correct objects returned in the query
-    FN = np.sum(correct_classes[:, i:]) #Correct objects not returned in the query
-    FP = correct_classes[:, :i].size - TP #Objects returned in the query that should not have been returned
-    TN = correct_classes[:, i:].size - FN #Objects not returned in the query that should indeed not be returned
+    TP = np.sum(correct_classes[:, :i])  # Correct objects returned in the query
+    FN = np.sum(correct_classes[:, i:])  # Correct objects not returned in the query
+    FP = correct_classes[:, :i].size - TP  # Objects returned in the query that should not have been returned
+    TN = correct_classes[:, i:].size - FN  # Objects not returned in the query that should indeed not be returned
     sensitivity = TP / (TP + FN)
     specificity = TN / (FP + TN)
     sensitivities.append(sensitivity)
@@ -112,10 +115,10 @@ def roc_plots(vindex):
       # Plot
       lw = 2
       plt.plot(
-          sensitivities,
-          specificities,
-          lw=lw,
-          label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
+        sensitivities,
+        specificities,
+        lw=lw,
+        label=f"Class: {shape_class}, Area = {round(auc(sensitivities, specificities), 3)}",
       )
       plt.plot([0, 1], [1, 0], color="navy", lw=lw, linestyle="--")
       plt.xlim([0.0, 1.01])
@@ -192,7 +195,6 @@ def boxplot_queries(show=False):
   plt.xticks([1, 2], ["Annoy", "Custom"])
   plt.ylabel("Time (seconds)")
   plt.xlabel("Query method")
-  plt.savefig('./evalimages/querytimes.png' )
+  plt.savefig('./evalimages/querytimes.png')
   if show:
     plt.show()
-
