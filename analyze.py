@@ -309,14 +309,14 @@ def save_histogram(data, info, path):
 
 def save_all_histograms(df, path, features=False):
   plotInfos = [
-    # {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
-    #   "xlabel": "Class name", "skip_outliers": False},
+    {"column": "class", "title": "Class distribution", "blocksize": 15, "xlim": 15, "ylim": 0, "ylabel": "#Meshes",
+      "xlabel": "Class name", "skip_outliers": False},
     {"column": "nrfaces", "title": "Face distribution", "blocksize": 25, "xlim": 0, "ylim": 750, "ylabel": "#Meshes",
       "xlabel": "Number of faces", "skip_outliers": True},
     {"column": "nrvertices", "title": "Vertice distribution", "blocksize": 25, "xlim": 0, "ylim": 800, "ylabel": "#Meshes",
       "xlabel": "Number of vertices", "skip_outliers": True},
     {"column": "volume", "title": "Mesh volume", "blocksize": 15, "xlim": 0, "ylim": 1400, "ylabel": "#Meshes",
-      "xlabel": "Mesh volume", "skip_outliers": False},
+      "xlabel": "Mesh volume", "skip_outliers": True},
     {"column": "barycentre_distance", "title": "Barycentre origin distance", "blocksize": 20, "xlim": 1, "ylim": 1400,
       "ylabel": "#Meshes", "xlabel": "Distance barycentre to origin", "skip_outliers": False},
     {"column": "axis-aligned_bounding_box_volume", "title": "Axis-aligned bounding box volume", "blocksize": 15,

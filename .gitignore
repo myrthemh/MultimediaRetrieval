@@ -147,7 +147,8 @@ cython_debug/
 models/**
 graphs/**
 features/**
-testModels/**
+testModels/refined_db/**
+veelModels/refined_db/**
 *.ann
 *.xml
 *.png
