@@ -141,7 +141,9 @@ def query(meshpath):
     vector = np.load(f)
     single_vector_norm = (single_vector - vector[0]) / vector[1]
     histogram_vector_norm = [x / sum(x) for x in histogram_vector]
-  results = get_distances(single_vector_norm, histogram_vector_norm, meshpath)
+  with open(utils.emd_norm_vector_path, 'rb') as f:
+    emd_vector = np.load(f)
+    results = get_distances(single_vector_norm, histogram_vector_norm, emd_vector, utils.read_excel(original=False), utils.weight_vectors[0])
   return results, preprocessed_mesh
 
 

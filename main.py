@@ -196,7 +196,7 @@ def main():
   write_html()
   evaluate.boxplot_queries()
   shaperetrieval.tsne()
-  evaluate.plot_ktier(refinedDF)
+  evaluate.plot_ktier()
   end_time = time.monotonic()
   print(timedelta(seconds=end_time - start_time))
 

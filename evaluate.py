@@ -32,8 +32,8 @@ def evaluate_score(DB, metric):
   return metric_performance_class, metric_performance_avg
 
 
-def plot_ktier(DB):
-  # info = {"xlabel": }
+def plot_ktier():
+  DB = utils.read_excel(original=False)
   plt.rcParams.update(plt.rcParamsDefault)
 
   for c, value in enumerate(utils.classes):
