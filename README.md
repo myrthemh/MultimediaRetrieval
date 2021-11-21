@@ -10,11 +10,7 @@ Install the required Python Packages with PIP:
 pip install -r requirements.txt
 ```
 
-### 2. Additional dependencies
-
-None so far
-
-### 3. How to run and see results:
+### 2. How to run and see results:
 
 1. Optionally change some of the parameters in `utils.py`.
 2. Run the main.py script, which will perform every step of the assignment in order. (Can take multiple hours)
