@@ -30,7 +30,8 @@ hist_features_norm = ["A3_norm", "D1_norm", "D2_norm", "D3_norm", "D4_norm"]
 norm_vector_path = "features/vector.npy"
 emd_norm_vector_path = "features/dist_vector.npy"
 
-weight_vectors = np.array([[1, 1, 0.01, 0.05, 1, 1.5, 1.25, 0.25, 0.75, 0.02, 1],
+weight_vectors = np.array([[1,1,1,1,1,1,1,1,1,1,1],
+                           [1, 1, 0.01, 0.05, 1, 1.5, 1.25, 0.25, 0.75, 0.02, 1],
                            [1, 1, 0, 0, 1, 1.5, 1.25, 0.25, 0.75, 0, 1],
                            ])
 
@@ -45,9 +46,13 @@ def read_excel(original=True):
 
 def save_excel(df, original=True):
   if original:
+    ensure_dir(picklePath)
+    ensure_dir(excelPath)
     df.to_pickle(picklePath)
     df.to_excel(excelPath)
   else:
+    ensure_dir(refinedpicklePath)
+    ensure_dir(refinedexcelPath)
     df.to_pickle(refinedpicklePath)
     df.to_excel(refinedexcelPath)
 
